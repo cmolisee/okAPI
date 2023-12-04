@@ -25,3 +25,9 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+
+
+# NOTES
+
+- we should be able to use `yarn watch` to get live updates while we develop. This will watch the updates and rebuild specific files which in turn updates the dist directory which contains the files that chrome looks at to run our extension.
+- 
