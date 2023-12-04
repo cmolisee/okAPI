@@ -1,6 +1,11 @@
 {
   "name": "ok-api",
   "version": "0.0.0",
+  "description": "Google Chrome browser extension for mocking and manipulating API's.",
+  "repository": "https://github.com/cmolisee/okAPI.git",
+  "license": "MIT",
+  "author": "codymolisee <molisee.cody@gmail.com>",
+  "contributors": [],
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -8,7 +13,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
-  "private": true,
+  "private": false,
   "dependencies": {
     "@angular/animations": "^16.2.0",
     "@angular/common": "^16.2.0",
@@ -34,5 +39,17 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.1.3"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
