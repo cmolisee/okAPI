@@ -60,7 +60,7 @@
 
 ## Details
 
-Project Details here
+Google chrome extension for mocking API requests.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -69,6 +69,7 @@ Project Details here
 ### Tech Stack
 
 [![Angular][Angular.io]][Angular-url]
+
 [![Typescript][Typescript.io]][Typescript-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -77,18 +78,35 @@ Project Details here
 
 ## Installation
 
-1. Clone the repo
-   ```sh
-   git clone https://github.com/your_username_/Project-Name.git
-   ```
-2. Install NPM packages
-   ```sh
-   npm install
-   ```
-3. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
+### Terminal
+
+1. Open your terminal and clone the repository
+  ```
+  git clone https://github.com/cmolisee/okAPI.git
+  ```
+
+1. Change directory to where you cloned the files and install dependencies
+  ```
+  cd <path/to/repo> && npm i
+  ```
+
+2. Build the project
+  ```
+  npm run build
+  ```
+
+4. Open the 'extension manager' in your chrome browser
+5. Turn on 'developer mode' and click 'load unpacked'
+6. Select the build folder generated from the previous step
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Release Artifacts
+
+1. Download the latest release [Releases](https://github.com/cmolisee/okAPI/releases)
+2. Open the 'extension manager' in your chrome browser
+3. Turn on 'developer mode' and click 'load unpacked'
+4. Select the build folder generated from the previous step
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -133,7 +151,6 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
 
-* [Choose an Open Source License][license-url]
 * [Img Shields](https://shields.io)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
