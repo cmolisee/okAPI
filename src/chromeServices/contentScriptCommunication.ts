@@ -47,7 +47,7 @@ const requestActionCallback = (props: IRequestActionCallback) => {
     };
 
 	if (validateSender(validateSenderArgumentBody)) {
-		const data = Object.assign({}, {"Data to return to the requester..."});
+		const data = Object.assign({}, {data: "Data to return to the requester..."});
 
 		props.response({
 			error: !data ? 'Error retrieving requested data...' : null,

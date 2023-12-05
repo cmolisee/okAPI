@@ -30,4 +30,12 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 # NOTES
 
 - we should be able to use `yarn watch` to get live updates while we develop. This will watch the updates and rebuild specific files which in turn updates the dist directory which contains the files that chrome looks at to run our extension.
-- 
+- To communicate with the content script you must do the following in the popup:
+  - using chrome api get the current tabID
+  - use chrome.tabs.sendMessage() to send a message with the correct message body (i.e. from, action, and message)
+
+_NOTE: The "content-script" is injected into the browser page and we instantiate listeners on chrome runtime. When we invoke sendMessage() from the extension the listener recieves it and processes it._
+_NOTE: This one-time messaging strategy works the same from the service_worker/background script and the popup itself._
+  - content script runs from context of webpage and can access the DOM.
+  - background script/service worker is a longer lived script that will run regardless of if the extension is open (as long as it is receiving events).
+  - the extension will only run when open/active.
