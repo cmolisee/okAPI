@@ -1,0 +1,21 @@
+{
+    "name": "okAPI",
+    "version": "0.0.0",
+    "description": "Google Chrome browser extension for mocking and manipulating API's.",
+    "manifest_version": 3,
+    "action": {
+        "default_popup": "index.html",
+        "default_title": "okAPI"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["contentCommunication.js"]
+        }
+    ],
+    "devtools_page": "index.html",
+    "permissions": ["tabs", "activeTab"]
+}
