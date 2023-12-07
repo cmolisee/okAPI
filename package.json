@@ -12,8 +12,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:ci": "ng test --prod",
-    "build:ci": "ng build --prod"
+    "test:ci": "ng test --configuration production",
+    "build:ci": "ng build --configuration production"
   },
   "private": false,
   "dependencies": {
