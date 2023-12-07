@@ -26,5 +26,5 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    - run: npm run build --if-present
-    - run: ng test --sourceMap=false --browsers=ChromeHeadless --watch=false
+    - run: npm run build:ci
+    - run: npm run test:ci
