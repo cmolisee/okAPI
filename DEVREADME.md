@@ -50,3 +50,7 @@ _NOTE: This one-time messaging strategy works the same from the service_worker/b
     { "scope": "no-release", "release": false }
   - *type *scope: *descriptive short message
     *longer/extended message
+
+
+SEE https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format
+for details on semantic versioning and some template for creating ctonributing documentation and guidlines (we are using eslint as default release preset. also see the releaserc file for custom release rules).
