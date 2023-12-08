@@ -39,3 +39,14 @@ _NOTE: This one-time messaging strategy works the same from the service_worker/b
   - content script runs from context of webpage and can access the DOM.
   - background script/service worker is a longer lived script that will run regardless of if the extension is open (as long as it is receiving events).
   - the extension will only run when open/active.
+
+- release rules commit message format
+- preset/default set to "eslint" see https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-eslint
+  - { "tag": "breaking", "release": "major" },
+    { "tag": "fix", "release": "patch" },
+    { "tag": "update", "release": "minor" },
+    { "tag": "new", "release": "minor" },
+    { "tag": "docs", "release": "patch" },
+    { "scope": "no-release", "release": false }
+  - *type *scope: *descriptive short message
+    *longer/extended message

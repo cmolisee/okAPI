@@ -3,17 +3,32 @@
         [
             "@semantic-release/commit-analyzer",
             {
+                "preset": "eslint",
                 "releaseRules": [
-                    { "type": "major", "release": "major" },
-                    { "type": "minor", "release": "minor" },
-                    { "type": "patch", "release": "patch" }
+                    { "tag": "breaking", "release": "major" },
+                    { "tag": "fix", "release": "patch" },
+                    { "tag": "update", "release": "minor" },
+                    { "tag": "new", "release": "minor" },
+                    { "tag": "docs", "release": "patch" },
+                    { "scope": "no-release", "release": false }
                   ],
                   "parserOpts": {
-                    "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES"]
+                    "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES", "BREAKING"]
                   }
             }
         ],
-        "@semantic-release/release-notes-generator",
+        [
+            "@semantic-release/release-notes-generator",
+            {
+                "preset": "eslint",
+                "parserOpts": {
+                "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES", "BREAKING"]
+                },
+                "writerOpts": {
+                    "commitsSort": ["subject", "scope"]
+                }
+            }
+        ],
         [
             "@semantic-release/exec",
             {
