@@ -1,6 +1,6 @@
 {
   "name": "ok-api",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Google Chrome browser extension for mocking and manipulating API's.",
   "repository": "https://github.com/cmolisee/okAPI.git",
   "license": "MIT",
