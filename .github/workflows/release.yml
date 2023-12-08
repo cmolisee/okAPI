@@ -1,0 +1,36 @@
+name: release
+
+on:
+    workflow_run:
+        workflows: [CI]
+        types:
+            - completed
+    push:
+        branches: [ "main" ]
+
+jobs:
+    packaging:
+        if:
+            ${{ github.ref_name == 'main' &&
+            github.event.workflow_run.conclusion == 'success' }}
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
+                  token: ${{ secrets.GH_TOKEN }}
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 16
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Release
+              run: npx semantic-release
+              env:
+                  GH_TOKEN: ${{ secrets.GH_TOKEN }}

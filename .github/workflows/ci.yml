@@ -2,9 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ "*" ]
   pull_request:
-    branches: [ "main" ]
 
 jobs:
   build:
@@ -17,14 +15,15 @@ jobs:
     strategy:
       matrix:
         node-version: [16.x]
-        
+
     steps:
     - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Use Node.js ${{ matrix.node-version}}
       uses: actions/setup-node@v3
-    	with:
+      with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    - run: npm run build --if-present
-    - run: ng test --sourceMap=false --browsers=ChromeHeadless --watch=false
+    - run: npm run build:ci
+    # todo: fail job if there are tests that do not pass...
+    - run: npm run test:ci
