@@ -1,0 +1,54 @@
+{
+    "plugins": [
+        [
+            "@semantic-release/commit-analyzer",
+            {
+                "releaseRules": [
+                    { "type": "major", "release": "major" },
+                    { "type": "minor", "release": "minor" },
+                    { "type": "patch", "release": "patch" }
+                  ],
+                  "parserOpts": {
+                    "noteKeywords": ["BREAKING CHANGE", "BREAKING CHANGES"]
+                  }
+            }
+        ],
+        "@semantic-release/release-notes-generator",
+        [
+            "@semantic-release/exec",
+            {
+                "prepareCmd": "./bin/build_release ${nextRelease.version} \"${nextRelease.notes}\""
+            }
+        ],
+        "@semantic-release/changelog",
+        [
+            "@semantic-release/npm",
+            {
+                "npmPublish": false
+            }
+        ],
+        [
+            "@semantic-release/git",
+            {
+                "assets": [
+                    "package.json",
+                    "src/manifest.json",
+                    "dist"
+                ],
+                "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+            }
+        ],
+        [
+            "@semantic-release/github",
+            {
+                "assets": [
+                    {
+                        "path": "releases/*.zip",
+                        "label": "okAPI (${nextRelease.version})"
+                    }
+                ]
+            }
+        ]
+    ],
+    "branches": ["main"]
+}
