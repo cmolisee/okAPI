@@ -1,0 +1,31 @@
+#!/usr/bin/env sh
+
+set -e
+VERSION=$1
+NOTES=$2
+
+echo "Create release notes for package... ✅"
+touch release.txt
+
+echo "Add version number: $VERSION to release.txt... ✅"
+echo $VERSION >> release.txt
+echo "Add release notes to release.txt... ✅"
+echo $NOTES >> release.txt
+
+echo "Bump the version in manifest.json... ✅"
+sed -i "s|\(\"version\": \)\(.*\),|\1\"$VERSION\",|g" ./src/manifest.json
+
+echo "Create location for release files... ✅"
+mkdir -p releases
+
+echo "Build project files with updated version... ✅"
+npm run build
+
+echo "Zip release: session_storage_hub.$VERSION.zip... ✅"
+zip -r "releases/session_storage_hub.$VERSION.zip" release.txt
+
+echo "Clean temporary assets... ✅"
+rm release.txt
+
+echo
+echo "Release build and packaging complete [$VERSION] 🔥🔥🔥"
