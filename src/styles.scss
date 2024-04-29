@@ -1,6 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 * {
-    box-sizing: border-box;
+	box-sizing: border-box;
 }
 
 // odd behavior with margin, padding, width, and height that i cannot identify
@@ -9,14 +9,14 @@
 //      when rebuilding UI.
 html,
 body {
-    display: block;
-    max-width: 100%;
-    width: 775px;
-    max-height: 100%;
+	display: block;
+	max-width: 100%;
+	width: 775px;
+	max-height: 100%;
 }
 
 // hiding the scrollbar because it sucks
 // will still scroll
 html::-webkit-scrollbar {
-    display: none;
+	display: none;
 }

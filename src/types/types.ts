@@ -5,7 +5,7 @@ export enum Sender {
 
 export enum Action {
 	Request,
-	release
+	release,
 }
 
 export interface IChromeMessage {

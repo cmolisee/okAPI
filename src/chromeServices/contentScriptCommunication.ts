@@ -10,16 +10,16 @@ import {
 type TResponse = (response?: IMessageResponse) => void;
 
 interface IValidateSender {
-    expectedSender: Sender,
-	expectedAction: Action,
-	message: IChromeMessage,
-	sender: chrome.runtime.MessageSender
+	expectedSender: Sender;
+	expectedAction: Action;
+	message: IChromeMessage;
+	sender: chrome.runtime.MessageSender;
 }
 
 interface IRequestActionCallback {
-    message: IChromeMessage,
-	sender: chrome.runtime.MessageSender,
-	response: TResponse
+	message: IChromeMessage;
+	sender: chrome.runtime.MessageSender;
+	response: TResponse;
 }
 
 // interface IReleaseActionCallback {
@@ -39,15 +39,18 @@ const validateSender = (props: IValidateSender) => {
 
 // handles REQUEST actions
 const requestActionCallback = (props: IRequestActionCallback) => {
-    const validateSenderArgumentBody: IValidateSender = {
-        expectedSender: Sender.Extension, 
-        expectedAction: Action.Request, 
-        message: props.message, 
-        sender: props.sender
-    };
+	const validateSenderArgumentBody: IValidateSender = {
+		expectedSender: Sender.Extension,
+		expectedAction: Action.Request,
+		message: props.message,
+		sender: props.sender,
+	};
 
 	if (validateSender(validateSenderArgumentBody)) {
-		const data = Object.assign({}, {data: "Data to return to the requester..."});
+		const data = Object.assign(
+			{},
+			{ data: 'Data to return to the requester...' },
+		);
 
 		props.response({
 			error: !data ? 'Error retrieving requested data...' : null,
@@ -62,9 +65,9 @@ const requestActionCallback = (props: IRequestActionCallback) => {
 // handles RELEASE actions
 // const releaseActionCallback = (props: IReleaseActionCallback) => {
 //     const validateSenderArgumentBody: IValidateSender = {
-//         expectedSender: Sender.Extension, 
-//         expectedAction: Action.Request, 
-//         message: props.message, 
+//         expectedSender: Sender.Extension,
+//         expectedAction: Action.Request,
+//         message: props.message,
 //         sender: props.sender
 //     };
 
@@ -93,8 +96,8 @@ const requestActionCallback = (props: IRequestActionCallback) => {
 //                             // TODO: we need to somehow retrieve the users current extension version
 //                             // previously this was done by placing the version in package.json into an env variable
 //                             // there might be a better/different way to do it here.
-// 							props.response({ 
-//                                 error: null, 
+// 							props.response({
+//                                 error: null,
 //                                 data: {
 //                                     isUpToDate: latestVersion === process.env['VERSION'],
 //                                     timestamp: new Date().getTime(),
