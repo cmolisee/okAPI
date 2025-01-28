@@ -69,10 +69,7 @@ This project follows [Semantic Versionaing](https://semver.org/)
 
 ## Contribution
 
-All commits must be signed. Set up GPG signing:
-```bash
-git config --global commit.gpgsign true
-```
+All commits must be signed. Set up GPG signing (see here)[https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification].
 
 ## Branching
 - **main** is our main release branch. Feature branches should be created off this branch.
