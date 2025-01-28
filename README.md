@@ -1,9 +1,6 @@
-<!-- Template from https://github.com/othneildrew/Best-README-Template/blob/master/README.md?plain=1 -->
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
 <a name="readme-top"></a>
 
 <!-- PROJECT SHIELDS -->
-<!-- add [version-url] when ready -->
 ![Current Version][version-shield]
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
@@ -42,12 +39,9 @@
 <details>
   <summary>Table of Contents</summary>
   <ol>
-    <li>
-      <a href="#details">Details</a>
-      <ul>
-        <li><a href="#tech-stack">Tech Stack</a></li>
-      </ul>
-    </li>
+    <li><a href="#description">Details</a></li>
+    <li><a href="#versioning">Installation</a></li>
+    <li><a href="#contribution">Installation</a></li>
     <li><a href="#installation">Installation</a></li>
     <li><a href="#usage">Usage</a></li>
     <li><a href="#contributing">Contributing</a></li>
@@ -58,85 +52,64 @@
 
 
 
-## Details
+## Description
 
-Google chrome extension for mocking API requests.
+Browser Extension for API's.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
+## Versioning
+
+This project follows [Semantic Versionaing](https://semver.org/)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
+## Contribution
 
-### Tech Stack
+All commits must be signed. Set up GPG signing:
+```bash
+git config --global commit.gpgsign true
+```
 
-[![Angular][Angular.io]][Angular-url]
-
-[![Typescript][Typescript.io]][Typescript-url]
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
+## Branching
+- **main** is our main release branch. Feature branches should be created off this branch.
+- **beta** is our pre-release branch.
 
 
 ## Installation
 
-### Terminal
+> [!WARNING]
+> When updating the extension you need to ensure that you reload your tabs.
 
-1. Open your terminal and clone the repository
-  ```
-  git clone https://github.com/cmolisee/okAPI.git
-  ```
+> [!WARNING]
+> Keeping tabs open for extended periods of time can generate errors.
 
-1. Change directory to where you cloned the files and install dependencies
-  ```
-  cd <path/to/repo> && npm i
-  ```
+> [!INFO]
+> Reloading the tabs or regularly closing them when done should resolve issues.
 
-2. Build the project
-  ```
-  npm run build
-  ```
+### Chrome/Edge Installation
 
-4. Open the 'extension manager' in your chrome browser
-5. Turn on 'developer mode' and click 'load unpacked'
-6. Select the build folder generated from the previous step
+1. Get latest release from [github](https://github.com/cmolisee/okapi/releaes/latest).
+2. Download the Chrome or Edge zip file and unpack to a directory of your choice.
+3. Open your browser and go the Extension Manager.
+4. Ensure developer mode is enabled and select 'load unpacked'.
+5. Select the '/dist/chrome-mv3' folder (or similar for edge).
+6. Reload your browser tabs.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### Release Artifacts
+> [!TIP]
+> You can pin the extension to your toolbar for quick access.
 
-1. Download the latest release [Releases](https://github.com/cmolisee/okAPI/releases)
-2. Open the 'extension manager' in your chrome browser
-3. Turn on 'developer mode' and click 'load unpacked'
-4. Select the build folder generated from the previous step
+### Safari/Firefox Installation
+
+1. Get latest release from [github](https://github.com/cmolisee/okapi/releaes/latest).
+2. Download the Safari or Firefox zip file and unpack to a directory of your choice.
+3. Follow the safari/Edge documentation for installing an unsigned extension.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-## Usage
-
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-## Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 ## License
@@ -144,7 +117,6 @@ Don't forget to give the project a star! Thanks again!
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 ## Acknowledgments

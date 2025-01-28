@@ -1,0 +1,30 @@
+name: prepare
+
+on: [push]
+
+jobs:
+    ci:
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+
+            - name: Install dependencies
+              run: |
+                  npm ci
+
+            # - name: Format
+            #   run: |
+            #       npm run format
+
+            # - name: Format
+            #   run: |
+            #       npm run lint
+
+            # put test run step here...
