@@ -1,6 +1,4 @@
 import { createSignal } from 'solid-js';
-import solidLogo from '@/assets/solid.svg';
-import wxtLogo from '/wxt.svg';
 import './App.css';
 
 function App() {
@@ -9,12 +7,6 @@ function App() {
   return (
     <>
       <div>
-        <a href="https://wxt.dev" target="_blank">
-          <img src={wxtLogo} class="logo" alt="WXT logo" />
-        </a>
-        <a href="https://solidjs.com" target="_blank">
-          <img src={solidLogo} class="logo solid" alt="Solid logo" />
-        </a>
       </div>
       <h1>WXT + Solid</h1>
       <div class="card">
