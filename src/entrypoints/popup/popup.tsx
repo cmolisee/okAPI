@@ -1,27 +1,21 @@
 import { createSignal } from 'solid-js';
-import './App.css';
 
-function App() {
+function Popup() {
   const [count, setCount] = createSignal(0);
 
   return (
     <>
       <div>
       </div>
-      <h1>WXT + Solid</h1>
+      <h1>okAPI</h1>
       <div class="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count()}
         </button>
-        <p>
-          Edit <code>popup/App.tsx</code> and save to test HMR
-        </p>
+        <a href='/options'>to the options page</a>
       </div>
-      <p class="read-the-docs">
-        Click on the WXT and Solid logos to learn more
-      </p>
     </>
   );
 }
 
-export default App;
+export default Popup;

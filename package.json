@@ -5,67 +5,67 @@
   "version": "0.0.0",
   "type": "module",
   "config": {
-        "commitizen": {
-            "path": "./node_modules/cz-conventional-changelog"
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      [
+        "@semantic-release/npm",
+        {
+          "npmPublish": false,
+          "pkgRoot": "."
         }
-    },
-    "release": {
-        "branches": [
-            "main"
-        ],
-        "plugins": [
-            "@semantic-release/commit-analyzer",
-            "@semantic-release/release-notes-generator",
-            [
-                "@semantic-release/npm",
-                {
-                    "npmPublish": false,
-                    "pkgRoot": "."
-                }
-            ],
-            "@semantic-release/changelog",
-            [
-                "@semantic-release/exec",
-                {
-                    "prepareCmd": "chmod +x ./tooling/prepare.sh && ./tooling/prepare.sh"
-                }
-            ],
-            [
-                "@semantic-release/github",
-                {
-                    "assets": [
-                        {
-                            "path": "chrome.zip",
-                            "label": "Chrome Extension"
-                        },
-                        {
-                            "path": "edge.zip",
-                            "label": "Edge Extension"
-                        },
-                        {
-                            "path": "firefox.zip",
-                            "label": "Firefox Extension"
-                        },
-                        {
-                            "path": "safari.zip",
-                            "label": "Safari Extension"
-                        }
-                    ]
-                }
-            ],
-            [
-                "@semantic-release/git",
-                {
-                    "assets": [
-                        "CHANGELOG.md",
-                        "package-lock.json",
-                        "package.json"
-                    ],
-                    "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-                }
-            ]
-        ]
-    },
+      ],
+      "@semantic-release/changelog",
+      [
+        "@semantic-release/exec",
+        {
+          "prepareCmd": "chmod +x ./tooling/prepare.sh && ./tooling/prepare.sh"
+        }
+      ],
+      [
+        "@semantic-release/github",
+        {
+          "assets": [
+            {
+              "path": "chrome.zip",
+              "label": "Chrome Extension"
+            },
+            {
+              "path": "edge.zip",
+              "label": "Edge Extension"
+            },
+            {
+              "path": "firefox.zip",
+              "label": "Firefox Extension"
+            },
+            {
+              "path": "safari.zip",
+              "label": "Safari Extension"
+            }
+          ]
+        }
+      ],
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "CHANGELOG.md",
+            "package-lock.json",
+            "package.json"
+          ],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ]
+    ]
+  },
   "scripts": {
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",
@@ -82,6 +82,7 @@
     "commit": "cz"
   },
   "dependencies": {
+    "@solidjs/router": "^0.15.3",
     "solid-js": "^1.9.3"
   },
   "devDependencies": {
@@ -92,6 +93,7 @@
     "@semantic-release/github": "^11.0.1",
     "@semantic-release/npm": "^12.0.1",
     "@semantic-release/release-notes-generator": "^14.0.3",
+    "@tailwindcss/postcss": "^4.0.0",
     "@types/chrome": "^0.0.280",
     "@wxt-dev/module-solid": "^1.1.2",
     "autoprefixer": "^10.4.20",

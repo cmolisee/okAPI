@@ -9,6 +9,11 @@ export default defineConfig({
   manifest: {
     permissions: [],
     action: {},
-    web_accessible_resources: [],
+    web_accessible_resources: [
+      {
+        resources: ['inject.js'],
+        matches: ["<all_urls>"],
+      }
+    ],
   },
 });
