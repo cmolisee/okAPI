@@ -38,7 +38,7 @@ declare global {
   const defineContentScript: typeof import('wxt/sandbox')['defineContentScript']
   const defineUnlistedScript: typeof import('wxt/sandbox')['defineUnlistedScript']
   const defineWxtPlugin: typeof import('wxt/sandbox')['defineWxtPlugin']
-  const extensionMessenger: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/messaging')['extensionMessenger']
+  const extensionMessenger: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/extensionMessenger')['extensionMessenger']
   const fakeBrowser: typeof import('wxt/testing')['fakeBrowser']
   const hydrate: typeof import('solid-js/web')['hydrate']
   const indexArray: typeof import('solid-js')['indexArray']
@@ -64,11 +64,11 @@ declare global {
   const useAppConfig: typeof import('wxt/client')['useAppConfig']
   const useContext: typeof import('solid-js')['useContext']
   const useTransition: typeof import('solid-js')['useTransition']
-  const webpageMessenger: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/messaging')['webpageMessenger']
+  const webpageMessenger: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/webpageMessenger')['webpageMessenger']
 }
 // for type re-export
 declare global {
   // @ts-ignore
-  export type { WebpageProtocolMap } from '/Users/cmolisee/Documents/okAPI/src/utils/messaging'
-  import('/Users/cmolisee/Documents/okAPI/src/utils/messaging')
+  export type { WebpageProtocolMap } from '/Users/cmolisee/Documents/okAPI/src/utils/webpageMessenger'
+  import('/Users/cmolisee/Documents/okAPI/src/utils/webpageMessenger')
 }

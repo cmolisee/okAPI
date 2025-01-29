@@ -1,6 +1,4 @@
-import { extensionMessenger } from "@/utils/messaging";
-
-export default defineBackground(() => {
+export default defineBackground(async () => {
   /**
    * This script runs for the extension. it runs in the extension context and
    * is viewable in the dev tools for the extension.

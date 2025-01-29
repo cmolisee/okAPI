@@ -16,11 +16,12 @@ export default defineConfig({
     web_accessible_resources: [
       {
         resources: ['inject.js'],
-        matches: ["<all_urls>"],
+        matches: ["*://*/*"],
       }
     ],
   },
   runner: {
     startUrls: ['https://webext-core.aklinker1.io/'],
   },
+  vite: () => ({}),
 });

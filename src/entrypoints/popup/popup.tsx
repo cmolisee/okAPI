@@ -1,4 +1,3 @@
-import { extensionMessenger } from '@/utils/messaging';
 import { createSignal } from 'solid-js';
 
 function Popup() {
@@ -6,13 +5,15 @@ function Popup() {
 
   const sendMessageUpdate = async (c: number) => await extensionMessenger.sendMessage('sendMessageToWebpage', `count is now: ${c}`);
 
-  onMount(() => {
+  onMount(async () => {
     const notifyWebpage = async (msg: string) => await extensionMessenger.sendMessage('sendMessageToWebpage', msg);
 
-    notifyWebpage('popup is mounted...');
+    await notifyWebpage('popup is mounted...');
+    // console.log('popup mounted...');
 
-    onCleanup(() => {
-      notifyWebpage('popup is being unmounted...');
+    onCleanup(async () => {
+      await notifyWebpage('popup is being unmounted...');
+      // console.log('popup unmounted...');
     });
   })
 
@@ -25,7 +26,7 @@ function Popup() {
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count()}
         </button>
-        <button onClick={() => sendMessageUpdate(count())}>
+        <button onClick={async () => await sendMessageUpdate(count())}>
           send count to webpage
         </button>
         <a href='/options'>to the options page</a>

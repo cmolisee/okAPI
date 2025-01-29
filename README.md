@@ -40,11 +40,9 @@
   <summary>Table of Contents</summary>
   <ol>
     <li><a href="#description">Details</a></li>
-    <li><a href="#versioning">Installation</a></li>
-    <li><a href="#contribution">Installation</a></li>
+    <li><a href="#versioning">Versioning</a></li>
+    <li><a href="#contribution">Contribution</a></li>
     <li><a href="#installation">Installation</a></li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
@@ -56,7 +54,7 @@
 
 Browser Extension for API's.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="center">(<a href="#readme-top">back to top</a>)</p>
 
 
 
@@ -64,12 +62,15 @@ Browser Extension for API's.
 
 This project follows [Semantic Versionaing](https://semver.org/)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="center">(<a href="#readme-top">back to top</a>)</p>
 
 
 ## Contribution
 
 All commits must be signed. Set up GPG signing (see here)[https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification].
+
+> [!INFO]
+> See npm run scripts for commiting and commit lint details.
 
 ## Branching
 - **main** is our main release branch. Feature branches should be created off this branch.
@@ -106,14 +107,14 @@ All commits must be signed. Set up GPG signing (see here)[https://docs.github.co
 2. Download the Safari or Firefox zip file and unpack to a directory of your choice.
 3. Follow the safari/Edge documentation for installing an unsigned extension.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="center">(<a href="#readme-top">back to top</a>)</p>
 
 
 ## License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="center">(<a href="#readme-top">back to top</a>)</p>
 
 
 ## Acknowledgments
@@ -122,7 +123,7 @@ Use this space to list resources you find helpful and would like to give credit 
 
 * [Img Shields](https://shields.io)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="center">(<a href="#readme-top">back to top</a>)</p>
 
 
 

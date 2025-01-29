@@ -1,4 +1,3 @@
-// import { extensionMessenger, webpageMessenger } from "@/utils/messaging";
 import { ScriptPublicPath } from "wxt/client";
 
 export default defineContentScript({
@@ -18,19 +17,25 @@ export default defineContentScript({
      */
     console.log('Hello from okapi content.ts');
 
-    // webpageMessenger.onMessage('sendMessageToExtension', async (message) => {
-    //   console.log('forward to extension: ', message);
-    //   return await extensionMessenger.sendMessage('receiveMessageFromWebpage', message.data)
-    //     .then(() => true)
-    //     .catch(() => false);
-    // });
+    webpageMessenger.onMessage('sendMessageToExtension', async (message) => {
+      console.log('forward to extension: ', message);
+      return await extensionMessenger.sendMessage('receiveMessageFromWebpage', message.data)
+        .then(() => true)
+        .catch((error) => {
+        console.debug(error);
+        return false;
+      });
+    });
 
-    // extensionMessenger.onMessage('sendMessageToWebpage', async (message) => {
-    //   console.log('forward to webpage: ', message);
-    //   return await webpageMessenger.sendMessage('receiveMessageFromExtension', message.data)
-    //     .then(() => true)
-    //     .catch(() => false);
-    // });
+    extensionMessenger.onMessage('sendMessageToWebpage', async (message) => {
+      console.log('forward to webpage: ', message);
+      return await webpageMessenger.sendMessage('receiveMessageFromExtension', message.data)
+        .then(() => true)
+        .catch((error) => {
+          console.debug(error);
+          return false;
+      });
+    });
 
     init();
   },
