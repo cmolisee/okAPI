@@ -83,6 +83,7 @@
   },
   "dependencies": {
     "@solidjs/router": "^0.15.3",
+    "@webext-core/messaging": "^2.2.0",
     "solid-js": "^1.9.3"
   },
   "devDependencies": {
