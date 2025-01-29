@@ -4,11 +4,13 @@ import { defineWindowMessaging } from "@webext-core/messaging/page";
 /** Protocol for extension messages */
 interface ExtensionProtocolMap {
     sendMessageToWebpage(msg: string): boolean; // this is just an example
+    receiveMessageFromWebpage(msg: string): boolean; // this is just an example
 }
 
 /** Protocol for webpage (window) messaging. */
 export interface WebpageProtocolMap {
     sendMessageToExtension(msg: string): boolean; // this is just an example
+    receiveMessageFromExtension(msg: string): boolean; // this is just an example
 };
 
 /** messaging from extension */

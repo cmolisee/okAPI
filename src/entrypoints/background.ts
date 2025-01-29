@@ -1,3 +1,5 @@
+import { extensionMessenger } from "@/utils/messaging";
+
 export default defineBackground(() => {
   /**
    * This script runs for the extension. it runs in the extension context and
@@ -8,4 +10,10 @@ export default defineBackground(() => {
    * chrome.runtime.id or safari.runtime.id, etc....
    */
   console.log('Hello from okapi background.ts!', { id: browser.runtime.id });
+
+  /** testing messaging from webpage */
+  extensionMessenger.onMessage('receiveMessageFromWebpage', (message) => {
+    console.log(message);
+    return true;
+  });
 });
