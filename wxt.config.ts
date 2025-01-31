@@ -11,7 +11,7 @@ export default defineConfig({
   srcDir: 'src',
   outDir: 'dist',
   manifest: {
-    permissions: ['activeTab', 'tabs'],
+    permissions: ['activeTab', 'tabs', 'sidePanel'],
     action: {},
     web_accessible_resources: [
       {
