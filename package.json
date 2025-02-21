@@ -84,7 +84,8 @@
   "dependencies": {
     "@solidjs/router": "^0.15.3",
     "@webext-core/messaging": "^2.2.0",
-    "solid-js": "^1.9.3"
+    "solid-js": "^1.9.3",
+    "tailwind-merge": "^3.0.1"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",

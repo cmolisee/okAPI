@@ -1,3 +1,4 @@
+import { twMerge } from "tailwind-merge";
 import "~/assets/tailwind.css";
 
 type MethodType = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -19,7 +20,7 @@ function TabButton(props: any) {
 }
 
 function TabContent(props: any) {
-    const [tab, setTab] = createSignal<Mock>(props.tab);
+    const [tab, setTab] = createSignal<Mock>({...props.tab});
 
     const getTab = createMemo(() => {
         return tab();
@@ -132,13 +133,12 @@ function TabContent(props: any) {
         });
     }
 
-    // createEffect(() => {
-    //     if (props?.tab && JSON.stringify(props.tab) !== JSON.stringify(tab)) {
-    //         setTab(props.tab);
-    //     }
-
-    //     console.log('create effect', tab());
-    // });
+    createEffect(() => {
+        console.log('tab', props.tab);
+        if (props?.tab && JSON.stringify(props.tab) !== JSON.stringify(tab)) {
+            setTab(props.tab);
+        }
+    });
 
     return (
         <div class="tabContent m-2">
@@ -146,10 +146,10 @@ function TabContent(props: any) {
                 <div class="tabContent_uriBar flex flex-row border border-solid rounded-sm w-[75%]">
                     <div class="mr-4">
                         <select class="border-none" name="method" on:change={hanldeMethodUpdate}>
-                            <option value="GET">GET</option>
-                            <option value="POST">POST</option>
-                            <option value="PUT">PUT</option>
-                            <option value="DELETE">DELETE</option>
+                            <option value="GET" selected={tab()?.method === 'GET'}>GET</option>
+                            <option value="POST" selected={tab()?.method === 'POST'}>POST</option>
+                            <option value="PUT" selected={tab()?.method === 'PUT'}>PUT</option>
+                            <option value="DELETE" selected={tab()?.method === 'DELETE'}>DELETE</option>
                         </select>
                     </div>
                     <input id="uri" class="bg-stone-100 w-full  border-l px-2" type="text" value={tab()?.uri ?? ''} placeholder="URI" on:blur={handleUriUpdate} /> 
@@ -191,14 +191,14 @@ function Tabs(props: any) {
     const [activeTabIndex, setActiveTabIndex] = createSignal(props?.activeIndex ?? -1);
     const [tabs, setTabs] = createSignal<Mock[]>(props?.tabs ?? []);
 
-    const activeTab = createMemo(() => {
-        const currentTabs = tabs();
-        const currentIndex = activeTabIndex();
+    // const activeTab = createMemo(() => {
+    //     const currentTabs = tabs();
+    //     const currentIndex = activeTabIndex();
 
-        return currentIndex >= 0 && currentIndex< currentTabs.length
-            ? currentTabs[currentIndex]
-            : undefined;
-    });
+    //     return currentIndex >= 0 && currentIndex < currentTabs.length
+    //         ? currentTabs[currentIndex]
+    //         : undefined;
+    // });
     
     function handleAddTab() {
         setTabs((prev) => [...prev, { isEnabled: false, method: 'GET' }]);
@@ -226,7 +226,7 @@ function Tabs(props: any) {
             <div class="tab_list flex flex-wrap flex-row align-items w-full">
                 <For each={tabs()}>
                     {(tab, i) => (
-                        <div class="tab_item flex flex-wrap mx-2" on:click={() => setActiveTabIndex(i())}>
+                        <div class={twMerge('tab_item flex flex-wrap mx-2 cursor-pointer rounded-md px-2', i() === activeTabIndex() ? 'bg-blue-300 text-white' : '')} on:click={() => setActiveTabIndex(i())}>
                             <span class="size-fit">{tab.method}</span>
                             <span class="mx-1 text-ellipsis">{`${tab.uri ? tab.uri : 'untitled'}`}</span>
                             <TabButton onClickCallback={() => handleRemoveTab(i())} text={'X'}/>
@@ -236,12 +236,10 @@ function Tabs(props: any) {
                 <div class="tab_item"><TabButton onClickCallback={() => handleAddTab()} text={'+'}/></div>
             </div>
             <div class="tab_content">
-                <Show when={activeTab()} fallback={<div class="m-8">Click '+' to create a new mock.</div>}>
-                    {(tab) => (
-                        <TabContent
-                            tab={tab}
-                            updateTab={(updatedTab: Mock) => handleUpdateTab(activeTabIndex(), updatedTab)} />
-                    )}
+                <Show when={activeTabIndex() >= 0 && activeTabIndex() < tabs().length} fallback={<div class="m-8">Click '+' to create a new mock.</div>}>
+                    <TabContent
+                        tab={tabs()[activeTabIndex()]}
+                        updateTab={(updatedTab: Mock) => handleUpdateTab(activeTabIndex(), updatedTab)} />
                 </Show>
             </div>
         </div>
