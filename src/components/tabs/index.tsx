@@ -209,11 +209,12 @@ function Tabs(props: any) {
         const newTabs = tabs().filter((_, i) => i !== index);
         setTabs(newTabs);
 
+
+
         if (newTabs.length === 0) {
             setActiveTabIndex(-1);
-        } else if (index <= activeTabIndex()) {
-            const newIndex = Math.min(activeTabIndex() - 1, newTabs.length - 1);
-            setActiveTabIndex(Math.max(0, newIndex));
+        } else {
+            setActiveTabIndex((prev) => prev - 1);
         }
     }
 
