@@ -23,5 +23,9 @@ export default defineConfig({
   runner: {
     startUrls: ['https://webext-core.aklinker1.io/'],
   },
-  vite: () => ({}),
+  vite: () => ({
+    css: {
+      postcss: './postcss.config.js'
+    }
+  })
 });

@@ -1,9 +1,10 @@
 import { render } from 'solid-js/web';
 import { HashRouter, Route } from '@solidjs/router';
 
-import './style.css';
 import Sidepanel from './sidepanel';
 import Options from './options';
+
+import './style.css';
 
 render(() => {
     return (
