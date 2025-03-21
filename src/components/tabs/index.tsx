@@ -1,5 +1,7 @@
+import { VsAdd, VsClose } from "solid-icons/vs";
 import { twMerge } from "tailwind-merge";
 import "~/assets/tailwind.css";
+import Button from "../button";
 
 type MethodType = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 interface Param {
@@ -13,10 +15,6 @@ interface Mock {
     method: MethodType;
     params?: Param[];
     body?: string;
-}
-
-function TabButton(props: any) {
-    return (<button class="inline size-fit mx-2" on:click={props.onClickCallback}>{props.text}</button>);
 }
 
 function TabContent(props: any) {
@@ -190,15 +188,6 @@ function TabContent(props: any) {
 function Tabs(props: any) {
     const [activeTabIndex, setActiveTabIndex] = createSignal(props?.activeIndex ?? -1);
     const [tabs, setTabs] = createSignal<Mock[]>(props?.tabs ?? []);
-
-    // const activeTab = createMemo(() => {
-    //     const currentTabs = tabs();
-    //     const currentIndex = activeTabIndex();
-
-    //     return currentIndex >= 0 && currentIndex < currentTabs.length
-    //         ? currentTabs[currentIndex]
-    //         : undefined;
-    // });
     
     function handleAddTab() {
         setTabs((prev) => [...prev, { isEnabled: false, method: 'GET' }]);
@@ -224,17 +213,17 @@ function Tabs(props: any) {
 
     return (
         <div class="tab_container flex flex-col gap-2">
-            <div class="tab_list flex flex-wrap flex-row align-items w-full">
+            <div class="tab_list flex flex-wrap flex-row align-items w-full border-b-[#98e5c7] border-b-[1px]">
                 <For each={tabs()}>
                     {(tab, i) => (
-                        <div class={twMerge('tab_item flex flex-wrap mx-2 cursor-pointer rounded-md px-2', i() === activeTabIndex() ? 'bg-blue-300 text-white' : '')} on:click={() => setActiveTabIndex(i())}>
+                        <div class={twMerge('tab_item flex flex-wrap items-center mx-2 cursor-pointer rounded-t-md px-2 border-[#98e5c7] border-b-white mb-[-1px]', i() === activeTabIndex() ? 'border-2' : '')} on:click={() => setActiveTabIndex(i())}>
                             <span class="size-fit">{tab.method}</span>
                             <span class="mx-1 text-ellipsis">{`${tab.uri ? tab.uri : 'untitled'}`}</span>
-                            <TabButton onClickCallback={() => handleRemoveTab(i())} text={'X'}/>
+                            <Button onClickCallback={() => handleRemoveTab(i())}><VsClose size={18} /></Button>
                         </div>
                     )}
                 </For>
-                <div class="tab_item"><TabButton onClickCallback={() => handleAddTab()} text={'+'}/></div>
+                <div class="tab_item flex mb-[-1px]"><Button onClickCallback={() => handleAddTab()}><VsAdd size={18} color="#98e5c7" /></Button></div>
             </div>
             <div class="tab_content">
                 <Show when={activeTabIndex() >= 0 && activeTabIndex() < tabs().length} fallback={<div class="m-8">Click '+' to create a new mock.</div>}>
