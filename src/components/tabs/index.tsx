@@ -1,15 +1,21 @@
-import { VsAdd, VsClose } from "solid-icons/vs";
+import { VsAdd, VsClose, VsTrash } from "solid-icons/vs";
 import { twMerge } from "tailwind-merge";
 import "~/assets/tailwind.css";
 import Button from "../button";
+import { createUniqueId } from "solid-js";
+import { SetStoreFunction } from "solid-js/store";
+import "./styles.css";
 
-type MethodType = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-interface Param {
+export type MethodType = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+export interface Param {
+    id: string;
     active?: boolean;
     key?: string;
     value?: string;
 }
-interface Mock {
+export interface Mock {
+    id: string;
+    isActive: boolean;
     isEnabled: boolean;
     uri?: string;
     method: MethodType;
@@ -17,223 +23,259 @@ interface Mock {
     body?: string;
 }
 
-function TabContent(props: any) {
-    const [tab, setTab] = createSignal<Mock>({...props.tab});
+export interface TabStore {
+    tabs: Mock[];
+}
 
-    const getTab = createMemo(() => {
-        return tab();
-    });
+export interface TabContext {
+    store: TabStore;
+    transaction: SetStoreFunction<TabStore>;
+}
 
-    function hanldeMethodUpdate(e: Event) {
-        const target: HTMLSelectElement = e.target as HTMLSelectElement;
-        const value = target?.value ?? 'GET';
-
-        props.updateTab({
-            ...tab(),
-            method: value
-        });
-    }
-
-    function handleUriUpdate(e: Event) {
-        const target: HTMLInputElement = e.target as HTMLInputElement;
-        const value = target?.value ?? '';
-
-        props.updateTab({
-            ...tab(),
-            uri: value
-        });
-    }
-
-    function handleIsEnabledUpdate(e: Event) {
-        const target: HTMLInputElement = e.target as HTMLInputElement;
-        const checked = target?.checked ?? false;
-
-        props.updateTab({
-            ...tab(),
-            isEnabled: checked
-        });
-    }
-
-    function handleBodyUpdate(e: FocusEvent) {
-        const target: HTMLTextAreaElement = e.target as HTMLTextAreaElement;
-        const value = target?.value ?? '';
-
-        props.updateTab({
-            ...tab(),
-            body: value
-        });
-    }
-
-    function handleParamUpdate(paramUpdate: Param, index: number) {
-        if (tab()?.params !== undefined && tab().params!.length > 0) {
-            props.updateTab({
-                ...JSON.parse(JSON.stringify(tab())),
-                params: tab().params!.map((param, i) => i === index ? paramUpdate : param)
-            });
-        } else {
-            props.updateTab({
-                ...JSON.parse(JSON.stringify(tab())),
-                params: [paramUpdate]
-            });
-        }
-    }
-
-    function onKeyBlur(e: Event, index: number) {
-        const target: HTMLInputElement = e.target as HTMLInputElement;
-        const value = target?.value ?? '';
-
-        const param = tab()?.params?.[index] ?? { active: true };
-
-        handleParamUpdate({ ...param, key: value }, index)
-    }
-
-    function onValueBlur(e: Event, index: number) {
-        const target: HTMLInputElement = e.target as HTMLInputElement;
-        const value = target?.value ?? '';
-
-        const param = tab()?.params?.[index] ?? { active: true };
-
-        handleParamUpdate({ ...param, value: value }, index)
-    }
-
-    function onActiveChange(e: Event, index: number) {
-        const target: HTMLInputElement = e.target as HTMLInputElement;
-        const checked = target?.checked ?? false;
-
-        const param = tab()?.params?.[index] ?? { active: true };
-
-        handleParamUpdate({ ...param, active: checked }, index)
-    }
-
-    function handleNewKey(e: Event) {
-        const target: HTMLInputElement = e.target as HTMLInputElement;
-        const value = target?.value ?? '';
-        const newParam = { active: true, key: value };
-        const updatedParams = [ ...tab()?.params ?? [], newParam]
-
-        target.value = '';
-        props.updateTab({
-            ...tab(),
-            params: updatedParams,
-        });
-    }
-
-    function handleNewValue(e: Event) {
-        const target: HTMLInputElement = e.target as HTMLInputElement;
-        const value = target?.value ?? '';
-        const newParam = { active: true, value: value };
-        const updatedParams = [ ...tab()?.params ?? [], newParam]
-
-        target.value = '';
-        props.updateTab({
-            ...tab(),
-            params: updatedParams,
-        });
-    }
-
-    createEffect(() => {
-        console.log('tab', props.tab);
-        if (props?.tab && JSON.stringify(props.tab) !== JSON.stringify(tab)) {
-            setTab(props.tab);
-        }
+const TabContext = createContext<TabContext>({ store: { tabs: [] }, transaction: () => {} });
+export function TabStore(props: any) {
+    const [store, transaction] = createStore<TabStore>({
+        tabs: [],
     });
 
     return (
-        <div class="tabContent m-2">
-            <div class="tabContent_topBar flex flex-row justify-between align-centermy-2">
-                <div class="tabContent_uriBar flex flex-row border border-solid rounded-sm w-[75%]">
-                    <div class="mr-4">
-                        <select class="border-none" name="method" on:change={hanldeMethodUpdate}>
-                            <option value="GET" selected={tab()?.method === 'GET'}>GET</option>
-                            <option value="POST" selected={tab()?.method === 'POST'}>POST</option>
-                            <option value="PUT" selected={tab()?.method === 'PUT'}>PUT</option>
-                            <option value="DELETE" selected={tab()?.method === 'DELETE'}>DELETE</option>
-                        </select>
-                    </div>
-                    <input id="uri" class="bg-stone-100 w-full  border-l px-2" type="text" value={tab()?.uri ?? ''} placeholder="URI" on:blur={handleUriUpdate} /> 
-                </div>
-                <input type="checkbox" id="isEnabled" name="isEnabled" checked={tab().isEnabled} aria-checked={tab().isEnabled} on:change={handleIsEnabledUpdate} />
-            </div>
-            <div class="tabContent_body my-2">
-                <textarea id="body" class="w-full" name="body" cols="50" placeholder="{}" on:blur={handleBodyUpdate}/>
-            </div>
-            <div class="tabContent_params my-2">
-                <div class="grid grid-cols-[6%_25%_69%] grid-rows-2">
-                    {/* header */}
-                    <div class="text-center border"></div>
-                    <div class="text-center border">Key</div>
-                    <div class="text-center border">Value</div>
-                    {/* defined params */}
-                    <For each={getTab().params}>
-                        {(param, i) => {
-                            return (
-                                <>
-                                    <input id={`active_${i}`} class="border" type="checkbox" name={`active_${i}`} checked={param.active} aria-checked={param.active} on:change={(e) => onActiveChange(e, i())}/>
-                                    <input id={`key_${i}`} class="bg-stone-100 w-full px-2 border" type="text" value={param.key || ''} placeholder="Key" on:blur={(e) => onKeyBlur(e, i())}/>
-                                    <input id={`value_${i}`} class="bg-stone-100 w-full px-2 border" type="text" value={param.value || ''} placeholder="Value" on:blur={(e) => onValueBlur(e, i())}/>
-                                </>
-                            )
-                        }}
-                    </For>
-                    {/* default */}
-                    <span class="border"/>
-                    <input id="defaultKey" class="bg-stone-100 w-full px-2 border" type="text" placeholder="Key" on:blur={handleNewKey} />
-                    <input id="defaultValue" class="bg-stone-100 w-full px-2 border" type="text" placeholder="Value" on:blur={handleNewValue} />
-                </div>
-            </div>
-        </div>
+        <TabContext.Provider value={{ store, transaction }}>
+            {props.children}
+        </TabContext.Provider>
     )
 }
 
-function Tabs(props: any) {
-    const [activeTabIndex, setActiveTabIndex] = createSignal(props?.activeIndex ?? -1);
-    const [tabs, setTabs] = createSignal<Mock[]>(props?.tabs ?? []);
+export function Tabs() {
+    const { store, transaction } = useContext(TabContext);
     
-    function handleAddTab() {
-        setTabs((prev) => [...prev, { isEnabled: false, method: 'GET' }]);
-        setActiveTabIndex(tabs().length - 1);
-    }
+    const handleAddTab = () => {
+        const newTabId = createUniqueId();
 
-    function handleRemoveTab(index: number) {
-        const newTabs = tabs().filter((_, i) => i !== index);
-        setTabs(newTabs);
+        transaction(produce((draft: any) => {
+            if (draft?.tabs?.length) {
+                draft.tabs.find((t: Mock) => t.isActive).isActive = false;
+            }
 
+            draft.tabs.push({ id: newTabId, isActive: true, isEnabled: false, method: 'GET' });
+        }));
+    };
 
+    const handleRemoveTab = (tabIdToRemove: string) => {
+        transaction(
+            produce((draft: any) => {
+                if (draft.tabs.length === 1) {
+                    draft.tabs = []
+                }
 
-        if (newTabs.length === 0) {
-            setActiveTabIndex(-1);
-        } else {
-            setActiveTabIndex((prev) => prev - 1);
-        }
-    }
-
-    function handleUpdateTab(index: number, updatedTab: Mock) {
-        setTabs((prev) => prev.map((tab, i) => i == index ? { ...tab, ...updatedTab } : tab));
-    }
+                const activeIndex = Math.max(0, Math.min(draft.tabs.findIndex((t: Mock) => t.isActive), draft.tabs.length - 2));
+                draft.tabs = draft.tabs.reduce((updatedTabs: Mock[], currentTab: Mock, i: number) => {
+                    if (currentTab.id !== tabIdToRemove) {
+                        updatedTabs.push({ ...currentTab, isActive: i === activeIndex});
+                    }
+                    
+                    return updatedTabs;
+                }, []);
+            })
+        );
+    };
 
     return (
-        <div class="tab_container flex flex-col gap-2">
-            <div class="tab_list flex flex-wrap flex-row align-items w-full border-b-[#98e5c7] border-b-[1px]">
-                <For each={tabs()}>
-                    {(tab, i) => (
-                        <div class={twMerge('tab_item flex flex-wrap items-center mx-2 cursor-pointer rounded-t-md px-2 border-[#98e5c7] border-b-white mb-[-1px]', i() === activeTabIndex() ? 'border-2' : '')} on:click={() => setActiveTabIndex(i())}>
-                            <span class="size-fit">{tab.method}</span>
-                            <span class="mx-1 text-ellipsis">{`${tab.uri ? tab.uri : 'untitled'}`}</span>
-                            <Button onClickCallback={() => handleRemoveTab(i())}><VsClose size={18} /></Button>
-                        </div>
-                    )}
+        <div class="flex flex-col gap-2">
+            <div class="flex flex-wrap flex-row items-center w-full">
+                <For each={store.tabs}>
+                    {(thisTab) =>{
+                        const setActiveTab = () => {
+                            if (thisTab.isActive) {
+                                return;
+                            }
+
+                            transaction(produce((draft: any) => {
+                                draft.tabs = draft.tabs.reduce((updatedTabs: Mock[], currentTab: Mock) => {
+                                    updatedTabs.push({ ...currentTab, isActive: currentTab.id === thisTab.id });
+                                    return updatedTabs;
+                                }, []);
+                            }));
+                        };
+
+                        const removeTab = () => handleRemoveTab(thisTab.id);
+
+                        return (
+                            <Show when={thisTab.id}>
+                                <div class={twMerge('flex flex-wrap items-center cursor-pointer rounded-md border-[#98e5c7] p-2 m-2', thisTab.isActive ? 'border-2' : '')}>
+                                    <div on:click={setActiveTab}>
+                                        <span class="size-fit">{thisTab.method}</span>
+                                        <span class="mx-1 text-ellipsis">{`${thisTab.uri ? thisTab.uri : 'untitled'}`}</span>
+                                    </div>
+                                    <Button onClickCallback={removeTab}><VsClose size={18} /></Button>
+                                </div>
+                            </Show>
+                        )
+                    }}
                 </For>
-                <div class="tab_item flex mb-[-1px]"><Button onClickCallback={() => handleAddTab()}><VsAdd size={18} color="#98e5c7" /></Button></div>
+                <div class="tab_item flex mb-[-1px]"><Button styles="addButton" onClickCallback={() => handleAddTab()}><VsAdd size={18} color="#98e5c7" /></Button></div>
             </div>
-            <div class="tab_content">
-                <Show when={activeTabIndex() >= 0 && activeTabIndex() < tabs().length} fallback={<div class="m-8">Click '+' to create a new mock.</div>}>
-                    <TabContent
-                        tab={tabs()[activeTabIndex()]}
-                        updateTab={(updatedTab: Mock) => handleUpdateTab(activeTabIndex(), updatedTab)} />
-                </Show>
-            </div>
+            
         </div>
     )
 }
+
+export function TabContentView(props: any) {
+    const { store, transaction } = useContext(TabContext);
+
+    const handleMethodUpdate = (e: Event) => {
+        const value = (e.target as HTMLSelectElement).value as MethodType;
+        transaction(produce((draft: any) => {
+            const tab = draft.tabs.find((t: Mock) => t.isActive);
+            if (tab) {
+                tab.method = value;
+            }
+        }));
+    };
+
+    const handleUriUpdate = (e: Event) => {
+        const value = (e.target as HTMLInputElement).value;
+        transaction(produce((draft: any) => {
+            const tab = draft.tabs.find((t: Mock) => t.isActive);
+            if (tab) {
+                tab.uri = value;
+            }
+        }));
+    };
+
+    const handleIsEnabledUpdate = (e: Event) => {
+        const value = (e.target as HTMLInputElement).checked;
+        transaction(produce((draft: any) => {
+            const tab = draft.tabs.find((t: Mock) => t.isActive);
+            if (tab) {
+                tab.isEnabled = value;
+            }
+        }));
+    };
+
+    const handleBodyUpdate = (e: Event) => {
+        const value = (e.target as HTMLTextAreaElement).value;
+        transaction(produce((draft: any) => {
+            const tab = draft.tabs.find((t: Mock) => t.isActive);
+            if (tab) {
+                tab.body = value;
+            }
+        }));
+    };
+    
+    // individual param add, delete, update is handled in <For />
+    const handleAddParam = () => {
+        transaction(produce((draft: any) => {
+            const tab = draft.tabs.find((t: Mock) => t.isActive);
+            if (tab) {
+                tab.params = tab?.params?.length 
+                    ? [ ...tab.params, { id: createUniqueId() }]
+                    : [{ id: createUniqueId() }];
+            }
+        }));
+    };
+
+    const handleRemoveParam = (paramIdToRemove: string) => {
+        transaction(
+            produce((draft: any) => {
+                const tab = draft.tabs.find((t: Mock) => t.isActive);
+
+                if (tab) {
+                    tab.params = tab.params.filter((p: Param) => p.id !== paramIdToRemove);
+                }
+            })
+        );
+    };
+
+    return (
+        <Show when={store.tabs.find((t: Mock) => t.isActive)} fallback={<div></div>} keyed>
+            {(tab) => (
+                <div class="m-2">
+                    <div class="flex flex-row justify-between align-centermy-2">
+                        <div class="flex flex-row border border-solid rounded-sm w-[85%]">
+                            <div class="mr-4">
+                                <select class="border-none" name="method" on:change={handleMethodUpdate}>
+                                    <option value="GET" selected={tab.method === 'GET'}>GET</option>
+                                    <option value="POST" selected={tab.method === 'POST'}>POST</option>
+                                    <option value="PUT" selected={tab.method === 'PUT'}>PUT</option>
+                                    <option value="DELETE" selected={tab.method === 'DELETE'}>DELETE</option>
+                                </select>
+                            </div>
+                            <input id="uri" class="bg-stone-100 w-full  border-l px-2" type="text" value={tab.uri ?? ''} placeholder="URI" on:blur={handleUriUpdate} /> 
+                        </div>
+                        <input type="checkbox" id="isEnabled" name="isEnabled" checked={tab.isEnabled} aria-checked={tab.isEnabled} on:change={handleIsEnabledUpdate} />
+                    </div>
+                    <div class="my-2">
+                        <textarea id="body" class="w-full" name="body" cols="50" placeholder="{}" on:blur={handleBodyUpdate}/>
+                    </div>
+                    <div class="my-2">
+                        <div class="grid grid-cols-[6%_6%_25%_63%] grid-rows-2 gap-1">
+                            {/* header */}
+                            <div class="text-center border"></div>
+                            <div class="text-center border"></div>
+                            <div class="text-center border">Key</div>
+                            <div class="text-center border">Value</div>
+                            {/* defined params */}
+                            <For each={tab.params}>
+                                {(thisParam) => {
+                                    const onActiveChange = (e: Event) => {
+                                        const value = (e.target as HTMLInputElement).checked;
+                                        transaction(produce((draft: any) => {
+                                            const tab = draft.tabs.find((t: Mock) => t.isActive);
+                                            if (tab) {
+                                                const updatedParams = [...tab.params];
+                                                updatedParams.find((p: Param) => p.id === thisParam.id).active = value;
+                                            }
+                                        }));
+                                    }
+
+                                    const onKeyBlur = (e: Event) => {
+                                        const value = (e.target as HTMLInputElement).value;
+                                        transaction(produce((draft: any) => {
+                                            const tab = draft.tabs.find((t: Mock) => t.isActive);
+                                            if (tab) {
+                                                const updatedParams = [...tab.params];
+                                                updatedParams.find((p: Param) => p.id === thisParam.id).key = value;
+                                            }
+                                        }));
+                                    }
+                                
+                                    const onValueBlur = (e: Event) => {
+                                        const value = (e.target as HTMLInputElement).value;
+                                        transaction(produce((draft: any) => {
+                                            const tab = draft.tabs.find((t: Mock) => t.isActive);
+                                            if (tab) {
+                                                const updatedParams = [...tab.params];
+                                                updatedParams.find((p: Param) => p.id === thisParam.id).value = value;
+                                            }
+                                        }));
+                                    }
+
+                                    const removeParam = () => handleRemoveParam(thisParam.id);
+
+                                    return (
+                                        <>
+                                            <input class="border" type="checkbox" checked={thisParam.active} aria-checked={thisParam.active} on:change={onActiveChange}/>
+                                            <Button styles="addButton" onClickCallback={removeParam}><VsTrash size={18} color="#db436c" /></Button>
+                                            <input class="bg-stone-100 w-full px-2 border" type="text" value={thisParam.key || ''} placeholder="Key" on:blur={onKeyBlur}/>
+                                            <input class="bg-stone-100 w-full px-2 border" type="text" value={thisParam.value || ''} placeholder="Value" on:blur={onValueBlur}/>
+                                        </>
+                                    )
+                                }}
+                            </For>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div class="flex justify-end">
+                                <Button styles="addButton" onClickCallback={handleAddParam}><VsAdd size={18} color="#98e5c7" /></Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </Show>
+    );
+}
+
+
 
 export default Tabs;

@@ -1,4 +1,4 @@
-import Tabs from '@/components/tabs';
+import { Tabs, TabContentView, TabStore } from '@/components/tabs';
 import { createSignal } from 'solid-js';
 
 function Sidepanel() {
@@ -22,7 +22,10 @@ function Sidepanel() {
     //   <div class="col-span-8">
     <div>
       <div class='m-4'>
-        <Tabs />
+        <TabStore>
+          <Tabs />
+          <TabContentView />
+        </TabStore>
       </div>
     </div>
   );
