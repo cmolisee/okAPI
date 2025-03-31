@@ -24,6 +24,10 @@ export default defineConfig({
     startUrls: ['https://webext-core.aklinker1.io/'],
   },
   vite: () => ({
+    // TODO: remove this when done debugging the teams link thing that periodically pops up.
+    build: {
+      minify: false,
+    },
     css: {
       postcss: './postcss.config.js'
     }

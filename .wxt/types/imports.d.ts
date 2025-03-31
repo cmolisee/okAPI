@@ -58,6 +58,7 @@ declare global {
   const renderToStream: typeof import('solid-js/web')['renderToStream']
   const renderToString: typeof import('solid-js/web')['renderToString']
   const renderToStringAsync: typeof import('solid-js/web')['renderToStringAsync']
+  const safeParse: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/utils')['safeParse']
   const splitProps: typeof import('solid-js')['splitProps']
   const storage: typeof import('wxt/storage')['storage']
   const untrack: typeof import('solid-js')['untrack']

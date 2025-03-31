@@ -1,4 +1,7 @@
-import { Tabs, TabContentView, TabStore } from '@/components/tabs';
+import TabContentView from '@/components/tabContentView';
+import Tabs from '@/components/tabs';
+import ThemeSwitcher from '@/components/themeSwitcher';
+import TabStore from '@/lib/tabStore';
 import { createSignal } from 'solid-js';
 
 function Sidepanel() {
@@ -17,11 +20,12 @@ function Sidepanel() {
   })
 
   return (
-    // <div class="grid grid-cols-10 grid-rows-1 gap-1">
-    //   <div class="col-span-2">Side Panel</div>
-    //   <div class="col-span-8">
-    <div>
-      <div class='m-4'>
+    <div class='h-full bg-primary-bg dark:bg-primary-bg text text-primary-text dark:text-primary-text'>
+      <div class='flex flex-row justify-between'>
+        <h1 class='flex items-center mx-4 text-lg font-bold'>OkApi: API Mocking Tool</h1>
+        <ThemeSwitcher />
+      </div>
+      <div class='mx-4'>
         <TabStore>
           <Tabs />
           <TabContentView />
