@@ -1,3 +1,4 @@
+import FileSystemTree from '@/components/FileSystemExplorer';
 import TabContentView from '@/components/tabContentView';
 import Tabs from '@/components/tabs';
 import ThemeSwitcher from '@/components/themeSwitcher';
@@ -30,6 +31,20 @@ function Sidepanel() {
           <Tabs />
           <TabContentView />
         </TabStore>
+        <FileSystemTree data={{
+            name: "Root",
+            type: "folder",
+            children: [
+              { name: "file1.txt", type: "file" },
+              { 
+                name: "Folder1", 
+                type: "folder",
+                children: [
+                  { name: "file2.txt", type: "file" }
+                ]
+              }
+            ]
+          }} />
       </div>
     </div>
   );

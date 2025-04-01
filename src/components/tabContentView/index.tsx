@@ -4,7 +4,6 @@ import Button from "../button";
 import Toggle from "../toggle";
 import { TabContext } from "@/lib/tabStore";
 import CodeField from "../codeField";
-import createDebounce from "@/lib/debounce";
 
 function TabContentView() {
     const { store, transaction } = useContext(TabContext);
@@ -91,7 +90,6 @@ function TabContentView() {
                         <Toggle toggleSize="medium" checked={tab.isEnabled} changeCallback={handleIsEnabledUpdate} />
                     </div>
                     <div class="my-2">
-                        {/* <textarea id="body" class="w-full bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text" name="body" cols="50" placeholder="{}" on:blur={handleBodyUpdate}/> */}
                         <CodeField value={tab?.body ?? '{}'} setValue={handleBodyUpdate} />
                     </div>
                     <div class="my-2">
@@ -142,7 +140,7 @@ function TabContentView() {
                                     return (
                                         <>
                                             <Toggle toggleSize="small" checked={thisParam.active} changeCallback={onActiveChange} />
-                                            <Button styles="addButton" onClickCallback={removeParam}><VsTrash size={18} color="#db436c" /></Button>
+                                            <Button styles="addButton" onClickCallback={removeParam}><VsTrash size={18} class="text-okRed-500 dark:text-okRed-500" /></Button>
                                             <input class="bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text w-full px-2 border " type="text" value={thisParam.key || ''} placeholder="Key" on:blur={onKeyBlur}/>
                                             <input class="bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text w-full px-2 border" type="text" value={thisParam.value || ''} placeholder="Value" on:blur={onValueBlur}/>
                                         </>
@@ -153,7 +151,7 @@ function TabContentView() {
                             <div></div>
                             <div></div>
                             <div class="flex justify-end">
-                                <Button styles="addButton" onClickCallback={handleAddParam}><VsAdd size={18} class="text-okPurple-700 dark:text-okGreen-700" /></Button>
+                                <Button styles="addButton" onClickCallback={handleAddParam}><VsAdd size={18} class="text-okPurple-500 dark:text-okGreen-500" /></Button>
                             </div>
                         </div>
                     </div>

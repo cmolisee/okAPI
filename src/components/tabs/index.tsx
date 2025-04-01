@@ -60,12 +60,12 @@ function Tabs() {
 
                         return (
                             <Show when={thisTab.id}>
-                                <div class={twMerge('flex flex-wrap items-center cursor-pointer rounded-md border-okPurple-700 dark:border-okGreen-700', thisTab.isActive ? 'border-2' : '')}>
+                                <div class={twMerge('flex flex-wrap items-center cursor-pointer rounded-md border-okPurple-500 dark:border-okGreen-500', thisTab.isActive ? 'border-2' : '')}>
                                     <div on:click={setActiveTab}>
                                         <span class="size-fit m-2">{thisTab.method}</span>
                                         <span class="mx-1 text-ellipsis">{`${thisTab.uri ? thisTab.uri : 'untitled'}`}</span>
                                     </div>
-                                    <Button onClickCallback={removeTab}><VsClose size={18} class="text-okRed-800" /></Button>
+                                    <Button onClickCallback={removeTab}><VsClose size={18} class="text-okRed-500" /></Button>
                                 </div>
                             </Show>
                         )
@@ -73,7 +73,7 @@ function Tabs() {
                 </For>
                 <div class="tab_item flex mb-[-1px]">
                     <Button styles="addButton" onClickCallback={() => handleAddTab()}>
-                        <VsAdd size={18} color="currentColor" class="text-okPurple-700 dark:text-okGreen-700" />
+                        <VsAdd size={18} color="currentColor" class="text-okPurple-500 dark:text-okGreen-500" />
                     </Button>
                 </div>
             </div>
