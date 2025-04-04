@@ -1,13 +1,23 @@
 type MethodType = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
+interface ApiMockNode {
+    name?: string;
+    type?: "mock" | "folder";
+    // todo: add description to describe folder, flow, etc...
+    children?: ApiMockNode[];
+    mock?: ApiMock;
+}
+
 interface ApiMock {
-    id: string;
-    isActive: boolean;
+    // TODO: add alias to replace method+uri
+    // todo: add description to describe mock
+    id?: string;
+    isEditing?: boolean;
     isEnabled: boolean;
-    uri?: string;
     method: MethodType;
-    params?: Param[];
+    uri?: string;
     body?: string;
+    params?: Param[];
 }
 
 interface MockParam {
@@ -17,13 +27,24 @@ interface MockParam {
     value?: string;
 }
 
-interface TabStore {
-    tabs: Mock[];
+interface MockExplorerContext {
+    mockExplorerData: ApiMockNode;
+    mockExplorerDataTransaction: SetStoreFunction<ApiMockNode>;
 }
 
-interface TabContext {
-    store: TabStore;
-    transaction: SetStoreFunction<TabStore>;
+// same as api mock except the dataPath will correspond to the 
+// mocks path in mockData from storage or null if its not saved.
+interface WorkspaceDataItem extends ApiMock {
+    dataPath: string|null;
+}
+
+interface WorkspaceData {
+    data: WorkspaceDataItem[];
+}
+
+interface WorkspaceStoreContext {
+    workspaceData: WorkspaceData;
+    workspaceDataTransaction: SetStoreFunction<WorkspaceData>;
 }
 
 interface EditorPanelState {

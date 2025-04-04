@@ -2,78 +2,78 @@ import { VsTrash, VsAdd } from "solid-icons/vs";
 import { createUniqueId } from "solid-js";
 import Button from "../button";
 import Toggle from "../toggle";
-import { TabContext } from "@/lib/tabStore";
+import { WorkspaceStoreContext } from "@/lib/workspaceStore";
 import CodeField from "../codeField";
 
 function TabContentView() {
-    const { store, transaction } = useContext(TabContext);
+    const { workspaceData, workspaceDataTransaction } = useContext(WorkspaceStoreContext);
 
     const handleMethodUpdate = (e: Event) => {
         const value = (e.target as HTMLSelectElement).value as MethodType;
-        transaction(produce((draft: any) => {
-            const tab = draft.tabs.find((t: ApiMock) => t.isActive);
-            if (tab) {
-                tab.method = value;
+        workspaceDataTransaction(produce((draft: WorkspaceData) => {
+            const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+            if (workspaceItem) {
+                workspaceItem.method = value;
             }
         }));
     };
 
     const handleUriUpdate = (e: Event) => {
         const value = (e.target as HTMLInputElement).value;
-        transaction(produce((draft: any) => {
-            const tab = draft.tabs.find((t: ApiMock) => t.isActive);
-            if (tab) {
-                tab.uri = value;
+        workspaceDataTransaction(produce((draft: WorkspaceData) => {
+            const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+            if (workspaceItem) {
+                workspaceItem.uri = value;
             }
         }));
     };
 
     const handleIsEnabledUpdate = (e: Event) => {
         const value = (e.target as HTMLInputElement).checked;
-        transaction(produce((draft: any) => {
-            const tab = draft.tabs.find((t: ApiMock) => t.isActive);
-            if (tab) {
-                tab.isEnabled = value;
+        workspaceDataTransaction(produce((draft: WorkspaceData) => {
+            const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+            if (workspaceItem) {
+                workspaceItem.isEnabled = value;
             }
         }));
     };
     
     const handleBodyUpdate = (doc: string) => {
-        transaction(produce((draft: any) => {
-            const tab = draft.tabs.find((t: ApiMock) => t.isActive);
-            if (tab) {
-                tab.body = doc;
+        workspaceDataTransaction(produce((draft: WorkspaceData) => {
+            const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+            if (workspaceItem) {
+                workspaceItem.body = doc;
             }
         }));
     };
 
     // individual param add, delete, update is handled in <For />
     const handleAddParam = () => {
-        transaction(produce((draft: any) => {
-            const tab = draft.tabs.find((t: ApiMock) => t.isActive);
-            if (tab) {
-                tab.params = tab?.params?.length 
-                    ? [ ...tab.params, { id: createUniqueId() }]
+        workspaceDataTransaction(produce((draft: WorkspaceData) => {
+            const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+            if (workspaceItem) {
+                workspaceItem.params = workspaceItem?.params?.length 
+                    ? [ ...workspaceItem.params, { id: createUniqueId() }]
                     : [{ id: createUniqueId() }];
             }
         }));
     };
 
     const handleRemoveParam = (paramIdToRemove: string) => {
-        transaction(
-            produce((draft: any) => {
-                const tab = draft.tabs.find((t: ApiMock) => t.isActive);
+        workspaceDataTransaction(
+            produce((draft: WorkspaceData) => {
+                const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
 
-                if (tab) {
-                    tab.params = tab.params.filter((p: MockParam) => p.id !== paramIdToRemove);
+                if (workspaceItem) {
+                    workspaceItem.params = workspaceItem.params?.filter((p: MockParam) => p.id !== paramIdToRemove);
                 }
             })
         );
     };
 
     return (
-        <Show when={store.tabs.find((t: ApiMock) => t.isActive)} fallback={<div></div>} keyed>
-            {(tab: ApiMock) => (
+        <Show when={workspaceData.data.find((t: WorkspaceDataItem) => t.isEditing)} fallback={<div></div>} keyed>
+            {(tab: WorkspaceDataItem) => (
                 <div class="mt-2">
                     <div class="flex flex-row justify-between align-centermy-2">
                         <div class="flex flex-row border border-solid rounded-sm w-[85%]">
@@ -104,10 +104,10 @@ function TabContentView() {
                                 {(thisParam) => {
                                     const onActiveChange = (e: Event) => {
                                         const value = (e.target as HTMLInputElement).checked;
-                                        transaction(produce((draft: any) => {
-                                            const tab = draft.tabs.find((t: ApiMock) => t.isActive);
-                                            if (tab) {
-                                                const updatedParams = [...tab.params];
+                                        workspaceDataTransaction(produce((draft: WorkspaceData) => {
+                                            const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+                                            if (workspaceItem) {
+                                                const updatedParams = [...workspaceItem?.params ?? []];
                                                 updatedParams.find((p: MockParam) => p.id === thisParam.id).active = value;
                                             }
                                         }));
@@ -115,10 +115,10 @@ function TabContentView() {
 
                                     const onKeyBlur = (e: Event) => {
                                         const value = (e.target as HTMLInputElement).value;
-                                        transaction(produce((draft: any) => {
-                                            const tab = draft.tabs.find((t: ApiMock) => t.isActive);
-                                            if (tab) {
-                                                const updatedParams = [...tab.params];
+                                        workspaceDataTransaction(produce((draft: WorkspaceData) => {
+                                            const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+                                            if (workspaceItem) {
+                                                const updatedParams = [...workspaceItem?.params ?? []];
                                                 updatedParams.find((p: MockParam) => p.id === thisParam.id).key = value;
                                             }
                                         }));
@@ -126,10 +126,10 @@ function TabContentView() {
                                 
                                     const onValueBlur = (e: Event) => {
                                         const value = (e.target as HTMLInputElement).value;
-                                        transaction(produce((draft: any) => {
-                                            const tab = draft.tabs.find((t: ApiMock) => t.isActive);
-                                            if (tab) {
-                                                const updatedParams = [...tab.params];
+                                        workspaceDataTransaction(produce((draft: WorkspaceData) => {
+                                            const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+                                            if (workspaceItem) {
+                                                const updatedParams = [...workspaceItem?.params ?? []];
                                                 updatedParams.find((p: MockParam) => p.id === thisParam.id).value = value;
                                             }
                                         }));
@@ -140,7 +140,7 @@ function TabContentView() {
                                     return (
                                         <>
                                             <Toggle toggleSize="small" checked={thisParam.active} changeCallback={onActiveChange} />
-                                            <Button styles="addButton" onClickCallback={removeParam}><VsTrash size={18} class="text-okRed-500 dark:text-okRed-500" /></Button>
+                                            <Button styles="addButton" onClickCallback={removeParam}><VsTrash size={18} class="vs text-okRed-500 dark:text-okRed-500" /></Button>
                                             <input class="bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text w-full px-2 border " type="text" value={thisParam.key || ''} placeholder="Key" on:blur={onKeyBlur}/>
                                             <input class="bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text w-full px-2 border" type="text" value={thisParam.value || ''} placeholder="Value" on:blur={onValueBlur}/>
                                         </>
@@ -151,7 +151,7 @@ function TabContentView() {
                             <div></div>
                             <div></div>
                             <div class="flex justify-end">
-                                <Button styles="addButton" onClickCallback={handleAddParam}><VsAdd size={18} class="text-okPurple-500 dark:text-okGreen-500" /></Button>
+                                <Button styles="addButton" onClickCallback={handleAddParam}><VsAdd size={18} class="vs text-okPurple-500 dark:text-okGreen-500" /></Button>
                             </div>
                         </div>
                     </div>

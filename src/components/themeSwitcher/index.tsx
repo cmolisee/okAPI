@@ -5,8 +5,8 @@ import { twMerge } from "tailwind-merge";
 function ThemeSwitcher() {
     const { theme, toggleTheme } = useTheme();
     const themeIcons = {
-        light: FiSun,
-        dark: FiMoon,
+        light: () => <FiSun stroke="currentColor" size={18} class="text-secondary-text dark:text-secondary-text" />,
+        dark: () => <FiMoon stroke="currentColor" size={18} class="text-secondary-text dark:text-secondary-text" />,
     };
 
     return (

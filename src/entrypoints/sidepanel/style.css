@@ -2,3 +2,23 @@
     width: 100vw;
     height: 100vh;
 }
+
+/*
+    Fix for solid-icons VSIcons to affect stroke.
+    VSIcons do not add stroke or stroke width property.
+    You have to apply the stroke property before 
+    being able to adjust the width. 
+*/
+svg.vs {
+    stroke: currentColor;
+}
+
+svg.vs:hover {
+    stroke-width: 2% !important;
+}
+
+svg:hover {
+    stroke-width: 11%;
+}
+/* end fix */
+

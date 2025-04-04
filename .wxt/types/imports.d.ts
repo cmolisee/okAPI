@@ -47,6 +47,7 @@ declare global {
   const lazy: typeof import('solid-js')['lazy']
   const mapArray: typeof import('solid-js')['mapArray']
   const mergeProps: typeof import('solid-js')['mergeProps']
+  const mockExplorerDataStorage: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/utils')['mockExplorerDataStorage']
   const observable: typeof import('solid-js')['observable']
   const on: typeof import('solid-js')['on']
   const onCleanup: typeof import('solid-js')['onCleanup']
@@ -66,6 +67,7 @@ declare global {
   const useContext: typeof import('solid-js')['useContext']
   const useTransition: typeof import('solid-js')['useTransition']
   const webpageMessenger: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/webpageMessenger')['webpageMessenger']
+  const workspaceDataStorage: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/utils')['workspaceDataStorage']
 }
 // for type re-export
 declare global {
