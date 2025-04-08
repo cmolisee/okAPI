@@ -17,13 +17,4 @@ export const workspaceDataStorage = storage.defineItem<WorkspaceData>(
     }
 );
 
-export async function getActiveTab() {
-    let queryOptions = { active: true, lastFocusedWindow: true };
-    // `tab` will either be a `tabs.Tab` instance or `undefined`.
-    let [tab] = await chrome.tabs.query(queryOptions);
-    return tab;
-  }
-
-  export async function getTabs() {
-    return await chrome.tabs.query({});
-  }
+export const getUniqueId = () => new Date().valueOf().toString(36);

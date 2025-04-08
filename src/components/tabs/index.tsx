@@ -1,8 +1,8 @@
 import { VsAdd, VsClose } from "solid-icons/vs";
 import { twMerge } from "tailwind-merge";
 import Button from "../button";
-import { createUniqueId } from "solid-js";
 import { WorkspaceStoreContext } from "@/lib/workspaceStore";
+import { getUniqueId } from "@/utils/utils";
 // import { mockExplorerContext } from "@/lib/mockExplorerStore";
 
 function Tabs() {
@@ -10,7 +10,7 @@ function Tabs() {
     const { workspaceData, workspaceDataTransaction } = useContext(WorkspaceStoreContext);
     
     const handleAddTab = () => {
-        const newTabId = createUniqueId();
+        const newTabId = getUniqueId();
 
         workspaceDataTransaction(produce((draft:WorkspaceData) => {
             if (draft.data.length) {
@@ -30,7 +30,9 @@ function Tabs() {
 
                 const newActiveIndex = Math.max(0, Math.min(draft.data.findIndex((t: ApiMock) => t.isEditing), draft.data.length - 2));
                 draft.data = draft.data.filter((w: WorkspaceDataItem) => w.id !== tabIdToRemove);
-                draft.data[newActiveIndex].isEditing = true;
+
+                const newActiveItem = draft.data[newActiveIndex];
+                newActiveItem.isEditing = true;
             })
         );
     };
