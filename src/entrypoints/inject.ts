@@ -1,11 +1,13 @@
 export default defineUnlistedScript(() => {
     try {
-        webpageMessenger.onMessage('receiveMessageFromExtension', (message: any) => {
-            console.log(message.data);
-            return true;
+        customEventMessenger.onMessage('toInject', (data: any) => {
+            console.log('message receieved from custom event messenger in inject', data.msg);
+            return { status: 200 };
         });
 
-        webpageMessenger.sendMessage('sendMessageToExtension', 'inject.js has been injected...')
+        browser.tabs.onActivated.addListener(async (activeInfo) => {
+            console.log("active info: ", activeInfo);
+          });
     } catch (e) {
         console.debug(e);
     }

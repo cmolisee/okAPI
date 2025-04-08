@@ -1,31 +1,31 @@
-import { workspaceDataStorage } from "@/utils/utils";
+import { trackDeep } from "@solid-primitives/deep";
+import createDebounce from "./debounce";
 
 const defaultWorkspaceData: WorkspaceData = { data: [] };
-export const WorkspaceStoreContext = createContext<WorkspaceStoreContext>({ workspaceData: defaultWorkspaceData, workspaceDataTransaction: () => {} });
+export const WorkspaceStoreContext = createContext<WorkspaceStoreContext>({
+    workspaceData: defaultWorkspaceData,
+    workspaceDataTransaction: () => { },
+});
 function WorkspaceStore(props: any) {
     const [workspaceData, workspaceDataTransaction] = createStore<WorkspaceData>(defaultWorkspaceData);
 
-    onMount(async () => {
-        await workspaceDataStorage.getValue()
-            .then((data: WorkspaceData|null) => {
-                console.log("getting workspaceDataStorage data", data);
-                // idk if this will work as i expect...
-                workspaceDataTransaction(reconcile(data?.data?.length ? data : defaultWorkspaceData));
-            })
-            .catch(error => console.debug('Could not get workspaceData at this time', error));
-
-        onCleanup(async () => {
-            console.log("value of workspace data on cleanup", workspaceData);
-            const notifyWebpage = async (msg: string) => await extensionMessenger.sendMessage('sendMessageToWebpage', msg);
-            await notifyWebpage("value of workspace data on cleanup: " + JSON.stringify(workspaceData)).catch(e => console.debug);
-            await workspaceDataStorage.setValue(workspaceData)
-                .then(() => true)
-                .catch((error) => {
-                    console.debug('Failed to save workspaceData to workspaceDataStorage:', error);
-                    return false
-                });
-        });
+    const debounce = createDebounce((update: WorkspaceData) => {
+        // 'update' is a proxy object and was not storing the correct values
+        // to ensure .data is always an array we should spread it like this.
+        workspaceDataStorage.setValue({ data: [ ...update.data ]})
+            .catch((e: any) => console.debug("Error saving workspace: ", e));
     });
+
+    onMount(async () => {
+        const savedWorkspace: WorkspaceData = await workspaceDataStorage.getValue();
+        workspaceDataTransaction(savedWorkspace);
+    });
+
+    createEffect(on(
+        () => trackDeep(workspaceData),
+        (update: WorkspaceData) => debounce(update),
+        { defer: true }
+    ));
 
     return (
         <WorkspaceStoreContext.Provider value={{ workspaceData, workspaceDataTransaction }}>

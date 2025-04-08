@@ -52,3 +52,27 @@ interface EditorPanelState {
     saveCallback: (doc: string) => void;
     change: boolean;
 }
+
+interface MessengerResponse {
+    status: number;
+    error?: string;
+    description?: string;
+}
+
+/** Protocol for internalMessenger */
+interface InternalMessengerProtocolMap {
+    toBackground(data: any): MessengerResponse;
+}
+
+/** Protocol for backgroundMessenger */
+interface BackgroundMessengerProtocolMap {
+    toContent(data: any): MessengerResponse;
+    fromContent(data: any): MessengerResponse;
+}
+
+/** Protocol for customEventMessenger */
+interface CustomEventMessengerProtocolMap {
+    toInject(data: any): MessengerResponse;
+    fromInject(data: any): MessengerResponse;
+    toBackground(data: any): MessengerResponse;
+}

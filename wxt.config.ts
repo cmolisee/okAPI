@@ -16,7 +16,7 @@ export default defineConfig({
     web_accessible_resources: [
       {
         resources: ['inject.js'],
-        matches: ["*://*/*"],
+        matches: ["<all_urls>"],
       }
     ],
   },

@@ -12,4 +12,18 @@ export const mockExplorerDataStorage = storage.defineItem<ApiMockNode>(
 
 export const workspaceDataStorage = storage.defineItem<WorkspaceData>(
     'local:workspaceData',
+    {
+        fallback: { data: [] } as WorkspaceData,
+    }
 );
+
+export async function getActiveTab() {
+    let queryOptions = { active: true, lastFocusedWindow: true };
+    // `tab` will either be a `tabs.Tab` instance or `undefined`.
+    let [tab] = await chrome.tabs.query(queryOptions);
+    return tab;
+  }
+
+  export async function getTabs() {
+    return await chrome.tabs.query({});
+  }

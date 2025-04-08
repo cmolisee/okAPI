@@ -25,6 +25,7 @@ function Tabs() {
         workspaceDataTransaction(produce((draft: WorkspaceData) => {
                 if (draft.data.length === 1) {
                     draft.data = [];
+                    return;
                 }
 
                 const newActiveIndex = Math.max(0, Math.min(draft.data.findIndex((t: ApiMock) => t.isEditing), draft.data.length - 2));
@@ -33,8 +34,6 @@ function Tabs() {
             })
         );
     };
-
-    console.log("workspace data from <Tabs />", workspaceData);
 
     // TODO:
         // create field to save individual mocks to a specific path

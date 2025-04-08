@@ -8,19 +8,7 @@ import { mockExplorerContext } from '@/lib/mockExplorerStore';
 import WorkspaceStore from '@/lib/workspaceStore';
 
 function Sidepanel() {
-  const { mockExplorerData } = useContext(mockExplorerContext)
-
-  // const sendMessageUpdate = async (c: number) => await extensionMessenger.sendMessage('sendMessageToWebpage', `count is now: ${c}`);
-
-  onMount(async () => {
-    const notifyWebpage = async (msg: string) => await extensionMessenger.sendMessage('sendMessageToWebpage', msg);
-    await notifyWebpage('sidepanel is mounted...').catch(e => console.debug);
-
-    onCleanup(async () => {
-      await notifyWebpage('sidepanel is being unmounted...').catch(e => console.debug);
-    });
-  });
-
+  const { mockExplorerData } = useContext(mockExplorerContext);
   // On open and on update pull the data from local and update the provider
   //      wrap the provider around main.tsx
 
@@ -29,6 +17,13 @@ function Sidepanel() {
   // add hover tooltip to toggles
   // add label to individual mock toggle to describe it and move the toggle to its own row above the method and uri
   //    let the method/uri field expand full row
+
+  const testMesseging = async () => {
+    // const res = await internalMessenger.sendMessage('toBackground', { msg: 'message from sidepanel component' });
+
+    // console.log("response from sending message internalMessenger::toBackground", res);
+    workspaceDataStorage.removeValue();
+  };
 
   return (
     <div class='h-full bg-primary-bg dark:bg-primary-bg text text-primary-text dark:text-primary-text'>
@@ -45,6 +40,7 @@ function Sidepanel() {
           <TabContentView />
         </WorkspaceStore>
       </div>
+      <button onclick={testMesseging}>button</button>
     </div>
   );
 }

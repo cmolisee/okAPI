@@ -90,6 +90,7 @@
     "@codemirror/search": "^6.5.10",
     "@codemirror/state": "^6.5.2",
     "@codemirror/view": "^6.36.5",
+    "@solid-primitives/deep": "^0.3.1",
     "@solidjs/router": "^0.15.3",
     "@types/codemirror": "^5.60.15",
     "@webext-core/messaging": "^2.2.0",

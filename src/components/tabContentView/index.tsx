@@ -70,9 +70,9 @@ function TabContentView() {
             })
         );
     };
-
+    
     return (
-        <Show when={workspaceData.data.find((t: WorkspaceDataItem) => t.isEditing)} fallback={<div></div>} keyed>
+        <Show when={workspaceData.data.find((t: WorkspaceDataItem) => t.isEditing)} fallback={<div>Loading...</div>} keyed>
             {(tab: WorkspaceDataItem) => (
                 <div class="mt-2">
                     <div class="flex flex-row justify-between align-centermy-2">

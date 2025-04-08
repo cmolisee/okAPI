@@ -15,6 +15,7 @@ declare global {
   const Suspense: typeof import('solid-js')['Suspense']
   const SuspenseList: typeof import('solid-js')['SuspenseList']
   const Switch: typeof import('solid-js')['Switch']
+  const backgroundMessenger: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/extensionMessaging')['backgroundMessenger']
   const batch: typeof import('solid-js')['batch']
   const browser: typeof import('wxt/browser/chrome')['browser']
   const children: typeof import('solid-js')['children']
@@ -32,17 +33,20 @@ declare global {
   const createShadowRootUi: typeof import('wxt/client')['createShadowRootUi']
   const createSignal: typeof import('solid-js')['createSignal']
   const createStore: typeof import('solid-js/store')['createStore']
+  const customEventMessenger: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/webpageMessaging')['customEventMessenger']
   const defineAppConfig: typeof import('wxt/sandbox')['defineAppConfig']
   const defineBackground: typeof import('wxt/sandbox')['defineBackground']
   const defineConfig: typeof import('wxt')['defineConfig']
   const defineContentScript: typeof import('wxt/sandbox')['defineContentScript']
   const defineUnlistedScript: typeof import('wxt/sandbox')['defineUnlistedScript']
   const defineWxtPlugin: typeof import('wxt/sandbox')['defineWxtPlugin']
-  const extensionMessenger: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/extensionMessenger')['extensionMessenger']
   const fakeBrowser: typeof import('wxt/testing')['fakeBrowser']
+  const getActiveTab: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/utils')['getActiveTab']
+  const getTabs: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/utils')['getTabs']
   const hydrate: typeof import('solid-js/web')['hydrate']
   const indexArray: typeof import('solid-js')['indexArray']
   const injectScript: typeof import('wxt/client')['injectScript']
+  const internalMessenger: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/extensionMessaging')['internalMessenger']
   const isServer: typeof import('solid-js/web')['isServer']
   const lazy: typeof import('solid-js')['lazy']
   const mapArray: typeof import('solid-js')['mapArray']
@@ -66,12 +70,5 @@ declare global {
   const useAppConfig: typeof import('wxt/client')['useAppConfig']
   const useContext: typeof import('solid-js')['useContext']
   const useTransition: typeof import('solid-js')['useTransition']
-  const webpageMessenger: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/webpageMessenger')['webpageMessenger']
   const workspaceDataStorage: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/utils')['workspaceDataStorage']
-}
-// for type re-export
-declare global {
-  // @ts-ignore
-  export type { WebpageProtocolMap } from '/Users/cmolisee/Documents/okAPI/src/utils/webpageMessenger'
-  import('/Users/cmolisee/Documents/okAPI/src/utils/webpageMessenger')
 }
