@@ -1,4 +1,4 @@
-import { trackDeep } from "@solid-primitives/deep";
+import { trackStore } from "@solid-primitives/deep";
 import createDebounce from "./debounce";
 
 const defaultWorkspaceData: WorkspaceData = { data: [] };
@@ -9,21 +9,25 @@ export const WorkspaceStoreContext = createContext<WorkspaceStoreContext>({
 function WorkspaceStore(props: any) {
     const [workspaceData, workspaceDataTransaction] = createStore<WorkspaceData>(defaultWorkspaceData);
 
-    const debounce = createDebounce((update: WorkspaceData) => {
-        // 'update' is a proxy object and was not storing the correct values
-        // to ensure .data is always an array we should spread it like this.
-        workspaceDataStorage.setValue({ data: [ ...update.data ]})
+    const debounce = createDebounce((proxyData: WorkspaceData) => {
+        // SolidJs is returning a Proxy(Object) where arrays are interpreted as objects .
+        // convert back to array by making a deep copy.
+        const unproxifiedData = JSON.parse(JSON.stringify(proxyData));
+        unproxifiedData.data.map((d: WorkspaceDataItem) => JSON.parse(JSON.stringify(d)));
+
+        workspaceDataStorage.setValue(unproxifiedData)
             .catch((e: any) => console.debug("Error saving workspace: ", e));
     });
 
     onMount(async () => {
         const savedWorkspace: WorkspaceData = await workspaceDataStorage.getValue();
+        console.log(savedWorkspace);
         workspaceDataTransaction(savedWorkspace);
     });
 
     createEffect(on(
-        () => trackDeep(workspaceData),
-        (update: WorkspaceData) => debounce(update),
+        () => trackStore(workspaceData),
+        (proxyData: WorkspaceData) => debounce(proxyData),
         { defer: true }
     ));
 

@@ -1,9 +1,9 @@
 import { VsTrash, VsAdd } from "solid-icons/vs";
-import { createUniqueId } from "solid-js";
 import Button from "../button";
 import Toggle from "../toggle";
 import { WorkspaceStoreContext } from "@/lib/workspaceStore";
 import CodeField from "../codeField";
+import { getUniqueId } from "@/utils/utils";
 
 function TabContentView() {
     const { workspaceData, workspaceDataTransaction } = useContext(WorkspaceStoreContext);
@@ -53,8 +53,8 @@ function TabContentView() {
             const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
             if (workspaceItem) {
                 workspaceItem.params = workspaceItem?.params?.length 
-                    ? [ ...workspaceItem.params, { id: createUniqueId() }]
-                    : [{ id: createUniqueId() }];
+                    ? [ ...workspaceItem.params, { id: getUniqueId() }]
+                    : [{ id: getUniqueId() }];
             }
         }));
     };
@@ -70,7 +70,7 @@ function TabContentView() {
             })
         );
     };
-    
+
     return (
         <Show when={workspaceData.data.find((t: WorkspaceDataItem) => t.isEditing)} fallback={<div>Loading...</div>} keyed>
             {(tab: WorkspaceDataItem) => (
@@ -93,10 +93,10 @@ function TabContentView() {
                         <CodeField value={tab?.body ?? '{}'} setValue={handleBodyUpdate} />
                     </div>
                     <div class="my-2">
-                        <div class="grid grid-cols-[6%_6%_25%_63%] grid-rows-2 gap-1">
+                        <div class="grid grid-cols-[5fr_7fr] grid-rows-2 gap-1">
                             {/* header */}
-                            <div class="text-center"></div>
-                            <div class="text-center"></div>
+                            {/* <div class="text-center"></div>
+                            <div class="text-center"></div> */}
                             <div class="text-center border">Key</div>
                             <div class="text-center border">Value</div>
                             {/* defined params */}
@@ -139,16 +139,18 @@ function TabContentView() {
 
                                     return (
                                         <>
-                                            <Toggle toggleSize="small" checked={thisParam.active} changeCallback={onActiveChange} />
-                                            <Button styles="addButton" onClickCallback={removeParam}><VsTrash size={18} class="vs text-okRed-500 dark:text-okRed-500" /></Button>
-                                            <input class="bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text w-full px-2 border " type="text" value={thisParam.key || ''} placeholder="Key" on:blur={onKeyBlur}/>
+                                            <div class="flex">
+                                                <Toggle toggleSize="small" checked={thisParam.active} changeCallback={onActiveChange} />
+                                                <Button styles="addButton" onClickCallback={removeParam}><VsTrash size={18} class="vs text-okRed-500 dark:text-okRed-500" /></Button>
+                                                <input class="bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text w-full px-2 border " type="text" value={thisParam.key || ''} placeholder="Key" on:blur={onKeyBlur}/>
+                                            </div>
                                             <input class="bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text w-full px-2 border" type="text" value={thisParam.value || ''} placeholder="Value" on:blur={onValueBlur}/>
                                         </>
                                     )
                                 }}
                             </For>
-                            <div></div>
-                            <div></div>
+                            {/* <div></div>
+                            <div></div> */}
                             <div></div>
                             <div class="flex justify-end">
                                 <Button styles="addButton" onClickCallback={handleAddParam}><VsAdd size={18} class="vs text-okPurple-500 dark:text-okGreen-500" /></Button>
