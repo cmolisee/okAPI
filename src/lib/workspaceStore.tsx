@@ -21,7 +21,6 @@ function WorkspaceStore(props: any) {
 
     onMount(async () => {
         const savedWorkspace: WorkspaceData = await workspaceDataStorage.getValue();
-        console.log(savedWorkspace);
         workspaceDataTransaction(savedWorkspace);
     });
 

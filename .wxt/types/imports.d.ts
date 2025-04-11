@@ -41,6 +41,8 @@ declare global {
   const defineUnlistedScript: typeof import('wxt/sandbox')['defineUnlistedScript']
   const defineWxtPlugin: typeof import('wxt/sandbox')['defineWxtPlugin']
   const fakeBrowser: typeof import('wxt/testing')['fakeBrowser']
+  const getNode: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/utils')['getNode']
+  const getPathsArray: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/utils')['getPathsArray']
   const getUniqueId: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/utils')['getUniqueId']
   const hydrate: typeof import('solid-js/web')['hydrate']
   const indexArray: typeof import('solid-js')['indexArray']

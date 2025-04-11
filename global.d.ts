@@ -2,7 +2,8 @@ type MethodType = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 interface ApiMockNode {
     name?: string;
-    type?: "mock" | "folder";
+    path?: string;
+    type?: "mock" | "folder" | "root";
     // todo: add description to describe folder, flow, etc...
     children?: ApiMockNode[];
     mock?: ApiMock;
@@ -28,8 +29,16 @@ interface MockParam {
 }
 
 interface MockExplorerContext {
-    mockExplorerData: ApiMockNode;
-    mockExplorerDataTransaction: SetStoreFunction<ApiMockNode>;
+    // mockExplorerData: ApiMockNode;
+    // mockExplorerDataTransaction: SetStoreFunction<ApiMockNode>;
+    // addNode: (nodePath: string, newNode: ApiMockNode) => void;
+    // removeNode: (nodePath: string) => void;
+    mockExplorerTree: ApiMockNode;
+    findNodeByPath: (tree: ApiMockNode, path: string) => ApiMockNode|null;
+    addNode: (parentPath: string, node: ApiMockNode) => ApiMockNode|null;
+    removeNode: (path: string) => void;
+    updateNodeName: () => void;
+    moveNode: () => void;
 }
 
 // same as api mock except the dataPath will correspond to the 
@@ -75,4 +84,21 @@ interface CustomEventMessengerProtocolMap {
     toInject(data: any): MessengerResponse;
     fromInject(data: any): MessengerResponse;
     toBackground(data: any): MessengerResponse;
+}
+
+interface Pos {
+    x: number;
+    y: number;
+}
+
+type ContextMenuRef = HTMLElement | undefined;
+
+interface ContextMenuContext {
+    showContextMenu: Accessor<boolean>;
+    position: Accessor<Pos>;
+    contextMenuChildren: Accessor<any>;
+    setContextMenuRef: Setter<ContextMenuRef>;
+    setContextMenuChildren: Setter<any>;
+    handleContextMenu: (e: MouseEvent, ...children: {text:string,callback:(e:MouseEvent)=>void}[]) => void;
+    handleCloseContextMenu: () => void;
 }

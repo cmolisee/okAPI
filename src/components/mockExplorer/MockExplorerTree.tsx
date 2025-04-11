@@ -1,9 +1,9 @@
-import FileSystemNode from "./MockExplorerNode";
+import MockExplorerNode from "./MockExplorerNode";
 
-function MockExplorerTree(props: { data: ApiMockNode }) {
+function MockExplorerTree(props: any) {
   return (
     <div class="file-system p-4 font-mono text-sm">
-      <FileSystemNode item={props.data} level={0} />
+      <MockExplorerNode item={props.data} level={0} />
     </div>
   );
 }
