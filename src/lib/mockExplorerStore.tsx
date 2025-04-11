@@ -1,4 +1,4 @@
-import { getPathsArray, mockExplorerDataStorage } from "@/utils/utils";
+import { mockExplorerDataStorage } from "@/utils/utils";
 
 const mockExplorerContext = createContext<MockExplorerContext>({ 
     mockExplorerTree: {},
@@ -16,12 +16,7 @@ export const useMockExplorer = () => {
     }
     return context;
 }
-// export const mockExplorerContext = createContext<MockExplorerContext>({ 
-//     mockExplorerData: {}, 
-//     mockExplorerDataTransaction: () => {},
-//     addNode: () => {},
-//     removeNode: () => {}
-// });
+
 function MockExplorerStore(props: any) {
     let mockExplorerTree = createMutable<ApiMockNode>({});
 
@@ -67,7 +62,16 @@ function MockExplorerStore(props: any) {
         return;
     };
 
-    const updateNodeName = () => console.log('implement');
+    const updateNodeName = (path: string, name: string) => {
+        const node = findNodeByPath(mockExplorerTree, path);
+        if (!node) {
+            return;
+        }
+
+        node.name = name;
+        node.path = node.path?.slice(0, node.path?.lastIndexOf('/')) + '/' + name
+    };
+
     const moveNode = () => console.log('implement');
 
     onMount(async () => {
@@ -99,63 +103,7 @@ function MockExplorerStore(props: any) {
         }}>
             {props.children}
         </mockExplorerContext.Provider>
-    )
-
-    // const [mockExplorerData, mockExplorerDataTransaction] = createStore<ApiMockNode>({});
-
-    // const addNode = (nodePath: string, newNode: ApiMockNode) => {
-    //     console.log('adding node', [
-    //         mockExplorerData,
-    //         nodePath,
-    //         newNode,
-    //     ]);
-    //     const paths = getPathsArray(nodePath);
-    //     const treeCopy = JSON.parse(JSON.stringify(mockExplorerData));
-    //     let node = treeCopy;
-    //     for (const path of paths.slice(1)) {
-    //         node = node.children.find((c: any) => c.path === path);
-    //     }
-    //     if (!node.children?.length) {
-    //         node.children = [];
-    //     }
-
-    //     node.children.push(newNode);
-    //     mockExplorerDataTransaction(treeCopy);
-    //     // mockExplorerDataTransaction((draft: ApiMockNode) => {
-    //     //     const updated = JSON.parse(JSON.stringify(draft));
-    //     //     let node = updated
-    //     //     for (const path of paths.slice(1)) {
-    //     //         node = node.children?.find((c: any) => c.path === path)!;
-    //     //     }
-
-    //     //     if (node.children?.length) {
-    //     //         node.children.push(newNode);
-    //     //     } else {
-    //     //         node.children = [newNode];
-    //     //     }
-    //     //     return updated;
-    //     // });
-    //     return;
-    // };
-
-    // const removeNode = (nodePath: string) => {
-    //     const paths = getPathsArray(nodePath);
-    //     mockExplorerDataTransaction(produce((draft: ApiMockNode) => {
-    //         let node = draft;
-    //         for (const path of paths.slice(1, paths.length - 1)) {
-    //             node = draft.children?.find((c) => c.path === path)!;
-    //         }
-
-    //         node.children = [...node.children?.filter((c) => c.path !== nodePath) ?? []]
-    //     }));
-    //     return;
-    // }
-
-    // return (
-    //     <mockExplorerContext.Provider value={{ mockExplorerData, mockExplorerDataTransaction, addNode, removeNode }}>
-    //         {props.children}
-    //     </mockExplorerContext.Provider>
-    // )
+    );
 }
 
 export default MockExplorerStore;

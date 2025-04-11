@@ -16,8 +16,6 @@ function CodeField(props: any) {
     const handleDebouncedChange = createDebounce((doc: string) => {
         props.setValue(doc);
     });
-
-    // GET THE CURSOR POSITION...
     
     const editorLinter = linter((view: EditorView): Diagnostic[] => {
         try {
@@ -82,15 +80,8 @@ function CodeField(props: any) {
         extension(lintGutter());
         extension(editorLinter);
 
-        // todo: configure custom theme
-        // const reconfigureTheme = extension(getEditorTheme(theme()));
-
         // reconfigure doc value on data update
         createEffect(on(() => props.value, (doc: string) => updateDoc(doc)));
-
-        // reconfigure theme on theme update
-        // configure custom theme...
-        // createEffect(on(theme, () => reconfigureTheme(getEditorTheme(theme()))));
     });
 
     return (

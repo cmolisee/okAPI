@@ -4,9 +4,10 @@ import { contextMenuContext } from "@/lib/contextMenuProvider";
 import { useMockExplorer } from "@/lib/mockExplorerStore";
 
 function MockExplorerNode(props: any) {
-    const { addNode, removeNode } = useMockExplorer();
+    const { addNode, removeNode, updateNodeName } = useMockExplorer();
     const { handleContextMenu, handleCloseContextMenu } = useContext(contextMenuContext);
     const [expanded, setExpanded] = createSignal(false);
+    const [editName, setEditName] = createSignal(false);
     const explorerIcons = {
         root: () => <VsFolder size={18} class="text-secondary-text dark:text-secondary-text" />,
         folder: () => <VsFolder size={18} class="text-secondary-text dark:text-secondary-text" />,
@@ -33,6 +34,36 @@ function MockExplorerNode(props: any) {
         return;
     }
 
+    const handleEditName = (e: MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        setEditName(true);
+        handleCloseContextMenu();
+        return;
+    }
+
+    const handleEditNameOnBlur = (e: Event) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const value = (e.target as HTMLInputElement).value;
+        updateNodeName(props.item.path, value);
+        setEditName(false);
+    }
+
+    const handleEditNameKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+    
+            const value = (e.target as HTMLInputElement).value;
+            updateNodeName(props.item.path, value);
+            setEditName(false);
+        }
+        return;
+    };
+
     const toggleExpand = () => {
         if (props.item.type !== "mock") {
             setExpanded(!expanded());
@@ -43,20 +74,42 @@ function MockExplorerNode(props: any) {
         e.preventDefault();
         e.stopPropagation();
         
-        handleContextMenu(e, { text: 'Add Folder', callback: handleAddFolder }, { text: 'Remove Folder', callback: handleRemoveFolder });
+        handleContextMenu(e, 
+            { text: 'Add Folder', callback: handleAddFolder }, 
+            { text: 'Remove Folder', callback: handleRemoveFolder },
+            { text: 'Edit Folder Name', callback: handleEditName },
+        );
     };
+
+    createEffect(() => {
+        if (editName()) {
+            const editNameField = document.getElementById('editNameField') as HTMLInputElement;
+            editNameField?.focus();
+            editNameField?.select();
+        }
+    });
 
     return (
         <div>
             <div class={twMerge("flex items-center pl-[12px] py-2 cursor-pointer", props.level > 0 ? "border-l-2" : "")}
                 style={{ "margin-left": `${props.level * 32}px` }}
                 onClick={props.item.type !== "mock" ? toggleExpand : undefined} 
+                ondblclick={handleEditName}
                 onContextMenu={contextHandler} >
                 <span class="mr-2">
                     <Dynamic component={explorerIcons[props.item.type as keyof typeof explorerIcons]} />
                 </span>
                 <span class={props.item.type !== "mock" ? "font-semibold" : "italic"}>
-                    {props.item.name}
+                    <Show when={!editName()}>
+                        {props.item.name}
+                    </Show>
+                    <Show when={editName()}>
+                        <input id='editNameField'
+                            type="text" 
+                            value={props.item.name} 
+                            on:keydown={handleEditNameKeyDown}
+                            on:blur={handleEditNameOnBlur} />
+                    </Show>
                 </span>
                 <Show when={props.item.children?.length > 0 && expanded()}>
                     <span class="mr-2">

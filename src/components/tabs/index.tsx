@@ -3,10 +3,8 @@ import { twMerge } from "tailwind-merge";
 import Button from "../button";
 import { WorkspaceStoreContext } from "@/lib/workspaceStore";
 import { getUniqueId } from "@/utils/utils";
-// import { mockExplorerContext } from "@/lib/mockExplorerStore";
 
 function Tabs() {
-    // const { mockExplorerData, mockExplorerDataTransaction } = useContext(mockExplorerContext);
     const { workspaceData, workspaceDataTransaction } = useContext(WorkspaceStoreContext);
     
     const handleAddTab = () => {
@@ -36,14 +34,6 @@ function Tabs() {
             })
         );
     };
-
-    // TODO:
-        // create field to save individual mocks to a specific path
-        // this will need to include the logic to call mockExploereDataTransaction with an update to 
-            // create that "path" if it DNE
-            // add the mock to the path if it does exist
-        // this will also need to include logic to call workspaceDataTransaction to update the workspace items 
-            // dataPath to the corresponding mockExplorerData path.
 
     return (
         <div class="flex flex-col gap-2 ">
@@ -86,7 +76,7 @@ function Tabs() {
             </div>
             
         </div>
-    )
+    );
 }
 
 export default Tabs;

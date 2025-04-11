@@ -21,9 +21,6 @@ function Save() {
             <div class="p-4">
                 <div class="">
                     <MockExplorerTree data={mockExplorerTree} />
-                    {/* opened/selected/active folder should be highlighted or have some way to identify */}
-                    {/* user should be able to add new folder via right click */}
-                    {/* user should be able to delete folder via right click */}
                 </div>
                 <div class="flex flex-row justify-end">
                     <Button styles="bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text " onClickCallback={() => navigate('/', { replace: true })}>Cancel</Button>

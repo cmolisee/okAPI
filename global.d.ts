@@ -29,15 +29,11 @@ interface MockParam {
 }
 
 interface MockExplorerContext {
-    // mockExplorerData: ApiMockNode;
-    // mockExplorerDataTransaction: SetStoreFunction<ApiMockNode>;
-    // addNode: (nodePath: string, newNode: ApiMockNode) => void;
-    // removeNode: (nodePath: string) => void;
     mockExplorerTree: ApiMockNode;
     findNodeByPath: (tree: ApiMockNode, path: string) => ApiMockNode|null;
     addNode: (parentPath: string, node: ApiMockNode) => ApiMockNode|null;
     removeNode: (path: string) => void;
-    updateNodeName: () => void;
+    updateNodeName: (path: string, name: string) => void;
     moveNode: () => void;
 }
 

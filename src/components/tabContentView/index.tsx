@@ -90,13 +90,8 @@ function TabContentView() {
                         <Toggle toggleSize="medium" checked={tab.isEnabled} changeCallback={handleIsEnabledUpdate} />
                     </div>
                     <div class="my-2">
-                        <CodeField value={tab?.body ?? '{}'} setValue={handleBodyUpdate} />
-                    </div>
-                    <div class="my-2">
                         <div class="grid grid-cols-[5fr_7fr] grid-rows-2 gap-1">
                             {/* header */}
-                            {/* <div class="text-center"></div>
-                            <div class="text-center"></div> */}
                             <div class="text-center border">Key</div>
                             <div class="text-center border">Value</div>
                             {/* defined params */}
@@ -149,13 +144,14 @@ function TabContentView() {
                                     )
                                 }}
                             </For>
-                            {/* <div></div>
-                            <div></div> */}
-                            <div></div>
+                            <div/>
                             <div class="flex justify-end">
                                 <Button styles="addButton" onClickCallback={handleAddParam}><VsAdd size={18} class="vs text-okPurple-500 dark:text-okGreen-500" /></Button>
                             </div>
                         </div>
+                    </div>
+                    <div class="my-2">
+                        <CodeField value={tab?.body ?? '{}'} setValue={handleBodyUpdate} />
                     </div>
                 </div>
             )}
