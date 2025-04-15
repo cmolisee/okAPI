@@ -10,18 +10,15 @@ function WorkspaceStore(props: any) {
     const [workspaceData, workspaceDataTransaction] = createStore<WorkspaceData>(defaultWorkspaceData);
 
     const debounce = createDebounce((proxyData: WorkspaceData) => {
-        // SolidJs is returning a Proxy(Object) where arrays are interpreted as objects .
-        // convert back to array by making a deep copy.
-        const unproxifiedData = JSON.parse(JSON.stringify(proxyData));
-        unproxifiedData.data.map((d: WorkspaceDataItem) => JSON.parse(JSON.stringify(d)));
+        const explorer = deepCopyAndUnproxy(proxyData)
 
-        workspaceDataStorage.setValue(unproxifiedData)
+        workspaceDataStorage.setValue(explorer)
             .catch((e: any) => console.debug("Error saving workspace: ", e));
     });
 
     onMount(async () => {
         const savedWorkspace: WorkspaceData = await workspaceDataStorage.getValue();
-        workspaceDataTransaction(savedWorkspace);
+        workspaceDataTransaction(deepCopyAndUnproxy(savedWorkspace));
     });
 
     createEffect(on(

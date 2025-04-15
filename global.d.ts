@@ -30,8 +30,8 @@ interface MockParam {
 
 interface MockExplorerContext {
     mockExplorerTree: ApiMockNode;
-    findNodeByPath: (tree: ApiMockNode, path: string) => ApiMockNode|null;
-    addNode: (parentPath: string, node: ApiMockNode) => ApiMockNode|null;
+    findNodeByPath: (tree: ApiMockNode, path: string) => void;
+    addNode: (parentPath: string, node: ApiMockNode) => void;
     removeNode: (path: string) => void;
     updateNodeName: (path: string, name: string) => void;
     moveNode: () => void;

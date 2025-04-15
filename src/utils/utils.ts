@@ -22,35 +22,26 @@ export const workspaceDataStorage = storage.defineItem<WorkspaceData>(
 
 export const getUniqueId = () => new Date().valueOf().toString(36);
 
-export const getPathsArray = (path: string) => path.split("/").filter(r => r).reduce((paths: string[], path: string, i: number) => {
-    paths.push(paths?.[i - 1] ? paths[i - 1] + `/${path}` : `/${path}`);
-    return paths;
-}, []);
-
-export const getNode = (root: ApiMockNode, path: string) => {
-    if (!path || !path.length) {
-        return;
+// solidjs will sometimes return proxy objects.
+// This function can create a deep copy and unproxy those objects so we 
+// can invoke functions without error (i.e. proxy arrays don't have find(), push(), etc...).
+export const deepCopyAndUnproxy = (obj: any) => {
+    if (obj === null || typeof obj !== 'object') {
+        return obj;
     }
 
-    if (root.path === path) {
-        return root;
+    const isArray = Array.isArray(obj) || typeof obj === 'object' && Object.prototype.toString.call(obj) === '[object Array]';
+    const target = isArray ? [] : {};
+    const keys = Object.keys(obj);
+
+    if (isArray) {
+        (target as []).length = obj.length;
     }
 
-    const paths = getPathsArray(path);
-    let targetNode = root;
-    for (const nextNodePath of paths.slice(1)) {
-        try {
-            const node = targetNode.children!.find((c) => c.path === nextNodePath);
-
-            if (!node) {
-                throw Error();
-            }
-
-            targetNode = node;
-        } catch (e) {
-            throw Error(`Error. Folder cannot be found at path ${path}.`);
-        }
+    for (let i = 0; i < keys.length; ++i) {
+        //@ts-ignore
+        target[keys[i]] = deepCopyAndUnproxy(obj[keys[i]]);
     }
 
-    return targetNode;
+    return target;
 }
