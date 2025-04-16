@@ -5,10 +5,12 @@ import SideMenu from '@/components/sideMenu';
 import TabContentView from '@/components/tabContentView';
 import Tabs from '@/components/tabs';
 import ThemeSwitcher from '@/components/themeSwitcher';
+import Workspace from '@/components/views/workspace';
 import { useMockExplorer } from '@/lib/mockExplorerStore';
 import WorkspaceStore from '@/lib/workspaceStore';
 import { useNavigate } from '@solidjs/router';
 import { VsSave, VsSaveAll } from 'solid-icons/vs';
+import { twMerge } from 'tailwind-merge';
 
 function Sidepanel() {
   const { mockExplorerTree } = useMockExplorer();
@@ -29,26 +31,26 @@ function Sidepanel() {
     workspaceDataStorage.removeValue();
   };
 
+  const containerStyles = 'h-full w-full bg-primary-bg text-md text-primary-text';
+  const containerDarkStyles = 'dark:bg-primary-bg dark:text-primary-text';
 
 
   return (
-    <div class='h-full bg-primary-bg dark:bg-primary-bg text text-primary-text dark:text-primary-text'>
+    <div class={twMerge(containerStyles, containerDarkStyles)}>
+      {/* Title Bar */}
       <div class='flex flex-row justify-between'>
         <SideMenu>
           <MockExplorerTree data={mockExplorerTree} />
         </SideMenu>
-        <Button onClickCallback={() => navigate('/saveAll', { replace: true })}><VsSaveAll stroke="currentColor" size={24} class="vs text-secondary-text dark:text-secondary-text" /></Button>
-        <Button onClickCallback={() => navigate('/save', { replace: true })}><VsSave stroke="currentColor" size={24} class="vs text-secondary-text dark:text-secondary-text" /></Button>
         <h1 class='flex items-center mx-4 text-lg font-bold'>OkApi: API Mocking Tool</h1>
         <ThemeSwitcher />
       </div>
-      <div class='mx-4'>
-        <WorkspaceStore>
-          <Tabs />
-          <TabContentView />
-        </WorkspaceStore>
+      {/* Primary UI Space */}
+      <div class='mx-4 bg-gray-300'>
+        <Workspace />
       </div>
-      <button onclick={testMesseging}>button</button>
+      <Button onClickCallback={() => navigate('/saveAll', { replace: true })}><VsSaveAll stroke="currentColor" size={24} class="vs text-secondary-text dark:text-secondary-text" /></Button>
+      <Button onClickCallback={() => navigate('/save', { replace: true })}><VsSave stroke="currentColor" size={24} class="vs text-secondary-text dark:text-secondary-text" /></Button>
     </div>
   );
 }

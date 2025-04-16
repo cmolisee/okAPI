@@ -8,6 +8,8 @@ import { getUniqueId } from "@/utils/utils";
 function TabContentView() {
     const { workspaceData, workspaceDataTransaction } = useContext(WorkspaceStoreContext);
 
+    const Fallback = <div class="m-4">Click the <span class="text-lg text-okPurple-500 dark:text-okGreen-500">+</span> button to create a new mock.</div>;
+
     const handleMethodUpdate = (e: Event) => {
         const value = (e.target as HTMLSelectElement).value as MethodType;
         workspaceDataTransaction(produce((draft: WorkspaceData) => {
@@ -72,7 +74,7 @@ function TabContentView() {
     };
 
     return (
-        <Show when={workspaceData.data.find((t: WorkspaceDataItem) => t.isEditing)} fallback={<div>Loading...</div>} keyed>
+        <Show when={workspaceData.data.find((t: WorkspaceDataItem) => t.isEditing)} fallback={Fallback} keyed>
             {(tab: WorkspaceDataItem) => (
                 <div class="mt-2">
                     <div class="flex flex-row justify-between align-centermy-2">

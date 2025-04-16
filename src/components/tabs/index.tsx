@@ -1,8 +1,8 @@
 import { VsAdd, VsClose } from "solid-icons/vs";
-import { twMerge } from "tailwind-merge";
 import Button from "../button";
 import { WorkspaceStoreContext } from "@/lib/workspaceStore";
 import { getUniqueId } from "@/utils/utils";
+import { twMerge } from "tailwind-merge";
 
 function Tabs() {
     const { workspaceData, workspaceDataTransaction } = useContext(WorkspaceStoreContext);
@@ -56,16 +56,22 @@ function Tabs() {
                         const removeTab = () => handleRemoveTab(thisTab.id as string);
 
                         return (
-                            <Show when={thisTab.id}>
-                                <div class={twMerge('flex flex-wrap items-center cursor-pointer rounded-md border-okPurple-500 dark:border-okGreen-500', thisTab.isEditing ? 'border-2' : '')}>
-                                    <div on:click={setActiveTab}>
-                                        <span class="size-fit m-2">{thisTab.method}</span>
-                                        <span class="mx-1 text-ellipsis">{`${thisTab.uri ? thisTab.uri : 'untitled'}`}</span>
-                                    </div>
-                                    <Button onClickCallback={removeTab}><VsClose size={18} class="vs text-okRed-500" /></Button>
+                            <div
+                                on:click={setActiveTab}
+                                class={twMerge("group relative flex justify-center mx-[0.125rem] mb-1 text-sm font-medium text-gray-900 bg-white rounded-sm border border-gray-200 focus:ring-1 focus:ring-okPurple-500", thisTab.isEditing ? 'border-2 border-okPurple-500' : '')}>
+                                <div>
+                                    <span class="size-fit m-2">{thisTab.method}</span>
+                                    <span class="mx-2 text-ellipsis">{`${thisTab.uri ? thisTab.uri : 'untitled'}`}</span>
                                 </div>
-                            </Show>
-                        )
+                                <div class='absolute w-full h-full rounded-sm z-10 hidden group-hover:flex'>
+                                    <div class="w-full h-full bg-[rgba(0,0,0,0.1)] border border-[rgba(0,0,0,0.1)]" />
+                                    <button on:click={removeTab}
+                                        class='w-[2rem] h-full bg-okRed-600 border border-okRed-600 flex justify-center items-center'>
+                                        <VsClose size={24} class="vs text-[#fff]" />
+                                    </button>
+                                </div>
+                            </div>
+                        );
                     }}
                 </For>
                 <div class="tab_item flex mb-[-1px]">
