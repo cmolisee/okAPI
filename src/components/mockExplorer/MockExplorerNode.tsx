@@ -34,6 +34,13 @@ function MockExplorerNode(props: any) {
         return;
     }
 
+    const removeFolderNotification = (node: ApiMockNode) => {
+        const noChildrenText = 'Are you sure you want to delete this folder?';
+        const withChildrenText = 'Are you sure you want to delete this folder and all child folders/nodes?';
+        // add yes button
+        // add cancel button
+    }
+
     const handleEditName = (e: MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();

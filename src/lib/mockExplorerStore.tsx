@@ -1,9 +1,10 @@
 import { deepCopyAndUnproxy, mockExplorerDataStorage } from "@/utils/utils";
-import createDebounce from "./debounce";
 import { trackStore } from "@solid-primitives/deep";
+import createDebounce from "./debounce";
 
 const mockExplorerContext = createContext<MockExplorerContext>({ 
     mockExplorerTree: {},
+    mockExplorerTreeTransaction: () => {},
     findNodeByPath: (tree: ApiMockNode, path: string) => null,
     addNode: (parentPath: string, node: ApiMockNode) => null,
     removeNode: (path: string) => {},
@@ -81,27 +82,27 @@ function MockExplorerStore(props: any) {
     // todo: implmement this
     const moveNode = () => console.log('implement');
 
-    const debounce = createDebounce((proxyData: WorkspaceData) => {
-        const explorer = deepCopyAndUnproxy(proxyData);
-
-        mockExplorerDataStorage.setValue(explorer)
-            .catch((e: any) => console.debug("Error saving explorer data: ", e));
+    const handleSaveExplorerEdits = createDebounce((proxyData: ApiMockNode) => {
+        const data = deepCopyAndUnproxy(proxyData)
+        mockExplorerDataStorage.setValue(data)
+            .catch((e: any) => console.debug("Error saving data: ", e));
     });
 
     onMount(async () => {
-        const explorer = await mockExplorerDataStorage.getValue();
-        mockExplorerTreeTransaction(deepCopyAndUnproxy(explorer));
+        const data: ApiMockNode = await mockExplorerDataStorage.getValue();
+        mockExplorerTreeTransaction(() => deepCopyAndUnproxy(data));
     });
 
     createEffect(on(
         () => trackStore(mockExplorerTree),
-        (proxyData: ApiMockNode) => debounce(proxyData),
+        (proxyData: ApiMockNode) => handleSaveExplorerEdits(proxyData),
         { defer: true }
     ));
 
     return (
         <mockExplorerContext.Provider value={{
             mockExplorerTree,
+            mockExplorerTreeTransaction,
             findNodeByPath,
             addNode,
             removeNode,

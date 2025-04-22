@@ -4,21 +4,26 @@ import { twMerge } from "tailwind-merge";
 
 function SideMenu(props: any) {
     const [expanded, setExpanded] = createSignal(false);
-    const scrollbarStyles = '[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:transparent [&::-webkit-scrollbar-thumb]:bg-secondary-text dark:[&::-webkit-scrollbar-thumb]:bg-secondary-text';
 
+    onMount(() => {
+        const closeMenuEventHandler = () => setExpanded(false);
+        document.addEventListener('customCloseMenu', closeMenuEventHandler);
+
+        onCleanup(() => document.removeEventListener('customCloseMenu', closeMenuEventHandler));
+    });
+    
     return (
         <>
-            <Button styles="flex items-center m-2 p-2" onClickCallback={() => setExpanded(true)}><VsMenu size={18} color="currentColor" class="vs text-primary-text dark:text-primary-text" /></Button>
+            <Button styles="flex items-center p-2" onClickCallback={() => setExpanded(true)}><VsMenu size={18} color="currentColor" class="vs text-primary-text dark:text-primary-text" /></Button>
             <Show when={expanded()}>
-                <div class="absolute h-screen w-screen z-10 bg-secondary-bg border-r-1 border-secondary-border dark:bg-secondary-bg dark:border-secondary-border">
-                    <div class="flex flex-row justify-end m-2 p-2">
-                        <Button onClickCallback={() => setExpanded(false)}><VsClose stroke="currentColor" size={24} class="vs text-secondary-text dark:text-secondary-text" /></Button>
-                    </div>
-                    <div class={twMerge('overflow-auto h-[calc(100%-3.5rem)] p-2', scrollbarStyles)}>
-                        {props.children}
-                    </div>
-                </div>
+                <div class="fixed inset-0 bg-[#000] bg-opacity-50 z-10 transition-opacity duration-300" />
             </Show>
+            <div class={twMerge("absolute top-0 left-0 h-screen z-20 bg-okPurple-600 w-12 flex flex-col items-center py-4 transform transition-all duration-300 ease-in-out", expanded() ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0')}>
+                <button type='button' on:click={() => setExpanded(false)} class="mb-6">
+                    <VsClose stroke="currentColor" size={32} class="vs text-[#fff]" />
+                </button>
+                {props.children}
+            </div>
         </>
     )
 }

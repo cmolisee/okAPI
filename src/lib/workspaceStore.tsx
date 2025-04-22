@@ -2,18 +2,26 @@ import { trackStore } from "@solid-primitives/deep";
 import createDebounce from "./debounce";
 
 const defaultWorkspaceData: WorkspaceData = { data: [] };
-export const WorkspaceStoreContext = createContext<WorkspaceStoreContext>({
+const WorkspaceStoreContext = createContext<WorkspaceStoreContext>({
     workspaceData: defaultWorkspaceData,
     workspaceDataTransaction: () => { },
 });
+
+export const useWorkspace = () => {
+    const context = useContext(WorkspaceStoreContext);
+    if (!context) {
+        throw Error("workspaceStoreContext does not exist.");
+    }
+    return context;
+}
+
 function WorkspaceStore(props: any) {
     const [workspaceData, workspaceDataTransaction] = createStore<WorkspaceData>(defaultWorkspaceData);
 
-    const debounce = createDebounce((proxyData: WorkspaceData) => {
-        const explorer = deepCopyAndUnproxy(proxyData)
-
-        workspaceDataStorage.setValue(explorer)
-            .catch((e: any) => console.debug("Error saving workspace: ", e));
+    const handleSaveWorkspace = createDebounce((proxyData: WorkspaceData) => {
+        const data = deepCopyAndUnproxy(proxyData)
+        workspaceDataStorage.setValue(data)
+            .catch((e: any) => console.debug("Error saving data: ", e));
     });
 
     onMount(async () => {
@@ -23,7 +31,7 @@ function WorkspaceStore(props: any) {
 
     createEffect(on(
         () => trackStore(workspaceData),
-        (proxyData: WorkspaceData) => debounce(proxyData),
+        (proxyData: WorkspaceData) => handleSaveWorkspace(proxyData),
         { defer: true }
     ));
 

@@ -1,11 +1,11 @@
 import { VsAdd, VsClose } from "solid-icons/vs";
 import Button from "../button";
-import { WorkspaceStoreContext } from "@/lib/workspaceStore";
+import { useWorkspace } from "@/lib/workspaceStore";
 import { getUniqueId } from "@/utils/utils";
 import { twMerge } from "tailwind-merge";
 
 function Tabs() {
-    const { workspaceData, workspaceDataTransaction } = useContext(WorkspaceStoreContext);
+    const { workspaceData, workspaceDataTransaction } = useWorkspace();
     
     const handleAddTab = () => {
         const newTabId = getUniqueId();

@@ -30,6 +30,7 @@ interface MockParam {
 
 interface MockExplorerContext {
     mockExplorerTree: ApiMockNode;
+    mockExplorerTreeTransaction: SetStoreFunction<ApiMockNode>;
     findNodeByPath: (tree: ApiMockNode, path: string) => void;
     addNode: (parentPath: string, node: ApiMockNode) => void;
     removeNode: (path: string) => void;
@@ -97,4 +98,11 @@ interface ContextMenuContext {
     setContextMenuChildren: Setter<any>;
     handleContextMenu: (e: MouseEvent, ...children: {text:string,callback:(e:MouseEvent)=>void}[]) => void;
     handleCloseContextMenu: () => void;
+}
+
+type NotificationContent = HTMLElement|HTMLElement[]|null;
+
+interface NotificationContext {
+    setShowNotification: Setter<boolean>;
+    setNotificationContent: Setter<NotificationContent>;
 }

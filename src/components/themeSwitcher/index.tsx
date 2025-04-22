@@ -13,7 +13,7 @@ function ThemeSwitcher() {
         <div class="flex items-center justify-end p-2">
             <button on:click={toggleTheme}
                 class={twMerge(
-                    "bg-secondary-bg p-1 m-1 rounded-md transition-okapi duration-300",
+                    "bg-secondary-bg p-1 m-1 rounded-md transition-color duration-300",
                     "dark:bg-secondary-bg"
                 )}
                 aria-label="Toggle Theme">

@@ -1,12 +1,12 @@
-import { VsTrash, VsAdd } from "solid-icons/vs";
+import { VsTrash, VsAdd, VsSave } from "solid-icons/vs";
 import Button from "../button";
 import Toggle from "../toggle";
-import { WorkspaceStoreContext } from "@/lib/workspaceStore";
+import { useWorkspace } from "@/lib/workspaceStore";
 import CodeField from "../codeField";
 import { getUniqueId } from "@/utils/utils";
 
 function TabContentView() {
-    const { workspaceData, workspaceDataTransaction } = useContext(WorkspaceStoreContext);
+    const { workspaceData, workspaceDataTransaction } = useWorkspace();
 
     const Fallback = <div class="m-4">Click the <span class="text-lg text-okPurple-500 dark:text-okGreen-500">+</span> button to create a new mock.</div>;
 
@@ -73,11 +73,53 @@ function TabContentView() {
         );
     };
 
+    interface ApiMockNode {
+        name?: string;
+        path?: string;
+        type?: "mock" | "folder" | "root";
+        // todo: add description to describe folder, flow, etc...
+        children?: ApiMockNode[];
+        mock?: ApiMock;
+    }
+
+    interface ApiMock {
+        // TODO: add alias to replace method+uri
+        // todo: add description to describe mock
+        id?: string;
+        isEditing?: boolean;
+        isEnabled: boolean;
+        method: MethodType;
+        uri?: string;
+        body?: string;
+        params?: Param[];
+    }
+
+    // workspace 
+        // Array of ApiMock objects
+        // also has dataPath which is null if it hasn't previously been saved...
+
+    // explorer
+        // ApiMockNode
+
+    const handleSaveMock = (mock: WorkspaceDataItem) => {
+        if (!mock.dataPath) {
+            // show prompt to choose path
+        }
+    }
+
     return (
         <Show when={workspaceData.data.find((t: WorkspaceDataItem) => t.isEditing)} fallback={Fallback} keyed>
             {(tab: WorkspaceDataItem) => (
-                <div class="mt-2">
-                    <div class="flex flex-row justify-between align-centermy-2">
+                <div>
+                    <Show when={tab.dataPath} fallback={<></>}>
+                        <div class="flex flex-row justify-end my-2">
+                            <span class="italic">
+                                This mock has not been saved. Do you want to save?
+                            </span>
+                            <VsSave stroke="currentColor" size={18} class="vs text-secondary-text dark:text-secondary-text m-2 cursor-pointer" on:click={() => console.log('implement save logic')} />
+                        </div>
+                    </Show>
+                    <div class="flex flex-row justify-between align-center my-2">
                         <div class="flex flex-row border border-solid rounded-sm w-[85%]">
                             <div class="mr-4">
                                 <select class="border-none bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text" name="method" on:change={handleMethodUpdate}>

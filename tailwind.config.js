@@ -85,7 +85,7 @@ export default {
             border: 'var(--color-secondary-border)',
           },
         transitionProperty: {
-          'okapi': 'background-color, color, border-color, transform'
+          'color': 'background-color, color, border-color, transform'
         }
         },
       },
