@@ -1,10 +1,10 @@
-import { deepCopyAndUnproxy, mockExplorerDataStorage } from "@/utils/utils";
+import { deepCopyAndUnproxy, explorerDataStorage } from "@/utils/utils";
 import { trackStore } from "@solid-primitives/deep";
 import createDebounce from "./debounce";
 
-const mockExplorerContext = createContext<MockExplorerContext>({ 
-    mockExplorerTree: {},
-    mockExplorerTreeTransaction: () => {},
+const ExplorerContext = createContext<ExplorerContext>({ 
+    explorerTree: {},
+    explorerTreeTransaction: () => {},
     findNodeByPath: (tree: ApiMockNode, path: string) => null,
     addNode: (parentPath: string, node: ApiMockNode) => null,
     removeNode: (path: string) => {},
@@ -12,16 +12,16 @@ const mockExplorerContext = createContext<MockExplorerContext>({
     moveNode: () => {},
 });
 
-export const useMockExplorer = () => {
-    const context = useContext(mockExplorerContext);
+export const useExplorer = () => {
+    const context = useContext(ExplorerContext);
     if (!context) {
-        throw Error("mockExplorerContext does not exist.");
+        throw Error("explorerContext does not exist.");
     }
     return context;
 }
 
-function MockExplorerStore(props: any) {
-    const [mockExplorerTree, mockExplorerTreeTransaction] = createStore<ApiMockNode>({});
+function ExplorerStore(props: any) {
+    const [explorerTree, explorerTreeTransaction] = createStore<ApiMockNode>({});
 
     const findNodeByPath = (tree: ApiMockNode, path: string): ApiMockNode|null => {
         if (tree.path === path) {
@@ -41,7 +41,7 @@ function MockExplorerStore(props: any) {
     };
 
     const addNode = (parentPath: string, node: ApiMockNode) => {
-        mockExplorerTreeTransaction(produce((draft: ApiMockNode) => {
+        explorerTreeTransaction(produce((draft: ApiMockNode) => {
             const parent = findNodeByPath(draft, parentPath);
 
             if (!parent) {
@@ -57,7 +57,7 @@ function MockExplorerStore(props: any) {
     };
 
     const removeNode = (path: string) => {
-        mockExplorerTreeTransaction(produce((draft: ApiMockNode) => {
+        explorerTreeTransaction(produce((draft: ApiMockNode) => {
             if (draft.path === path) {
                 return; // can't remove root node.
             }
@@ -68,7 +68,7 @@ function MockExplorerStore(props: any) {
     };
 
     const updateNodeName = (path: string, name: string) => {
-        mockExplorerTreeTransaction(produce((draft: ApiMockNode) => {
+        explorerTreeTransaction(produce((draft: ApiMockNode) => {
             const node = findNodeByPath(draft, path);
             if (!node) {
                 return;
@@ -84,25 +84,25 @@ function MockExplorerStore(props: any) {
 
     const handleSaveExplorerEdits = createDebounce((proxyData: ApiMockNode) => {
         const data = deepCopyAndUnproxy(proxyData)
-        mockExplorerDataStorage.setValue(data)
+        explorerDataStorage.setValue(data)
             .catch((e: any) => console.debug("Error saving data: ", e));
     });
 
     onMount(async () => {
-        const data: ApiMockNode = await mockExplorerDataStorage.getValue();
-        mockExplorerTreeTransaction(() => deepCopyAndUnproxy(data));
+        const data: ApiMockNode = await explorerDataStorage.getValue();
+        explorerTreeTransaction(() => deepCopyAndUnproxy(data));
     });
 
     createEffect(on(
-        () => trackStore(mockExplorerTree),
+        () => trackStore(explorerTree),
         (proxyData: ApiMockNode) => handleSaveExplorerEdits(proxyData),
         { defer: true }
     ));
 
     return (
-        <mockExplorerContext.Provider value={{
-            mockExplorerTree,
-            mockExplorerTreeTransaction,
+        <ExplorerContext.Provider value={{
+            explorerTree,
+            explorerTreeTransaction,
             findNodeByPath,
             addNode,
             removeNode,
@@ -110,8 +110,8 @@ function MockExplorerStore(props: any) {
             moveNode,
         }}>
             {props.children}
-        </mockExplorerContext.Provider>
+        </ExplorerContext.Provider>
     );
 }
 
-export default MockExplorerStore;
+export default ExplorerStore;

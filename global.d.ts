@@ -28,9 +28,9 @@ interface MockParam {
     value?: string;
 }
 
-interface MockExplorerContext {
-    mockExplorerTree: ApiMockNode;
-    mockExplorerTreeTransaction: SetStoreFunction<ApiMockNode>;
+interface ExplorerContext {
+    explorerTree: ApiMockNode;
+    explorerTreeTransaction: SetStoreFunction<ApiMockNode>;
     findNodeByPath: (tree: ApiMockNode, path: string) => void;
     addNode: (parentPath: string, node: ApiMockNode) => void;
     removeNode: (path: string) => void;

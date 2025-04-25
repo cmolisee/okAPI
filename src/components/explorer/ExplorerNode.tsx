@@ -1,10 +1,10 @@
 import { VsBracketDot, VsFolder, VsTriangleDown, VsTriangleRight } from "solid-icons/vs";
 import { twMerge } from "tailwind-merge";
 import { contextMenuContext } from "@/lib/contextMenuProvider";
-import { useMockExplorer } from "@/lib/mockExplorerStore";
+import { useExplorer } from "@/lib/explorerStore";
 
-function MockExplorerNode(props: any) {
-    const { addNode, removeNode, updateNodeName } = useMockExplorer();
+function ExplorerNode(props: any) {
+    const { addNode, removeNode, updateNodeName } = useExplorer();
     const { handleContextMenu, handleCloseContextMenu } = useContext(contextMenuContext);
     const [expanded, setExpanded] = createSignal(false);
     const [editName, setEditName] = createSignal(false);
@@ -133,7 +133,7 @@ function MockExplorerNode(props: any) {
                 <div class="children">
                     <For each={props.item.children}>
                         {(child) => (
-                            <MockExplorerNode
+                            <ExplorerNode
                                 item={child}
                                 level={props.level + 1}
                             />
@@ -145,4 +145,4 @@ function MockExplorerNode(props: any) {
     );
 }
 
-export default MockExplorerNode;
+export default ExplorerNode;

@@ -2,7 +2,6 @@ import TabContentView from "@/components/tabContentView";
 import Tabs from "@/components/tabs";
 import WorkspaceStore, { useWorkspace } from "@/lib/workspaceStore";
 import { trackDeep } from "@solid-primitives/deep";
-import { VsSave } from "solid-icons/vs";
 import { twMerge } from "tailwind-merge";
 
 function Workspace (props: any) {
