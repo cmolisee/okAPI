@@ -9,7 +9,7 @@ export function safeParse(obj: any) {
 export const explorerDataStorage = storage.defineItem<ApiMockNode>(
     'local:explorerData',
     {
-        fallback: { name: "Saved Mocks", path: "/root", type: "root" } as ApiMockNode,
+        fallback: { name: "Root", path: "/root", type: "root" } as ApiMockNode,
     }
 );
 

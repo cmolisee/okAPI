@@ -91,7 +91,7 @@ function TabContentView() {
         method: MethodType;
         uri?: string;
         body?: string;
-        params?: Param[];
+        params?: MockParam[];
     }
 
     // workspace 

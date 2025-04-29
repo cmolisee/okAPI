@@ -7,6 +7,7 @@ interface ApiMockNode {
     // todo: add description to describe folder, flow, etc...
     children?: ApiMockNode[];
     mock?: ApiMock;
+    expandedState?: boolean;
 }
 
 interface ApiMock {
@@ -35,6 +36,8 @@ interface ExplorerContext {
     addNode: (parentPath: string, node: ApiMockNode) => void;
     removeNode: (path: string) => void;
     updateNodeName: (path: string, name: string) => void;
+    updateExpandedState: (path: string, expanded: boolean) => void;
+    toggleAllExpandedState: (expanded: boolean) => void;
     moveNode: () => void;
 }
 

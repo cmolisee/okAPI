@@ -1,12 +1,12 @@
-import { VsBracketDot, VsFolder, VsTriangleDown, VsTriangleRight } from "solid-icons/vs";
+import { VsAdd, VsBracketDot, VsFolder, VsTriangleDown, VsTriangleRight } from "solid-icons/vs";
 import { twMerge } from "tailwind-merge";
 import { contextMenuContext } from "@/lib/contextMenuProvider";
 import { useExplorer } from "@/lib/explorerStore";
 
 function ExplorerNode(props: any) {
-    const { addNode, removeNode, updateNodeName } = useExplorer();
+    const { addNode, removeNode, updateNodeName, updateExpandedState } = useExplorer();
     const { handleContextMenu, handleCloseContextMenu } = useContext(contextMenuContext);
-    const [expanded, setExpanded] = createSignal(false);
+    // const [expanded, setExpanded] = createSignal(false);
     const [editName, setEditName] = createSignal(false);
     const explorerIcons = {
         root: () => <VsFolder size={18} class="text-secondary-text dark:text-secondary-text" />,
@@ -21,7 +21,7 @@ function ExplorerNode(props: any) {
         const contextId = getUniqueId();
         addNode(props.item.path, { name: contextId, path: props.item.path + '/' + contextId, type: 'folder' });
         handleCloseContextMenu();
-        setExpanded(true);
+        updateExpandedState(props.item.path, true);
         return;
     }
 
@@ -73,7 +73,7 @@ function ExplorerNode(props: any) {
 
     const toggleExpand = () => {
         if (props.item.type !== "mock") {
-            setExpanded(!expanded());
+            updateExpandedState(props.item.path, !props.item.expandedState);
         }
     };
 
@@ -88,6 +88,17 @@ function ExplorerNode(props: any) {
         );
     };
 
+    const NoFoldersFallback = () => {
+        return (
+            <Show when={!props.item?.children?.length}>
+                <div class='flex'>
+                    Click here to create a folder 
+                    <VsAdd size={18} color="currentColor" class="vs text-okPurple-500 dark:text-okGreen-500 mx-2" on:click={handleAddFolder} />
+                </div>
+            </Show>
+        )
+    }
+
     createEffect(() => {
         if (editName()) {
             const editNameField = document.getElementById('editNameField') as HTMLInputElement;
@@ -96,40 +107,56 @@ function ExplorerNode(props: any) {
         }
     });
 
+    // Do not show the root node
+    if (props.level === -1) {
+        return (
+            <For each={props.item?.children}>
+                {(child) => (
+                    <ExplorerNode
+                        item={child}
+                        level={props.level + 1}
+                    />
+                )}
+            </For>
+        )
+    }
+
     return (
         <div>
-            <div class={twMerge("flex items-center pl-[12px] py-2 cursor-pointer", props.level > 0 ? "border-l-2" : "")}
-                style={{ "margin-left": `${props.level * 32}px` }}
-                onClick={props.item.type !== "mock" ? toggleExpand : undefined} 
-                ondblclick={handleEditName}
-                onContextMenu={contextHandler} >
-                <span class="mr-2">
-                    <Dynamic component={explorerIcons[props.item.type as keyof typeof explorerIcons]} />
-                </span>
-                <span class={props.item.type !== "mock" ? "font-semibold" : "italic"}>
-                    <Show when={!editName()}>
-                        {props.item.name}
-                    </Show>
-                    <Show when={editName()}>
-                        <input id='editNameField'
-                            type="text" 
-                            value={props.item.name} 
-                            on:keydown={handleEditNameKeyDown}
-                            on:blur={handleEditNameOnBlur} />
-                    </Show>
-                </span>
-                <Show when={props.item.children?.length > 0 && expanded()}>
+            <Show when={props.item.type !== 'root'} fallback={<NoFoldersFallback />}>
+                <div class={twMerge("flex items-center pl-[12px] py-2 cursor-pointer", props.level > 0 ? "border-l-2" : "")}
+                    style={{ "margin-left": `${props.level * 32}px` }}
+                    onClick={props.item.type !== "mock" ? toggleExpand : undefined}
+                    ondblclick={handleEditName}
+                    onContextMenu={contextHandler} >
                     <span class="mr-2">
-                        <VsTriangleDown size={18} class="text-secondary-text dark:text-secondary-text" />
+                        <Dynamic component={explorerIcons[props.item.type as keyof typeof explorerIcons]} />
                     </span>
-                </Show>
-                <Show when={props.item.children?.length > 0 && !expanded()}>
-                    <span class="mr-2">
-                        <VsTriangleRight size={18} class="text-secondary-text dark:text-secondary-text" />
+                    <span class={props.item.type !== "mock" ? "font-semibold" : "italic"}>
+                        <Show when={!editName()}>
+                            {props.item.name}
+                        </Show>
+                        <Show when={editName()}>
+                            <input id='editNameField'
+                                type="text" 
+                                value={props.item.name} 
+                                on:keydown={handleEditNameKeyDown}
+                                on:blur={handleEditNameOnBlur} />
+                        </Show>
                     </span>
-                </Show>
-            </div>
-            <Show when={expanded()}>
+                    <Show when={props.item.children?.length > 0 && props.item.expandedState}>
+                        <span class="mr-2">
+                            <VsTriangleDown size={18} class="text-secondary-text dark:text-secondary-text" />
+                        </span>
+                    </Show>
+                    <Show when={props.item.children?.length > 0 && !props.item.expandedState}>
+                        <span class="mr-2">
+                            <VsTriangleRight size={18} class="text-secondary-text dark:text-secondary-text" />
+                        </span>
+                    </Show>
+                </div>
+            </Show>
+            <Show when={props.item.expandedState}>
                 <div class="children">
                     <For each={props.item.children}>
                         {(child) => (
