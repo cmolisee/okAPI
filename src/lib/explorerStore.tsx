@@ -91,11 +91,11 @@ function ExplorerStore(props: any) {
         explorerTreeTransaction(treeCopy);
     };
 
-    const _treeExpand = (root: ApiMockNode) => {
-        let node: ApiMockNode|null = root;
+    const _treeExpand = (target: ApiMockNode, tree: ApiMockNode) => {
+        let node: ApiMockNode|null = target;
         while (node && node.path !== '/root') {
             node.expandedState = true;
-            node = findNodeByPath(root, node.path?.slice(0, node.path?.lastIndexOf('/')) ?? '')
+            node = findNodeByPath(tree, node.path?.slice(0, node.path?.lastIndexOf('/')) ?? '');
         }
     };
 
@@ -116,7 +116,7 @@ function ExplorerStore(props: any) {
         }
 
         if (expanded) {
-            _treeExpand(node);
+            _treeExpand(node, treeCopy);
         } else {
             _treeCollapse(node)
         }

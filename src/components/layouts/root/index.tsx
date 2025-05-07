@@ -4,7 +4,6 @@ import { useNavigate } from "@solidjs/router";
 import { BsPersonWorkspace } from "solid-icons/bs";
 import { FaSolidFolderOpen } from "solid-icons/fa";
 import { HiSolidCog6Tooth } from "solid-icons/hi";
-import { VsSaveAll } from "solid-icons/vs";
 
 function Root (props: any) {
     const navigate = useNavigate();
@@ -41,7 +40,7 @@ function Root (props: any) {
                             </div>
                             <div class="w-[90%] border border-[#fff]" />
                             {/* save all */}
-                            <div class="group relative flex justify-center cursor-pointer" on:click={() => {
+                            {/* <div class="group relative flex justify-center cursor-pointer" on:click={() => {
                                 dispatchCloseMenu();
                                 navigate('/save', { replace: true });
                             }}>
@@ -50,7 +49,7 @@ function Root (props: any) {
                                     <span class="text-3xl font-extrabold text-[#fff] bold">Save Workspace</span>
                                 </div>
                             </div>
-                            <div class="w-[90%] border border-[#fff]" />
+                            <div class="w-[90%] border border-[#fff]" /> */}
                             {/* explorer */}
                             <div class="group relative flex justify-center cursor-pointer" on:click={() => {
                                 dispatchCloseMenu();
@@ -58,10 +57,9 @@ function Root (props: any) {
                             }}>
                                 <FaSolidFolderOpen stroke="currentColor" size={32} class="vs text-[#fff] my-4" />
                                 <div class="absolute top-1/2 -translate-x-full -translate-y-1/2 w-full opacity-0 transform transition-all duration-300 ease-in-out group-hover:translate-x-[150%] group-hover:opacity-100">
-                                    <span class="text-3xl font-extrabold text-[#fff] bold">Mock Explorer</span>
+                                    <span class="text-3xl font-extrabold text-[#fff] bold">Explore Mocks</span>
                                 </div>
                             </div>
-                            {/* <MockExplorerTree data={mockExplorerTree} /> */}
                         </SideMenu>
                         <h1 class='flex items-center mx-4 text-lg font-bold'>OkApi: API Mocking Tool</h1>
                         <ThemeSwitcher />

@@ -9,21 +9,26 @@ import Save from '@/components/views/save';
 import Options from '@/components/views/options';
 import NotificationProvider from '@/lib/notificationProvider';
 import ExplorerStore from '@/lib/explorerStore';
+import NoNavigation from '@/components/layouts/noNavigation';
 
 render(() => {    
     return (
-        <ExplorerStore>
-            <ContextMenuProvider>
-                <NotificationProvider>
-                    <HashRouter root={Root}>
-                        <Route path={'/'} component={Workspace} />
-                        <Route path={'/options'} component={Options} />
-                        <Route path={'/save'} component={Save} />
-                        <Route path={'/explorer'} component={Explorer} />
-                    </HashRouter>
-                </NotificationProvider>
-            </ContextMenuProvider>
-            <button on:click={() => explorerDataStorage.removeValue()}>removeValue</button>
-        </ExplorerStore>
+       
+            <ExplorerStore>
+                <ContextMenuProvider>
+                    <NotificationProvider>
+                        <HashRouter >
+                            <Route component={Root}>
+                                <Route path={'/'} component={Workspace} />
+                                <Route path={'/options'} component={Options} />
+                                <Route path={'/explorer'} component={Explorer} />
+                            </Route>
+                            <Route component={NoNavigation}>
+                                <Route path={'/save'} component={Save} />
+                            </Route>
+                        </HashRouter>
+                    </NotificationProvider>
+                </ContextMenuProvider>
+            </ExplorerStore>
     )
 }, document.getElementById('root')!);

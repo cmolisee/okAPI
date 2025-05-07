@@ -1,8 +1,9 @@
+import { VsClose } from "solid-icons/vs";
 import { twMerge } from "tailwind-merge";
 
 export const notificationContext = createContext<NotificationContext>({
     setShowNotification: () => {},
-    setNotificationContent: () => {},
+    setNotificationConfig: () => {},
 });
 
 export const useNotifications = () => {
@@ -15,22 +16,41 @@ export const useNotifications = () => {
 
 function NotificationProvider(props: any) {
     const [showNotification, setShowNotification] = createSignal(false);
-    const [notificationContent, setNotificationContent] = createSignal<NotificationContent>(null);
+    const [notificationConfig, setNotificationConfig] = createSignal<NotificationContent>({});
 
     const styles = "border-2 bg-primary-bg text-primary-text border-primary-text z-40";
-    const positionStyles = "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2";
     const darkStyles = "dark:bg-primary-bg dark:text-primary-text dark:border-primary-text";
+
+    const handleExit = () => {
+        notificationConfig()?.cancelCallback?.();
+        setShowNotification(false);
+    };
+
+    const handleSave = () => {
+
+    }
 
     return (
         <notificationContext.Provider value={{
             setShowNotification,
-            setNotificationContent,
+            setNotificationConfig,
         }}>
             {props.children}
             <Show when={showNotification()}>
-                <Portal>
-                    <div class={twMerge(styles, positionStyles, darkStyles)}>
-                        {notificationContent()}
+                <Portal mount={document.getElementById('root')!} ref={(el) => { 
+                        el.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); min-width: 55vw;';
+                    }}> 
+                    <div class={twMerge(styles, darkStyles)}>
+                        <div class="flex justify-end">
+                            <button type='button' on:click={handleExit} class="mb-6">
+                                <VsClose stroke="currentColor" size={18} class="vs text-okRed-500" />
+                            </button>
+                        </div>
+                        {props.children}
+                        <div class="flex flex-row gap-6 justify-end">
+                            <div on:click={handleExit}>{notificationConfig()?.cancelText ?? 'Cancel'}</div>
+                            <div on:click={handleSave}>{notificationConfig()?.continueText ?? 'Save'}</div>
+                        </div>
                     </div>
                 </Portal>
             </Show>

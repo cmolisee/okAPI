@@ -4,9 +4,16 @@ import Toggle from "../toggle";
 import { useWorkspace } from "@/lib/workspaceStore";
 import CodeField from "../codeField";
 import { getUniqueId } from "@/utils/utils";
+import { ImNotification } from "solid-icons/im";
+import { useNotifications } from "@/lib/notificationProvider";
+import SaveWindow from "../saveWindow";
+import Explorer from "../explorer/Explorer";
+import { useNavigate } from "@solidjs/router";
 
 function TabContentView() {
+    const navigate = useNavigate();
     const { workspaceData, workspaceDataTransaction } = useWorkspace();
+    const { setNotificationContent, setShowNotification } = useNotifications();
 
     const Fallback = <div class="m-4">Click the <span class="text-lg text-okPurple-500 dark:text-okGreen-500">+</span> button to create a new mock.</div>;
 
@@ -101,9 +108,9 @@ function TabContentView() {
     // explorer
         // ApiMockNode
 
-    const handleSaveMock = (mock: WorkspaceDataItem) => {
-        if (!mock.dataPath) {
-            // show prompt to choose path
+    const handleSaveMock = () => {
+        if (!workspaceData.data.find((t: WorkspaceDataItem) => t.isEditing)?.dataPath) {
+            navigate('/save', { replace: true });
         }
     }
 
@@ -111,12 +118,12 @@ function TabContentView() {
         <Show when={workspaceData.data.find((t: WorkspaceDataItem) => t.isEditing)} fallback={Fallback} keyed>
             {(tab: WorkspaceDataItem) => (
                 <div>
-                    <Show when={tab.dataPath} fallback={<></>}>
-                        <div class="flex flex-row justify-end my-2">
+                    <Show when={!tab.dataPath} fallback={<></>}>
+                        <div class="flex flex-row p-[0.375rem] rounded-md items-center my-2 bg-okRed-200">
+                            <ImNotification stroke="currentColor" size={18} class="vs mr-2 text-okRed-500 cursor-pointer" />
                             <span class="italic">
-                                This mock has not been saved. Do you want to save?
+                                This mock has not been saved. <span class="text-okBlue-500 italic hover:underline cursor-pointer" on:click={handleSaveMock}>Click here</span> to save this mock.
                             </span>
-                            <VsSave stroke="currentColor" size={18} class="vs text-secondary-text dark:text-secondary-text m-2 cursor-pointer" on:click={() => console.log('implement save logic')} />
                         </div>
                     </Show>
                     <div class="flex flex-row justify-between align-center my-2">

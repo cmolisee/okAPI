@@ -45,6 +45,7 @@ interface ExplorerContext {
 // mocks path in mockData from storage or null if its not saved.
 interface WorkspaceDataItem extends ApiMock {
     dataPath: string|null;
+    hasEdits: boolean;
 }
 
 interface WorkspaceData {
@@ -103,9 +104,14 @@ interface ContextMenuContext {
     handleCloseContextMenu: () => void;
 }
 
-type NotificationContent = HTMLElement|HTMLElement[]|null;
+interface NotificationContent {
+    cancelText?: string;
+    continueText?: string;
+    cancelCallback?: Function;
+    continueCallback?: Function;
+};
 
 interface NotificationContext {
     setShowNotification: Setter<boolean>;
-    setNotificationContent: Setter<NotificationContent>;
+    setNotificationConfig: Setter<NotificationContent>;
 }

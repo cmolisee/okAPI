@@ -1,7 +1,7 @@
 import { useExplorer } from "@/lib/explorerStore";
 import ExplorerTree from "./ExplorerTree";
 import { twMerge } from "tailwind-merge";
-import { trackDeep } from "@solid-primitives/deep";
+import { trackStore } from "@solid-primitives/deep";
 
 function Explorer(props: any) {
     const { explorerTree, updateExpandedState, toggleAllExpandedState } = useExplorer();
@@ -35,7 +35,7 @@ function Explorer(props: any) {
     };
 
     const paths = createMemo(() => {
-        const trackedTree = trackDeep(explorerTree);
+        const trackedTree = trackStore(explorerTree);
         return getPaths(trackedTree).sort(comparePaths);
     });
 
@@ -76,8 +76,8 @@ function Explorer(props: any) {
         el.id = opt;
         el.addEventListener('mousedown', () => {
             setSavePath(() => opt);
-            generateAutocopletePaths(opt);
             updateExpandedState('/root' + opt, true);
+            setShowAutocomplete(false);
         });
         parent.appendChild(el);
     };
@@ -107,63 +107,65 @@ function Explorer(props: any) {
         }    
     };
 
+    const handleBlur = (e: Event) => {
+        setSavePath((e.currentTarget as HTMLInputElement).value);
+        setShowAutocomplete(false)
+    };
+
+    let keyStack: string[] = [];
+    const handleKeyDown = (e: KeyboardEvent) => {
+        if (!e.repeat) {
+            keyStack.push(e.key);
+        }
+    }
+
     const handleKeyUp = (e: KeyboardEvent) => {
         const parent = autocompleteRef as HTMLDivElement;
-        const targetKeys = ['Enter', 'ArrowDown', 'ArrowUp'];
+        const currentEle = parent?.querySelector('.active');
+        const firstEle = parent?.firstElementChild;
+        const lastEle = parent?.lastElementChild;
+
+        const isEnter = e.key === 'Enter' || keyStack.slice(-1)[0] === 'Enter';
+        const isArrowDown = e.key === 'ArrowDown' || keyStack.slice(-1)[0] === 'ArrowDown';
+        const isArrowUp = e.key === 'ArrowUp' || keyStack.slice(-1)[0] === 'ArrowUp';
 
         if (!parent) {
             return;
         }
 
-        if (!targetKeys.includes(e.key)) {
-            const v = (e.currentTarget as HTMLInputElement).value;
-            if (v) {
-                generateAutocopletePaths(v);
-            }
-            return;
-        }
-
-        const currentEle = parent.querySelector('.active');
-        const firstEle = parent.firstElementChild;
-        const lastEle = parent.lastElementChild;
-
-        if (!currentEle) {
+        if (!currentEle) {  // set the active element if not yet set
             parent.firstElementChild?.classList.add('active');
             return;
-        }
-
-        if (e.key === 'Enter') {
+        } else if (isEnter) { // if Enter key is pressed (active element is garunteed to exist)
             setSavePath(() => currentEle.id);
             updateExpandedState('/root' + currentEle.id, true);
-            generateAutocopletePaths(currentEle.id);
-            return;
-        }
-
-        if (e.key === 'ArrowDown' && lastEle?.classList.contains('active')) {
+            setShowAutocomplete(false);
+        } else if (isArrowDown && lastEle?.classList.contains('active')) { // if arrowDown on last element, loop to top
             lastEle?.classList.remove('active');
             firstEle?.classList.add('active');
             firstEle?.scrollIntoView({ behavior: 'smooth', block: 'end'});
-            return;
-        }
-
-        if (e.key === 'ArrowUp' && firstEle?.classList.contains('active')) {
+        } else if (isArrowUp && firstEle?.classList.contains('active')) { // if arrowUp on last element, loop to end
             firstEle?.classList.remove('active');
             lastEle?.classList.add('active');
             lastEle?.scrollIntoView({ behavior: 'smooth', block: 'end'});
-            return;
+        } else if (isArrowDown || isArrowUp) { // if arrowDown or arrowUp, no loop
+            const children = parent.children;
+            for (let i = 0; i < children.length; ++i) {
+                if (children[i] === currentEle) {
+                    currentEle.classList.remove('active');
+                    const delta = e.key === 'ArrowDown' ? 1 : -1;
+                    const newActiveEle = children[i + delta];
+                    newActiveEle.classList.add('active');
+                    newActiveEle.scrollIntoView({ behavior: 'smooth', block: 'end'});
+                    return;
+                }
+            }
+        } else { // default update autocomplete
+            const v = (e.currentTarget as HTMLInputElement).value;
+            generateAutocopletePaths(v);
         }
 
-        const children = parent.children;
-        for (let i = 0; i < children.length; ++i) {
-            if (children[i] === currentEle) {
-                currentEle.classList.remove('active');
-                const delta = e.key === 'ArrowDown' ? 1 : -1;
-                const newActiveEle = children[i + delta];
-                newActiveEle.classList.add('active');
-                newActiveEle.scrollIntoView({ behavior: 'smooth', block: 'end'});
-                return;
-            }
-        }
+        keyStack = [];
     };
 
     onMount(() => {
@@ -174,11 +176,12 @@ function Explorer(props: any) {
         <div>
             <div class="relative flex">
                 <input type="text" 
-                    class="bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text border w-full"
+                    class="bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text border w-full p-1"
                     value={savePath()}
                     on:focus={handleFocusAndEdit}
-                    on:blur={() => setShowAutocomplete(false)}
+                    on:blur={handleBlur}
                     on:change={handleFocusAndEdit}
+                    on:keydown={handleKeyDown}
                     on:keyup={handleKeyUp} />
                 <div ref={autocompleteRef} 
                     class={twMerge(

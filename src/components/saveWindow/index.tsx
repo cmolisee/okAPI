@@ -1,23 +1,17 @@
 import { useExplorer } from "@/lib/explorerStore";
-import Toggle from "@/components/toggle";
 import { useWorkspace } from "@/lib/workspaceStore";
-import { useNotifications } from "@/lib/notificationProvider";
-import { useNavigate } from "@solidjs/router";
-import Explorer from "@/components/explorer/Explorer";
+import Toggle from "../toggle";
 
-function Save (props:any) {
-    const navigate = useNavigate();
+function SaveWindow(props: any) {
     const { workspaceData, workspaceDataTransaction } = useWorkspace();
     const { explorerTree, explorerTreeTransaction } = useExplorer();
-    const {} = useNotifications();
     const [ mocksToSave, setMocksToSave ] = createSignal<{ checked: Boolean, mock: ApiMock }[]>([]);
 
-    const saveNotification = () => {
-
-    };
+    const handleSave = () => {};
 
     const handleCancel = () => {
-        navigate('/', { replace: true });
+        console.log('close window...');
+        props.notificationCallback(false);
     };
 
     const handleToggle = (item: { checked: Boolean, mock: ApiMock }) => {
@@ -38,10 +32,10 @@ function Save (props:any) {
     return (
         <div class="flex flex-col p-2">
             <div>
+                {/* show unsaved mocks with checkbox that are checked */}
                 <For each={mocksToSave()}>
                     {(item) => (
                         <div class="flex gap-4 p-2">
-                            {/* create a checkbox component here instead of toggle slider */}
                             <Toggle toggleSize="small" 
                                 checked={item.checked} 
                                 changeCallback={() => handleToggle(item)} />
@@ -53,13 +47,17 @@ function Save (props:any) {
                     )}
                 </For>
             </div>
-            <Explorer />
+
+
+            {/* render the explorer here. for some reason its not rendering it... */}
+
+            
             <div class="flex flex-row justify-end ">
                 <button class="mx-4 cursor-pointer" on:click={handleCancel}>Cancel</button>
-                <button class="mx-4 cursor-pointer" on:click={saveNotification}>Save</button>
+                <button class="mx-4 cursor-pointer" on:click={handleSave}>Save</button>
             </div>
         </div>
     )
 }
 
-export default Save;
+export default SaveWindow;
