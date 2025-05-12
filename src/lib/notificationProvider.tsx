@@ -16,7 +16,7 @@ export const useNotifications = () => {
 
 function NotificationProvider(props: any) {
     const [showNotification, setShowNotification] = createSignal(false);
-    const [notificationConfig, setNotificationConfig] = createSignal<NotificationContent>({});
+    const [notificationConfig, setNotificationConfig] = createSignal<NotificationConfiguration>({});
 
     const styles = "border-2 bg-primary-bg text-primary-text border-primary-text z-40";
     const darkStyles = "dark:bg-primary-bg dark:text-primary-text dark:border-primary-text";
@@ -46,10 +46,10 @@ function NotificationProvider(props: any) {
                                 <VsClose stroke="currentColor" size={18} class="vs text-okRed-500" />
                             </button>
                         </div>
-                        {props.children}
+                        {notificationConfig().content}
                         <div class="flex flex-row gap-6 justify-end">
                             <div on:click={handleExit}>{notificationConfig()?.cancelText ?? 'Cancel'}</div>
-                            <div on:click={handleSave}>{notificationConfig()?.continueText ?? 'Save'}</div>
+                            <div on:click={handleSave}>{notificationConfig()?.continueText ?? 'Continue'}</div>
                         </div>
                     </div>
                 </Portal>

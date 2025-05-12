@@ -1,4 +1,4 @@
-import Explorer from "@/components/explorer/Explorer";
+import Explorer from "@/components/explorer/SaveExplorer";
 
 function Options (props:any) {
     return (

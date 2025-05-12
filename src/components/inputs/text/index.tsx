@@ -8,8 +8,12 @@ function Text(props: any) {
             id={props?.id ?? ''} 
             type="text" 
             value={props?.value ?? ''} 
-            placeholder={props?.placeholder ?? ''} 
-            on:blur={props?.handleBlur} /> 
+            placeholder={props?.placeholder ?? ''}
+            on:focus={props?.handleFocus}
+            on:blur={props?.handleBlur}
+            on:change={props?.handleChange}
+            on:keydown={props?.handleKeyDown}
+            on:keyup={props?.handleKeyUp} /> 
     );
 }
 

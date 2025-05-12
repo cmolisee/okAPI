@@ -32,7 +32,7 @@ interface MockParam {
 interface ExplorerContext {
     explorerTree: ApiMockNode;
     explorerTreeTransaction: SetStoreFunction<ApiMockNode>;
-    findNodeByPath: (tree: ApiMockNode, path: string) => void;
+    findNodeByPath: (tree: ApiMockNode, path: string) => ApiMockNode|null;
     addNode: (parentPath: string, node: ApiMockNode) => void;
     removeNode: (path: string) => void;
     updateNodeName: (path: string, name: string) => void;
@@ -104,14 +104,15 @@ interface ContextMenuContext {
     handleCloseContextMenu: () => void;
 }
 
-interface NotificationContent {
+interface NotificationConfiguration {
     cancelText?: string;
     continueText?: string;
     cancelCallback?: Function;
     continueCallback?: Function;
+    content?: any;
 };
 
 interface NotificationContext {
     setShowNotification: Setter<boolean>;
-    setNotificationConfig: Setter<NotificationContent>;
+    setNotificationConfig: Setter<NotificationConfiguration>;
 }

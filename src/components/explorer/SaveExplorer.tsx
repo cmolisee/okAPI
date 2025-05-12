@@ -2,11 +2,11 @@ import { useExplorer } from "@/lib/explorerStore";
 import ExplorerTree from "./ExplorerTree";
 import { twMerge } from "tailwind-merge";
 import { trackStore } from "@solid-primitives/deep";
+import Text from '@/components/inputs/text';
 
-function Explorer(props: any) {
+function SaveExplorer(props: any) {
     const { explorerTree, updateExpandedState, toggleAllExpandedState } = useExplorer();
     const [ showAutocomplete, setShowAutocomplete ] = createSignal(false);
-    const [ savePath, setSavePath ] = createSignal('');
     const scrollbarStyles = '[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:transparent [&::-webkit-scrollbar-thumb]:bg-secondary-text dark:[&::-webkit-scrollbar-thumb]:bg-secondary-text';
 
     let autocompleteRef: any;
@@ -75,7 +75,7 @@ function Explorer(props: any) {
         el.innerText = opt;
         el.id = opt;
         el.addEventListener('mousedown', () => {
-            setSavePath(() => opt);
+            props.setSavePath(() => opt);
             updateExpandedState('/root' + opt, true);
             setShowAutocomplete(false);
         });
@@ -98,7 +98,7 @@ function Explorer(props: any) {
         const v = (e.currentTarget as HTMLInputElement).value;
         if (v) {
             generateAutocopletePaths(v);
-            setSavePath(() => v);
+            props.setSavePath(() => v);
             updateExpandedState('/root' + v, true);
             setShowAutocomplete(autocompleteRef.children?.length > 0);
         } else {
@@ -108,7 +108,7 @@ function Explorer(props: any) {
     };
 
     const handleBlur = (e: Event) => {
-        setSavePath((e.currentTarget as HTMLInputElement).value);
+        props.setSavePath((e.currentTarget as HTMLInputElement).value);
         setShowAutocomplete(false)
     };
 
@@ -137,7 +137,7 @@ function Explorer(props: any) {
             parent.firstElementChild?.classList.add('active');
             return;
         } else if (isEnter) { // if Enter key is pressed (active element is garunteed to exist)
-            setSavePath(() => currentEle.id);
+            props.setSavePath(() => currentEle.id);
             updateExpandedState('/root' + currentEle.id, true);
             setShowAutocomplete(false);
         } else if (isArrowDown && lastEle?.classList.contains('active')) { // if arrowDown on last element, loop to top
@@ -175,21 +175,20 @@ function Explorer(props: any) {
     return (
         <div>
             <div class="relative flex">
-                <input type="text" 
-                    class="bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text border w-full p-1"
-                    value={savePath()}
-                    on:focus={handleFocusAndEdit}
-                    on:blur={handleBlur}
-                    on:change={handleFocusAndEdit}
-                    on:keydown={handleKeyDown}
-                    on:keyup={handleKeyUp} />
+                <Text value={props.savePath()}
+                    class={'border border-solid leading-[2em]'}
+                    handleFocus={handleFocusAndEdit}
+                    handleBlur={handleBlur}
+                    handleChange={handleFocusAndEdit}
+                    handleKeyDown={handleKeyDown}
+                    handleKeyUp={handleKeyUp} />
                 <div ref={autocompleteRef} 
                     class={twMerge(
                         'absolute z-20 top-full left-[0] right-[0] max-h-[8em] bg-primary-bg shadow-lg overflow-scroll mt-2 p-2', 
                         scrollbarStyles,
                         showAutocomplete() ? '' : 'invisible'
                     )}>
-                    {/* autocomplete options */}
+                    {/* autocomplete options dynamically generated and injected into the DOM */}
                 </div>
             </div>
             <div class={twMerge('h-full', scrollbarStyles)}>
@@ -199,4 +198,4 @@ function Explorer(props: any) {
     )
 }
 
-export default Explorer;
+export default SaveExplorer;

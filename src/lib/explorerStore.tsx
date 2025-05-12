@@ -5,7 +5,7 @@ import createDebounce from "./debounce";
 const ExplorerContext = createContext<ExplorerContext>({ 
     explorerTree: {},
     explorerTreeTransaction: () => {},
-    findNodeByPath: () => {},
+    findNodeByPath: () => null,
     addNode: () => {},
     removeNode: () => {},
     updateNodeName: () => {},
