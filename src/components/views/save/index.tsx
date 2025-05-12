@@ -1,9 +1,10 @@
 import { useExplorer } from "@/lib/explorerStore";
-import Toggle from "@/components/toggle";
 import { useWorkspace } from "@/lib/workspaceStore";
 import { useNotifications } from "@/lib/notificationProvider";
 import { useNavigate } from "@solidjs/router";
 import Explorer from "@/components/explorer/Explorer";
+import Checkbox from "@/components/inputs/checkbox";
+import Toggle from "@/components/inputs/toggle";
 
 function Save (props:any) {
     const navigate = useNavigate();
@@ -37,14 +38,13 @@ function Save (props:any) {
 
     return (
         <div class="flex flex-col p-2">
+            <Toggle />
             <div>
                 <For each={mocksToSave()}>
                     {(item) => (
                         <div class="flex gap-4 p-2">
                             {/* create a checkbox component here instead of toggle slider */}
-                            <Toggle toggleSize="small" 
-                                checked={item.checked} 
-                                changeCallback={() => handleToggle(item)} />
+                            <Checkbox checked={item.checked} color={'#aaa'} changeCallback={() => handleToggle(item)} />
                             <div class="flex gap-2">
                                 <span>{item.mock.method}</span>
                                 <span>{item.mock?.uri ?? 'untitled'}</span>

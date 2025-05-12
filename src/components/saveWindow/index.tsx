@@ -1,6 +1,6 @@
 import { useExplorer } from "@/lib/explorerStore";
+import Checkbox from "@/components/inputs/checkbox";
 import { useWorkspace } from "@/lib/workspaceStore";
-import Toggle from "../toggle";
 
 function SaveWindow(props: any) {
     const { workspaceData, workspaceDataTransaction } = useWorkspace();
@@ -36,9 +36,7 @@ function SaveWindow(props: any) {
                 <For each={mocksToSave()}>
                     {(item) => (
                         <div class="flex gap-4 p-2">
-                            <Toggle toggleSize="small" 
-                                checked={item.checked} 
-                                changeCallback={() => handleToggle(item)} />
+                            <Checkbox checked={item.checked} changeCallback={() => handleToggle(item)} size={'1rem'}/>
                             <div class="flex gap-2">
                                 <span>{item.mock.method}</span>
                                 <span>{item.mock?.uri ?? 'untitled'}</span>

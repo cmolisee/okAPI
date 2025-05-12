@@ -13,7 +13,7 @@ import { useNavigate } from "@solidjs/router";
 function TabContentView() {
     const navigate = useNavigate();
     const { workspaceData, workspaceDataTransaction } = useWorkspace();
-    const { setNotificationContent, setShowNotification } = useNotifications();
+    // const { setNotificationContent, setShowNotification } = useNotifications();
 
     const Fallback = <div class="m-4">Click the <span class="text-lg text-okPurple-500 dark:text-okGreen-500">+</span> button to create a new mock.</div>;
 
@@ -138,7 +138,7 @@ function TabContentView() {
                             </div>
                             <input id="uri" class="bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text w-full  border-l px-2" type="text" value={tab.uri ?? ''} placeholder="URI" on:blur={handleUriUpdate} /> 
                         </div>
-                        <Toggle toggleSize="medium" checked={tab.isEnabled} changeCallback={handleIsEnabledUpdate} />
+                        <Toggle toggleSize="m" checked={tab.isEnabled} changeCallback={handleIsEnabledUpdate} />
                     </div>
                     <div class="my-2">
                         <div class="grid grid-cols-[5fr_7fr] grid-rows-2 gap-1">
@@ -186,7 +186,7 @@ function TabContentView() {
                                     return (
                                         <>
                                             <div class="flex">
-                                                <Toggle toggleSize="small" checked={thisParam.active} changeCallback={onActiveChange} />
+                                                <Toggle toggleSize="m" checked={thisParam.active} changeCallback={onActiveChange} />
                                                 <Button styles="addButton" onClickCallback={removeParam}><VsTrash size={18} class="vs text-okRed-500 dark:text-okRed-500" /></Button>
                                                 <input class="bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text w-full px-2 border " type="text" value={thisParam.key || ''} placeholder="Key" on:blur={onKeyBlur}/>
                                             </div>
