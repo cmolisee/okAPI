@@ -1,14 +1,13 @@
-import { VsTrash, VsAdd, VsSave } from "solid-icons/vs";
-import Button from "../button";
-import Toggle from "../toggle";
+import Button from "@/components/button";
+import CodeField from "@/components/codeField";
+import Dropdown from "@/components/inputs/dropdown";
+import Text from '@/components/inputs/text';
+import Toggle from "@/components/inputs/toggle";
 import { useWorkspace } from "@/lib/workspaceStore";
-import CodeField from "../codeField";
 import { getUniqueId } from "@/utils/utils";
-import { ImNotification } from "solid-icons/im";
-import { useNotifications } from "@/lib/notificationProvider";
-import SaveWindow from "../saveWindow";
-import Explorer from "../explorer/Explorer";
 import { useNavigate } from "@solidjs/router";
+import { ImNotification } from "solid-icons/im";
+import { VsAdd, VsTrash } from "solid-icons/vs";
 
 function TabContentView() {
     const navigate = useNavigate();
@@ -117,7 +116,7 @@ function TabContentView() {
     return (
         <Show when={workspaceData.data.find((t: WorkspaceDataItem) => t.isEditing)} fallback={Fallback} keyed>
             {(tab: WorkspaceDataItem) => (
-                <div>
+                <div class="flex flex-col gap-4">
                     <Show when={!tab.dataPath} fallback={<></>}>
                         <div class="flex flex-row p-[0.375rem] rounded-md items-center my-2 bg-okRed-200">
                             <ImNotification stroke="currentColor" size={18} class="vs mr-2 text-okRed-500 cursor-pointer" />
@@ -126,22 +125,18 @@ function TabContentView() {
                             </span>
                         </div>
                     </Show>
-                    <div class="flex flex-row justify-between align-center my-2">
-                        <div class="flex flex-row border border-solid rounded-sm w-[85%]">
-                            <div class="mr-4">
-                                <select class="border-none bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text" name="method" on:change={handleMethodUpdate}>
-                                    <option value="GET" selected={tab.method === 'GET'}>GET</option>
-                                    <option value="POST" selected={tab.method === 'POST'}>POST</option>
-                                    <option value="PUT" selected={tab.method === 'PUT'}>PUT</option>
-                                    <option value="DELETE" selected={tab.method === 'DELETE'}>DELETE</option>
-                                </select>
-                            </div>
-                            <input id="uri" class="bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text w-full  border-l px-2" type="text" value={tab.uri ?? ''} placeholder="URI" on:blur={handleUriUpdate} /> 
-                        </div>
+                    <div class="flex flex-row justify-between gap-2 align-center">
+                        <Dropdown class={'border-solid'} name={'method'} handleChange={handleMethodUpdate}>
+                            <option value="GET" selected={tab.method === 'GET'}>GET</option>
+                            <option value="POST" selected={tab.method === 'POST'}>POST</option>
+                            <option value="PUT" selected={tab.method === 'PUT'}>PUT</option>
+                            <option value="DELETE" selected={tab.method === 'DELETE'}>DELETE</option>
+                        </Dropdown>
+                        <Text class='border-solid' id={'uri'} value={tab.uri} placeholder={'URI'} handleBlur={handleUriUpdate} />
                         <Toggle toggleSize="m" checked={tab.isEnabled} changeCallback={handleIsEnabledUpdate} />
                     </div>
-                    <div class="my-2">
-                        <div class="grid grid-cols-[5fr_7fr] grid-rows-2 gap-1">
+                    <div>
+                        <div class="grid grid-cols-[5fr_7fr] grid-rows-2 gap-2">
                             {/* header */}
                             <div class="text-center border">Key</div>
                             <div class="text-center border">Value</div>
@@ -186,11 +181,11 @@ function TabContentView() {
                                     return (
                                         <>
                                             <div class="flex">
-                                                <Toggle toggleSize="m" checked={thisParam.active} changeCallback={onActiveChange} />
+                                                <Toggle toggleSize={'s'} checked={thisParam.active} changeCallback={onActiveChange} />
                                                 <Button styles="addButton" onClickCallback={removeParam}><VsTrash size={18} class="vs text-okRed-500 dark:text-okRed-500" /></Button>
-                                                <input class="bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text w-full px-2 border " type="text" value={thisParam.key || ''} placeholder="Key" on:blur={onKeyBlur}/>
+                                                <Text value={thisParam.key} placeholder={'Key'} handleBlur={onKeyBlur} />
                                             </div>
-                                            <input class="bg-primary-bg dark:bg-primary-bg text-primary-text dark:text-primary-text w-full px-2 border" type="text" value={thisParam.value || ''} placeholder="Value" on:blur={onValueBlur}/>
+                                            <Text value={thisParam.value} placeholder={'value'} handleBlur={onValueBlur} />
                                         </>
                                     )
                                 }}
@@ -201,7 +196,7 @@ function TabContentView() {
                             </div>
                         </div>
                     </div>
-                    <div class="my-2">
+                    <div>
                         <CodeField value={tab?.body ?? '{}'} setValue={handleBodyUpdate} />
                     </div>
                 </div>
