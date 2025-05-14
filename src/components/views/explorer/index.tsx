@@ -1,3 +1,4 @@
+import ExplorerNode from "@/components/explorer/ExplorerNode";
 import ExplorerTree from "@/components/explorer/ExplorerTree";
 import { useExplorer } from "@/lib/explorerStore";
 import { trackStore } from "@solid-primitives/deep";
@@ -30,7 +31,7 @@ function Explorer (props:any) {
     // creates new mock at location of the right click
     
     const handleExplorerCleanup = () => {
-        const data: ApiMockNode = trackStore(explorerTree);
+        const data: OkMock = trackStore(explorerTree);
 
         if (Object.keys(explorerTree).length) {    
             explorerDataStorage.setValue(deepCopyAndUnproxy(data));
@@ -49,7 +50,9 @@ function Explorer (props:any) {
 
     return (
         <div class={twMerge('h-full', scrollbarStyles)}>
-            <ExplorerTree data={explorerTree} />
+            <ExplorerTree>
+                <ExplorerNode node={explorerTree} level={props.level ?? -1} />
+            </ExplorerTree>
         </div>
     )
 }

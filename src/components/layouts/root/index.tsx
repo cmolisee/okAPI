@@ -39,18 +39,6 @@ function Root (props: any) {
                                 </div>
                             </div>
                             <div class="w-[90%] border border-[#fff]" />
-                            {/* save all */}
-                            {/* <div class="group relative flex justify-center cursor-pointer" on:click={() => {
-                                dispatchCloseMenu();
-                                navigate('/save', { replace: true });
-                            }}>
-                                <VsSaveAll stroke="currentColor" size={32} class="vs text-[#fff] my-4" />
-                                <div class="absolute top-1/2 -translate-x-full -translate-y-1/2 w-full opacity-0 transform transition-all duration-300 ease-in-out group-hover:translate-x-[150%] group-hover:opacity-100">
-                                    <span class="text-3xl font-extrabold text-[#fff] bold">Save Workspace</span>
-                                </div>
-                            </div>
-                            <div class="w-[90%] border border-[#fff]" /> */}
-                            {/* explorer */}
                             <div class="group relative flex justify-center cursor-pointer" on:click={() => {
                                 dispatchCloseMenu();
                                 navigate('/explorer', { replace: true });
@@ -60,6 +48,29 @@ function Root (props: any) {
                                     <span class="text-3xl font-extrabold text-[#fff] bold">Explore Mocks</span>
                                 </div>
                             </div>
+
+                            <div class="w-[90%] border border-[#fff]" />
+                            <div class="group relative flex justify-center cursor-pointer" on:click={() => {
+                                dispatchCloseMenu();
+                                workspaceDataStorage.removeValue();
+                            }}>
+                                <BsPersonWorkspace stroke="currentColor" size={32} class="vs text-[#fff] my-4" />
+                                <div class="absolute top-1/2 -translate-x-full -translate-y-1/2 w-full opacity-0 transform transition-all duration-300 ease-in-out group-hover:translate-x-[150%] group-hover:opacity-100">
+                                    <span class="text-3xl font-extrabold text-[#fff] bold">Remove Workspace</span>
+                                </div>
+                            </div>
+                            <div class="w-[90%] border border-[#fff]" />
+                            <div class="group relative flex justify-center cursor-pointer" on:click={() => {
+                                dispatchCloseMenu();
+                                explorerDataStorage.removeValue();
+                                storage.removeItem('local:explorerData');
+                            }}>
+                                <BsPersonWorkspace stroke="currentColor" size={32} class="vs text-[#fff] my-4" />
+                                <div class="absolute top-1/2 -translate-x-full -translate-y-1/2 w-full opacity-0 transform transition-all duration-300 ease-in-out group-hover:translate-x-[150%] group-hover:opacity-100">
+                                    <span class="text-3xl font-extrabold text-[#fff] bold">Remove Explorer</span>
+                                </div>
+                            </div>
+
                         </SideMenu>
                         <h1 class='flex items-center mx-4 text-lg font-bold'>OkApi: API Mocking Tool</h1>
                         <ThemeSwitcher />

@@ -1,4 +1,4 @@
-import Button from "@/components/button";
+import Button from "@/components/inputs/button";
 import ContextMenu from "@/components/contextMenu/ContextMenu";
 
 export const contextMenuContext = createContext<ContextMenuContext>({
@@ -10,6 +10,15 @@ export const contextMenuContext = createContext<ContextMenuContext>({
     handleContextMenu: () => { },
     handleCloseContextMenu: () => { },
 });
+
+export const useMenuContext = () => {
+    const context = useContext(contextMenuContext);
+    if (!context) {
+        throw Error("contextMenuContext does not exist.");
+    }
+    return context;
+};
+
 function ContextMenuProvider(props: any) {
     const [showContextMenu, setShowContextMenu] = createSignal(false);
     const [position, setPosition] = createSignal<Pos>({ x: 0, y: 0 });

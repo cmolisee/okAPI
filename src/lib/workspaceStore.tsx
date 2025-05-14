@@ -1,10 +1,13 @@
 import { trackStore } from "@solid-primitives/deep";
 import createDebounce from "./debounce";
+import { deepCopy } from "@/utils/utils";
 
-const defaultWorkspaceData: WorkspaceData = { data: [] };
 const WorkspaceStoreContext = createContext<WorkspaceStoreContext>({
-    workspaceData: defaultWorkspaceData,
-    workspaceDataTransaction: () => { },
+    workspaceData: {},
+    workspaceDataTransaction: () => {},
+    addWorkspaceItem: () => {},
+    removeWorkspaceItem: () => {},
+    setEditingWorkspaceItem: () => {},
 });
 
 export const useWorkspace = () => {
@@ -16,27 +19,61 @@ export const useWorkspace = () => {
 }
 
 function WorkspaceStore(props: any) {
-    const [workspaceData, workspaceDataTransaction] = createStore<WorkspaceData>(defaultWorkspaceData);
+    const [workspaceData, workspaceDataTransaction] = createStore<ObjectArray<OkMock>>({});
 
-    const handleSaveWorkspace = createDebounce((proxyData: WorkspaceData) => {
-        const data = deepCopyAndUnproxy(proxyData)
-        workspaceDataStorage.setValue(data)
-            .catch((e: any) => console.debug("Error saving data: ", e));
+    const addWorkspaceItem = (newItem: OkMock) => {
+        workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
+            for (const mockIndex in draft) {
+                draft[mockIndex].metadta.isEditing = false;
+            }
+
+            newItem.metadta.isEditing = true;
+            draft[newItem.metadta.id] = newItem;
+        }));
+    };
+
+    const removeWorkspaceItem = (id: string) => {
+        workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
+            for (const mockIndex in draft) {
+                if (mockIndex === id) {
+                    delete draft[mockIndex];
+                }
+            }
+        }));
+    };
+
+    const setEditingWorkspaceItem = (id: string) => {
+        workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
+            for (const mockIndex in draft) {
+                draft[mockIndex].metadta.isEditing = mockIndex === id;
+            }
+        }));
+    };
+
+    const handleSaveWorkspace = createDebounce((data: ObjectArray<OkMock>) => {
+        workspaceDataStorage.setValue(deepCopy(data))
+            .catch((e: any) => console.debug("Error saving workspace data: ", e));
     });
 
     onMount(async () => {
-        const savedWorkspace: WorkspaceData = await workspaceDataStorage.getValue();
-        workspaceDataTransaction(deepCopyAndUnproxy(savedWorkspace));
+        const savedWorkspace: ObjectArray<OkMock> = await workspaceDataStorage.getValue();
+        workspaceDataTransaction(deepCopy(savedWorkspace));
     });
 
     createEffect(on(
         () => trackStore(workspaceData),
-        (proxyData: WorkspaceData) => handleSaveWorkspace(proxyData),
+        (data: ObjectArray<OkMock>) => handleSaveWorkspace(data),
         { defer: true }
     ));
 
     return (
-        <WorkspaceStoreContext.Provider value={{ workspaceData, workspaceDataTransaction }}>
+        <WorkspaceStoreContext.Provider value={{
+            workspaceData, 
+            workspaceDataTransaction,
+            addWorkspaceItem,
+            removeWorkspaceItem,
+            setEditingWorkspaceItem,
+        }}>
             {props.children}
         </WorkspaceStoreContext.Provider>
     )

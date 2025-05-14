@@ -1,4 +1,4 @@
-import Button from "@/components/button";
+import Button from "@/components/inputs/button";
 import CodeField from "@/components/codeField";
 import Dropdown from "@/components/inputs/dropdown";
 import Text from '@/components/inputs/text';
@@ -8,18 +8,18 @@ import { getUniqueId } from "@/utils/utils";
 import { useNavigate } from "@solidjs/router";
 import { ImNotification } from "solid-icons/im";
 import { VsAdd, VsTrash } from "solid-icons/vs";
+import { trackDeep } from "@solid-primitives/deep";
 
 function TabContentView() {
     const navigate = useNavigate();
     const { workspaceData, workspaceDataTransaction } = useWorkspace();
-    // const { setNotificationContent, setShowNotification } = useNotifications();
 
     const Fallback = <div class="m-4">Click the <span class="text-lg text-okPurple-500 dark:text-okGreen-500">+</span> button to create a new mock.</div>;
 
     const handleMethodUpdate = (e: Event) => {
         const value = (e.target as HTMLSelectElement).value as MethodType;
-        workspaceDataTransaction(produce((draft: WorkspaceData) => {
-            const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+        workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
+            const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
             if (workspaceItem) {
                 workspaceItem.method = value;
             }
@@ -28,8 +28,8 @@ function TabContentView() {
 
     const handleUriUpdate = (e: Event) => {
         const value = (e.target as HTMLInputElement).value;
-        workspaceDataTransaction(produce((draft: WorkspaceData) => {
-            const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+        workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
+            const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
             if (workspaceItem) {
                 workspaceItem.uri = value;
             }
@@ -38,8 +38,8 @@ function TabContentView() {
 
     const handleIsEnabledUpdate = (e: Event) => {
         const value = (e.target as HTMLInputElement).checked;
-        workspaceDataTransaction(produce((draft: WorkspaceData) => {
-            const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+        workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
+            const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
             if (workspaceItem) {
                 workspaceItem.isEnabled = value;
             }
@@ -47,8 +47,8 @@ function TabContentView() {
     };
     
     const handleBodyUpdate = (doc: string) => {
-        workspaceDataTransaction(produce((draft: WorkspaceData) => {
-            const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+        workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
+            const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
             if (workspaceItem) {
                 workspaceItem.body = doc;
             }
@@ -57,8 +57,8 @@ function TabContentView() {
 
     // individual param add, delete, update is handled in <For />
     const handleAddParam = () => {
-        workspaceDataTransaction(produce((draft: WorkspaceData) => {
-            const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+        workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
+            const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
             if (workspaceItem) {
                 workspaceItem.params = workspaceItem?.params?.length 
                     ? [ ...workspaceItem.params, { id: getUniqueId() }]
@@ -69,55 +69,30 @@ function TabContentView() {
 
     const handleRemoveParam = (paramIdToRemove: string) => {
         workspaceDataTransaction(
-            produce((draft: WorkspaceData) => {
-                const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+            produce((draft: WorkspaceData[]) => {
+                const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
 
                 if (workspaceItem) {
-                    workspaceItem.params = workspaceItem.params?.filter((p: MockParam) => p.id !== paramIdToRemove);
+                    workspaceItem.params = workspaceItem.params?.filter((p: OkParam) => p.id !== paramIdToRemove);
                 }
             })
         );
     };
 
-    interface ApiMockNode {
-        name?: string;
-        path?: string;
-        type?: "mock" | "folder" | "root";
-        // todo: add description to describe folder, flow, etc...
-        children?: ApiMockNode[];
-        mock?: ApiMock;
-    }
-
-    interface ApiMock {
-        // TODO: add alias to replace method+uri
-        // todo: add description to describe mock
-        id?: string;
-        isEditing?: boolean;
-        isEnabled: boolean;
-        method: MethodType;
-        uri?: string;
-        body?: string;
-        params?: MockParam[];
-    }
-
-    // workspace 
-        // Array of ApiMock objects
-        // also has dataPath which is null if it hasn't previously been saved...
-
-    // explorer
-        // ApiMockNode
-
     const handleSaveMock = () => {
-        if (!workspaceData.data.find((t: WorkspaceDataItem) => t.isEditing)?.dataPath) {
-            navigate('/save', { replace: true });
-        }
+        navigate('/save', { replace: true });
     }
+
+    createEffect(() => {
+        const data = trackDeep(workspaceData);
+        console.log('tabContentView: ', data);
+    })
 
     return (
-        <Show when={workspaceData.data.find((t: WorkspaceDataItem) => t.isEditing)} fallback={Fallback} keyed>
-            {(tab: WorkspaceDataItem) => (
+        <Show when={workspaceData.find((t: WorkspaceData) => t.isEditing)} fallback={Fallback} keyed>
+            {(tab: WorkspaceData) => (
                 <div class="flex flex-col gap-4">
-                    <Show when={!tab.dataPath} fallback={<></>}>
+                    <Show when={!tab.path} fallback={<></>}>
                         <div class="flex flex-row p-[0.375rem] rounded-md items-center my-2 bg-okRed-200">
                             <ImNotification stroke="currentColor" size={18} class="vs mr-2 text-okRed-500 cursor-pointer" />
                             <span class="italic">
@@ -145,33 +120,45 @@ function TabContentView() {
                                 {(thisParam) => {
                                     const onActiveChange = (e: Event) => {
                                         const value = (e.target as HTMLInputElement).checked;
-                                        workspaceDataTransaction(produce((draft: WorkspaceData) => {
-                                            const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+                                        workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
+                                            const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
                                             if (workspaceItem) {
                                                 const updatedParams = [...workspaceItem?.params ?? []];
-                                                updatedParams.find((p: MockParam) => p.id === thisParam.id).active = value;
+                                                const paramToUpdate = updatedParams.find((p: OkParam) => p.id === thisParam.id);
+
+                                                if (paramToUpdate) {
+                                                    paramToUpdate.active = value;
+                                                }
                                             }
                                         }));
                                     }
 
                                     const onKeyBlur = (e: Event) => {
                                         const value = (e.target as HTMLInputElement).value;
-                                        workspaceDataTransaction(produce((draft: WorkspaceData) => {
-                                            const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+                                        workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
+                                            const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
                                             if (workspaceItem) {
                                                 const updatedParams = [...workspaceItem?.params ?? []];
-                                                updatedParams.find((p: MockParam) => p.id === thisParam.id).key = value;
+                                                const paramToUpdate = updatedParams.find((p: OkParam) => p.id === thisParam.id);
+
+                                                if (paramToUpdate) {
+                                                    paramToUpdate.key = value;
+                                                }
                                             }
                                         }));
                                     }
                                 
                                     const onValueBlur = (e: Event) => {
                                         const value = (e.target as HTMLInputElement).value;
-                                        workspaceDataTransaction(produce((draft: WorkspaceData) => {
-                                            const workspaceItem = draft.data.find((t: WorkspaceDataItem) => t.isEditing);
+                                        workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
+                                            const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
                                             if (workspaceItem) {
                                                 const updatedParams = [...workspaceItem?.params ?? []];
-                                                updatedParams.find((p: MockParam) => p.id === thisParam.id).value = value;
+                                                const paramToUpdate = updatedParams.find((p: OkParam) => p.id === thisParam.id);
+
+                                                if (paramToUpdate) {
+                                                    paramToUpdate.key = value;
+                                                }
                                             }
                                         }));
                                     }

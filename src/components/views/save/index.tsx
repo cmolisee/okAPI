@@ -1,29 +1,25 @@
 import { useExplorer } from "@/lib/explorerStore";
 import { useWorkspace } from "@/lib/workspaceStore";
-import { notificationContext, useNotifications } from "@/lib/notificationProvider";
+import { useNotifications } from "@/lib/notificationProvider";
 import { useNavigate } from "@solidjs/router";
 import Checkbox from "@/components/inputs/checkbox";
 import SaveExplorer from "@/components/explorer/SaveExplorer";
-import { cancelCallback } from "solid-js";
 
 function Save (props:any) {
     const navigate = useNavigate();
     const { workspaceData, workspaceDataTransaction } = useWorkspace();
-    const { explorerTree, explorerTreeTransaction, findNodeByPath } = useExplorer();
+    const { explorerTree, explorerTreeTransaction, findMockByPath } = useExplorer();
     const [ savePath, setSavePath ] = createSignal('');
     const { setShowNotification, setNotificationConfig} = useNotifications();
-    const [ mocksToSave, setMocksToSave ] = createSignal<{ checked: Boolean, mock: ApiMock }[]>([]);
+    const [ mocksToSave, setMocksToSave ] = createSignal<{ checked: Boolean, mock: OkMock }[]>([]);
 
     const saveNotification = () => {
         setNotificationConfig({
-            cancelText: 'No',
-            continueText: 'Yes',
-            cancelCallback: () => setShowNotification(false),
             continueCallback: handleSave,
-            notificationContext: (
+            content: (
                 <div>
                     Are you sure you want to save these mocks?
-                    <ul>
+                    <ul class="list-disc list-inside">
                         <For each={mocksToSave().filter((m) => m.checked)}>
                             {(item) => (
                                 <li>{`${item.mock.method} ${item.mock.uri}`}</li>
@@ -46,16 +42,16 @@ function Save (props:any) {
             .filter((m) => m.checked)
             .map((m) => m.mock);
         
-        const updatedWorkspaceData = workspaceData.data.map((wsMock) => {
+        const updatedWorkspaceData = workspaceData.map((wsMock: OkMock) => {
             if (mocks.some((m) => m.id === wsMock.id)) {
-                wsMock.dataPath = `${savePath()}/${wsMock.id}`;
+                wsMock.path = `${savePath()}/${wsMock.id}`;
             }
 
             return wsMock;
         });
 
         const treeCopy = JSON.parse(JSON.stringify(explorerTree));
-        const node = findNodeByPath(treeCopy, savePath());
+        const node = findMockByPath(treeCopy, '/root' + savePath());
 
         if (node) {
             if (!node?.children) {
@@ -67,14 +63,19 @@ function Save (props:any) {
                 path: `${savePath()}/${m.id}`,
                 type: 'mock',
                 mock: m,
-            } as ApiMockNode)));
+            } as OkMock)));
         }
 
-        workspaceDataTransaction({ data: updatedWorkspaceData });
+        workspaceDataTransaction([...updatedWorkspaceData]);
         explorerTreeTransaction(treeCopy);
+
+        console.log('updated to:', [
+            updatedWorkspaceData,
+            treeCopy
+        ]);
     }
 
-    const handleToggle = (item: { checked: Boolean, mock: ApiMock }) => {
+    const handleToggle = (item: { checked: Boolean, mock: OkMock }) => {
         setMocksToSave((prev) => {
             return prev.map((m) => {
                 if (JSON.stringify(m.mock).replace(/\s+/g, '') === JSON.stringify(item.mock).replace(/\s+/g, '')) {
@@ -86,7 +87,8 @@ function Save (props:any) {
     };
 
     onMount(() => {
-        setMocksToSave(workspaceData.data.filter((d) => !d.dataPath).map((f) => ({ checked: true, mock: f})))
+        console.log('save view', workspaceData);
+        setMocksToSave(workspaceData.filter((d) => !d.path).map((f) => ({ checked: true, mock: f})))
     });
 
     return (
@@ -97,10 +99,17 @@ function Save (props:any) {
                         <div class="flex gap-4 p-2">
                             {/* create a checkbox component here instead of toggle slider */}
                             <Checkbox checked={item.checked} color={'#aaa'} changeCallback={() => handleToggle(item)} />
-                            <div class="flex gap-2">
-                                <span>{item.mock.method}</span>
-                                <span>{item.mock?.uri ?? 'untitled'}</span>
-                            </div>
+                            <Show when={item.mock?.name}>
+                                <div class="flex gap-2">
+                                    <span>{item.mock.name}</span>
+                                </div>
+                            </Show>
+                            <Show when={!item.mock?.name}>
+                                <div class="flex gap-2">
+                                    <span>{item.mock.method}</span>
+                                    <span>{item.mock?.uri ?? 'untitled'}</span>
+                                </div>
+                            </Show>
                         </div>
                     )}
                 </For>

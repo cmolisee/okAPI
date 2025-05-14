@@ -22,7 +22,7 @@ jobs:
                 fetch-depth: 0
                 token: ${{ secrets.RELEASE_PAT }}
 
-            - name: Setup Node.js
+            - name: Setup OkNode.js
               uses: actions/setup-node@v4
               with:
                 node-version: 'lts/*'

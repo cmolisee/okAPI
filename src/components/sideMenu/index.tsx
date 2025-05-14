@@ -1,5 +1,5 @@
 import { VsClose, VsMenu } from "solid-icons/vs";
-import Button from "../button";
+import Button from "@/components/inputs/button";
 import { twMerge } from "tailwind-merge";
 
 function SideMenu(props: any) {

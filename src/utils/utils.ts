@@ -6,42 +6,23 @@ export function safeParse(obj: any) {
     }
 }
 
-export const explorerDataStorage = storage.defineItem<ApiMockNode>(
+export const explorerDataStorage = storage.defineItem<OkMock>(
     'local:explorerData',
     {
-        fallback: { name: "Root", path: "/root", type: "root" } as ApiMockNode,
+        fallback: { name: "Root", path: "/root", type: "root", id: "root" } as OkMock,
     }
 );
 
-export const workspaceDataStorage = storage.defineItem<WorkspaceData>(
+export const workspaceDataStorage = storage.defineItem<ObjectArray<OkMock>>(
     'local:workspaceData',
     {
-        fallback: { data: [] } as WorkspaceData,
+        fallback: {} as ObjectArray<OkMock>,
     }
 );
 
 export const getUniqueId = () => new Date().valueOf().toString(36);
+export const createUniqueFolderName = () => `newFolder_${getUniqueId()}`;
 
-// solidjs will sometimes return proxy objects.
-// This function can create a deep copy and unproxy those objects so we 
-// can invoke functions without error (i.e. proxy arrays don't have find(), push(), etc...).
-export const deepCopyAndUnproxy = (obj: any) => {
-    if (obj === null || typeof obj !== 'object') {
-        return obj;
-    }
-
-    const isArray = Array.isArray(obj) || typeof obj === 'object' && Object.prototype.toString.call(obj) === '[object Array]';
-    const target = isArray ? [] : {};
-    const keys = Object.keys(obj);
-
-    if (isArray) {
-        (target as []).length = obj.length;
-    }
-
-    for (let i = 0; i < keys.length; ++i) {
-        //@ts-ignore
-        target[keys[i]] = deepCopyAndUnproxy(obj[keys[i]]);
-    }
-
-    return target;
+export const deepCopy = (obj: any) => {
+    return JSON.parse(JSON.stringify(obj));
 }

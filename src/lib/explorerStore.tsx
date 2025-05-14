@@ -1,17 +1,17 @@
-import { deepCopyAndUnproxy, explorerDataStorage } from "@/utils/utils";
+import { deepCopy, explorerDataStorage } from "@/utils/utils";
 import { trackStore } from "@solid-primitives/deep";
 import createDebounce from "./debounce";
 
 const ExplorerContext = createContext<ExplorerContext>({ 
-    explorerTree: {},
+    explorerTree: null,
     explorerTreeTransaction: () => {},
-    findNodeByPath: () => null,
-    addNode: () => {},
-    removeNode: () => {},
-    updateNodeName: () => {},
+    findMockByPath: () => null,
+    addMock: () => {},
+    removeMock: () => {},
+    updateMockName: () => {},
     updateExpandedState: () => {},
     toggleAllExpandedState: () => {},
-    moveNode: () => {},
+    moveMock: () => {},
 });
 
 export const useExplorer = () => {
@@ -23,62 +23,55 @@ export const useExplorer = () => {
 }
 
 function ExplorerStore(props: any) {
-    const [explorerTree, explorerTreeTransaction] = createStore<ApiMockNode>({});
+    const [explorerTree, explorerTreeTransaction] = createStore<OkMock|object>({});
 
-    const findNodeByPath = (tree: ApiMockNode, path: string): ApiMockNode|null => {
-        if (tree.path === path) {
-            return tree;
+    const findMockById = (mock: OkMock, id: string): OkMock|null => {
+        if (mock.metadta.id === id) {
+            return mock;
         }
 
-        if (tree.children) {
-            for (let node of tree.children) {
-                const found = findNodeByPath(node, path);
+        if (mock.children) {
+            for (let child in mock.children) {
+                const found = findMockById(mock.children[child], id);
+
                 if (found) {
                     return found;
                 }
             }
         }
 
-        return null;
+        throw Error(`unable to find mock with 'id': ${id}.`);
     };
 
-    const addNode = (parentPath: string, node: ApiMockNode) => {
-        explorerTreeTransaction(produce((draft: ApiMockNode) => {
-            const parent = findNodeByPath(draft, parentPath);
+    const addMock = (id: string, newMock: OkMock) => {
+        explorerTreeTransaction(produce((draft: OkMock) => {
+            const parent = findMockById(draft, id);
 
-            if (!parent) {
-                throw Error(`unable to add node. node at ${parentPath} not found.`);
-            }
-
-            if (!parent.children) {
-                parent.children = [];
-            }
-
-            parent.children.push(node);
+            parent!.children[newMock.metadta.id] = newMock;
         }));
     };
 
-    const removeNode = (path: string) => {
-        explorerTreeTransaction(produce((draft: ApiMockNode) => {
-            if (draft.path === path) {
-                return; // can't remove root node.
+    const removeMock = (parentId: string, id: string) => {
+        explorerTreeTransaction(produce((draft: OkMock) => {
+            try {
+                const parent = findMockById(draft, parentId);
+                delete parent!.children[id]
+            } catch {
+                return; // node DNE
             }
-    
-            const parent = findNodeByPath(draft, path.slice(0, path.lastIndexOf('/')));
-            parent!.children = parent!.children!.filter((c) => c.path !== path);
         }));
     };
 
-    const _updateTreePaths = (node: ApiMockNode) => {
-        node?.children?.forEach((c) => {
-            c.path = node.path + '/' + c.name;
-            _updateTreePaths(c);
-        });
+    const _updateTreePaths = (mock: OkMock) => {
+        for (const child in mock.children) {
+            mock.children[child].metadta.path = `${mock.metadta.path}/${mock.children[child].name}`;
+            _updateTreePaths(mock.children[child]);
+        }
     };
 
-    const updateNodeName = (path: string, name: string) => {
+    const updateMockName = (path: string, name: string) => {
         const treeCopy = JSON.parse(JSON.stringify(explorerTree));
-        const node = findNodeByPath(treeCopy, path);
+        const node = findMockByPath(treeCopy, path);
 
         if (!node) {
             return;
@@ -91,15 +84,15 @@ function ExplorerStore(props: any) {
         explorerTreeTransaction(treeCopy);
     };
 
-    const _treeExpand = (target: ApiMockNode, tree: ApiMockNode) => {
-        let node: ApiMockNode|null = target;
+    const _treeExpand = (target: OkMock, tree: OkMock) => {
+        let node: OkMock|null = target;
         while (node && node.path !== '/root') {
             node.expandedState = true;
-            node = findNodeByPath(tree, node.path?.slice(0, node.path?.lastIndexOf('/')) ?? '');
+            node = findMockByPath(tree, node.path?.slice(0, node.path?.lastIndexOf('/')) ?? '');
         }
     };
 
-    const _treeCollapse = (root: ApiMockNode) => {
+    const _treeCollapse = (root: OkMock) => {
         root.expandedState = false;
         root?.children?.forEach((c) => {
             c.expandedState = false;
@@ -109,7 +102,7 @@ function ExplorerStore(props: any) {
 
     const updateExpandedState = (path: string, expanded: boolean) => {
         const treeCopy = JSON.parse(JSON.stringify(explorerTree));
-        let node = findNodeByPath(treeCopy, path);
+        let node = findMockByPath(treeCopy, path);
 
         if (!node) {
             return;
@@ -124,7 +117,7 @@ function ExplorerStore(props: any) {
         explorerTreeTransaction(treeCopy);
     }
 
-    const _updateTreeExpandedState = (node: ApiMockNode, expanded: boolean) => {
+    const _updateTreeExpandedState = (node: OkMock, expanded: boolean) => {
         node?.children?.forEach((c) => {
             c.expandedState = expanded;
             _updateTreeExpandedState(c, expanded);
@@ -133,7 +126,7 @@ function ExplorerStore(props: any) {
 
     const toggleAllExpandedState = (expanded: boolean) => {
         const treeCopy = JSON.parse(JSON.stringify(explorerTree));
-        const node = findNodeByPath(treeCopy, '/root');
+        const node = findMockByPath(treeCopy, '/root');
 
         if (!node) {
             return;
@@ -144,22 +137,22 @@ function ExplorerStore(props: any) {
     }
 
     // todo: implmement this
-    const moveNode = () => console.log('implement');
+    const moveMock = () => console.log('implement');
 
-    const handleSaveExplorerEdits = createDebounce((proxyData: ApiMockNode) => {
+    const handleSaveExplorerEdits = createDebounce((proxyData: OkMock) => {
         const data = deepCopyAndUnproxy(proxyData)
         explorerDataStorage.setValue(data)
             .catch((e: any) => console.debug("Error saving data: ", e));
     });
 
     onMount(async () => {
-        const data: ApiMockNode = await explorerDataStorage.getValue();
+        const data: OkMock = await explorerDataStorage.getValue();
         explorerTreeTransaction(() => deepCopyAndUnproxy(data));
     });
 
     createEffect(on(
         () => trackStore(explorerTree),
-        (proxyData: ApiMockNode) => handleSaveExplorerEdits(proxyData),
+        (proxyData: OkMock) => handleSaveExplorerEdits(proxyData),
         { defer: true }
     ));
 
@@ -167,13 +160,13 @@ function ExplorerStore(props: any) {
         <ExplorerContext.Provider value={{
             explorerTree,
             explorerTreeTransaction,
-            findNodeByPath,
-            addNode,
-            removeNode,
-            updateNodeName,
+            findMockByPath,
+            addMock,
+            removeMock,
+            updateMockName,
             updateExpandedState,
             toggleAllExpandedState,
-            moveNode,
+            moveMock,
         }}>
             {props.children}
         </ExplorerContext.Provider>

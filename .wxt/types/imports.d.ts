@@ -33,6 +33,7 @@ declare global {
   const createShadowRootUi: typeof import('wxt/client')['createShadowRootUi']
   const createSignal: typeof import('solid-js')['createSignal']
   const createStore: typeof import('solid-js/store')['createStore']
+  const createUniqueFolderName: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/utils')['createUniqueFolderName']
   const customEventMessenger: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/webpageMessaging')['customEventMessenger']
   const deepCopyAndUnproxy: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/utils')['deepCopyAndUnproxy']
   const defineAppConfig: typeof import('wxt/sandbox')['defineAppConfig']

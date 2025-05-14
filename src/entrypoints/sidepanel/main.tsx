@@ -10,25 +10,27 @@ import Options from '@/components/views/options';
 import NotificationProvider from '@/lib/notificationProvider';
 import ExplorerStore from '@/lib/explorerStore';
 import NoNavigation from '@/components/layouts/noNavigation';
+import WorkspaceStore from '@/lib/workspaceStore';
 
 render(() => {    
     return (
-       
             <ExplorerStore>
-                <ContextMenuProvider>
-                    <NotificationProvider>
-                        <HashRouter >
-                            <Route component={Root}>
-                                <Route path={'/'} component={Workspace} />
-                                <Route path={'/options'} component={Options} />
-                                <Route path={'/explorer'} component={Explorer} />
-                            </Route>
-                            <Route component={NoNavigation}>
-                                <Route path={'/save'} component={Save} />
-                            </Route>
-                        </HashRouter>
-                    </NotificationProvider>
-                </ContextMenuProvider>
+                <WorkspaceStore>
+                    <ContextMenuProvider>
+                        <NotificationProvider>
+                            <HashRouter >
+                                <Route component={Root}>
+                                    <Route path={'/'} component={Workspace} />
+                                    <Route path={'/options'} component={Options} />
+                                    <Route path={'/explorer'} component={Explorer} />
+                                </Route>
+                                <Route component={NoNavigation}>
+                                    <Route path={'/save'} component={Save} />
+                                </Route>
+                            </HashRouter>
+                        </NotificationProvider>
+                    </ContextMenuProvider>
+                </WorkspaceStore>
             </ExplorerStore>
     )
 }, document.getElementById('root')!);

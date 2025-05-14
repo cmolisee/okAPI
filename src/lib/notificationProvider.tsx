@@ -18,7 +18,7 @@ function NotificationProvider(props: any) {
     const [showNotification, setShowNotification] = createSignal(false);
     const [notificationConfig, setNotificationConfig] = createSignal<NotificationConfiguration>({});
 
-    const styles = "border-2 bg-primary-bg text-primary-text border-primary-text z-40";
+    const styles = "flex flex-col gap-4 p-4 border-2 bg-primary-bg text-primary-text border-primary-text z-40";
     const darkStyles = "dark:bg-primary-bg dark:text-primary-text dark:border-primary-text";
 
     const handleExit = () => {
@@ -27,7 +27,8 @@ function NotificationProvider(props: any) {
     };
 
     const handleSave = () => {
-
+        notificationConfig()?.continueCallback?.();
+        setShowNotification(false);
     }
 
     return (
@@ -42,14 +43,14 @@ function NotificationProvider(props: any) {
                     }}> 
                     <div class={twMerge(styles, darkStyles)}>
                         <div class="flex justify-end">
-                            <button type='button' on:click={handleExit} class="mb-6">
+                            <button type='button' on:click={handleExit}>
                                 <VsClose stroke="currentColor" size={18} class="vs text-okRed-500" />
                             </button>
                         </div>
                         {notificationConfig().content}
-                        <div class="flex flex-row gap-6 justify-end">
-                            <div on:click={handleExit}>{notificationConfig()?.cancelText ?? 'Cancel'}</div>
-                            <div on:click={handleSave}>{notificationConfig()?.continueText ?? 'Continue'}</div>
+                        <div class="flex flex-row gap-4 justify-end mx-4">
+                            <div class="cursor-pointer hover:font-bold focus:font-bold" on:click={handleExit}>{notificationConfig()?.cancelText ?? 'Cancel'}</div>
+                            <div class="cursor-pointer hover:font-bold focus:font-bold" on:click={handleSave}>{notificationConfig()?.continueText ?? 'Continue'}</div>
                         </div>
                     </div>
                 </Portal>

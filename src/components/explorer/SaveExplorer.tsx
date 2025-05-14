@@ -3,6 +3,7 @@ import ExplorerTree from "./ExplorerTree";
 import { twMerge } from "tailwind-merge";
 import { trackStore } from "@solid-primitives/deep";
 import Text from '@/components/inputs/text';
+import ExplorerNode from "./ExplorerNode";
 
 function SaveExplorer(props: any) {
     const { explorerTree, updateExpandedState, toggleAllExpandedState } = useExplorer();
@@ -18,7 +19,7 @@ function SaveExplorer(props: any) {
         return x.pop()! < y.pop()! ? -1 : 1;
     };
 
-    const getPaths = (directory: ApiMockNode, paths: string[] = []) => {
+    const getPaths = (directory: OkMock, paths: string[] = []) => {
         if (!directory.path) {
             return paths;
         }
@@ -192,7 +193,9 @@ function SaveExplorer(props: any) {
                 </div>
             </div>
             <div class={twMerge('h-full', scrollbarStyles)}>
-                <ExplorerTree data={explorerTree} />
+                <ExplorerTree>
+                    <ExplorerNode node={explorerTree} level={props.level ?? -1} />
+                </ExplorerTree>
             </div>
         </div>
     )
