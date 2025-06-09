@@ -9,7 +9,24 @@ export function safeParse(obj: any) {
 export const explorerDataStorage = storage.defineItem<OkMock>(
     'local:explorerData',
     {
-        fallback: { name: "Root", path: "/root", type: "root", id: "root" } as OkMock,
+        fallback: {
+            name: "root",
+            description: "",
+            method: "GET",
+            uri: "",
+            body: "",
+            params: {},
+            children: {},
+            metadata: {
+                id: "root",
+                type: "root",
+                isEditing: false,
+                isEnabled: false,
+                isExpanded: false,
+                path: "/root",
+                hasEdits: false
+            }
+        } as OkMock,
     }
 );
 

@@ -34,8 +34,8 @@ interface OkMock {
     method: MethodType;
     uri: string;
     body: string;
-    params: ObjectArray<OkParam>;
-    children: ObjectArray<OkMock>;
+    params: ObjectArray<OkParam>|object;
+    children: ObjectArray<OkMock>|object;
     metadata: OkMetadata;
 }
 
