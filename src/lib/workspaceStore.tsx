@@ -18,13 +18,14 @@ export const useWorkspace = () => {
     return context;
 }
 
+// workspace object is expected to reflect the structure of a single level array
 function WorkspaceStore(props: any) {
     const [workspaceData, workspaceDataTransaction] = createStore<ObjectArray<OkMock>>({});
 
     const addWorkspaceItem = (newItem: OkMock) => {
         workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
-            for (const mockIndex in draft) {
-                draft[mockIndex].metadata.isEditing = false;
+            for (const mock of Object.values(draft)) {
+                mock.metadata.isEditing = false;
             }
 
             newItem.metadata.isEditing = true;
@@ -34,18 +35,16 @@ function WorkspaceStore(props: any) {
 
     const removeWorkspaceItem = (id: string) => {
         workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
-            for (const mockIndex in draft) {
-                if (mockIndex === id) {
-                    delete draft[mockIndex];
-                }
+            if (id in draft) {
+                delete draft[id];
             }
         }));
     };
 
     const setEditingWorkspaceItem = (id: string) => {
         workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
-            for (const mockIndex in draft) {
-                draft[mockIndex].metadata.isEditing = mockIndex === id;
+            for (const mock of Object.values(draft)) {
+                mock.metadata.isEditing = mock.metadata.id === id;
             }
         }));
     };
