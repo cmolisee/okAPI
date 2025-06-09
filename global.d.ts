@@ -36,7 +36,7 @@ interface OkMock {
     body: string;
     params: ObjectArray<OkParam>;
     children: ObjectArray<OkMock>;
-    metadta: OkMetadata;
+    metadata: OkMetadata;
 }
 
 interface WorkspaceStoreContext {
@@ -48,13 +48,13 @@ interface WorkspaceStoreContext {
 }
 
 interface ExplorerContext {
-    explorerTree: OkMock|null;
+    explorerTree: OkMock|object;
     explorerTreeTransaction: SetStoreFunction<OkMock>;
-    findMockByPath: (tree: OkMock, path: string) => OkMock|null;
+    findMockById: (tree: OkMock, id: string) => OkMock|null;
     addMock: (parentPath: string, node: OkMock) => void;
-    removeMock: (path: string) => void;
-    updateMockName: (path: string, name: string) => void;
-    updateExpandedState: (path: string, expanded: boolean) => void;
+    removeMock: (parentId: string, targetId: string) => void;
+    updateMockName: (id: string, name: string) => void;
+    updateExpandedState: (id: string, expanded: boolean) => void;
     toggleAllExpandedState: (expanded: boolean) => void;
     moveMock: () => void;
 }
