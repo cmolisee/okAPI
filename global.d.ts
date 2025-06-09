@@ -50,7 +50,7 @@ interface ExplorerContext {
     explorerTree: OkMock|EmptyObject;
     explorerTreeTransaction: SetStoreFunction<OkMock|EmptyObject>;
     findMockById: (tree: OkMock|EmptyObject, id: string) => OkMock;
-    addMock: (parentPath: string, node: OkMock) => void;
+    addMock: (parentId: string, node: OkMock) => void;
     removeMock: (parentId: string, targetId: string) => void;
     updateMockName: (id: string, name: string) => void;
     updateExpandedState: (id: string, expanded: boolean) => void;

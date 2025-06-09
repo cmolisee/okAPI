@@ -22,11 +22,25 @@ function ExplorerNode(props: any) {
 
         const folderName = createUniqueFolderName();
         addMock(
-            props.node?.path, 
+            props.node?.metadata.id, 
             {
-                name: folderName, 
-                path: props.node?.path + '/' + folderName, 
-                type: 'folder'
+                name: folderName,
+                description: '',
+                method: 'GET',
+                uri: '',
+                body: '',
+                params: {},
+                children: {},
+                metadata: {
+                    id: folderName,
+                    type: 'folder',
+                    isEditing: false,
+                    isEnabled: false,
+                    isExpanded: false,
+                    path: props.node?.metadata?.path + '/' + folderName,
+                    hasEdits: false,
+
+                }
             });
         handleCloseContextMenu();
         updateExpandedState(props.node?.path, true);
@@ -37,7 +51,12 @@ function ExplorerNode(props: any) {
         e.preventDefault();
         e.stopPropagation();
 
-        removeMock(props.node?.path);
+        const parentId = props.node?.metadata?.path?.slice(
+            0, 
+            props.node?.metadata?.path?.lastIndexOf('/')
+        );
+
+        removeMock(parentId, props.node?.metadata?.id);
         handleCloseContextMenu();
         return;
     }
