@@ -19,18 +19,18 @@ function SaveExplorer(props: any) {
         return x.pop()! < y.pop()! ? -1 : 1;
     };
 
-    const getPaths = (directory: OkMock, paths: string[] = []) => {
-        if (!directory.path) {
+    const getPaths = (node: OkMock|EmptyObject, paths: string[] = []) => {
+        if (!node?.metadata?.path || Object.keys(node).length < 1) {
             return paths;
         }
 
-        if (directory.path !== '/root') {
-            paths.push(directory.path);
+        if (node.metadata.path !== '/root') {
+            paths.push(node.metadata.path);
         }
 
-        directory?.children?.forEach((c) => {
-            return getPaths(c, paths);
-        });
+        for (const child of Object.values(node.children)) {
+            return getPaths(child, paths);
+        }
 
         return paths;
     };
@@ -40,19 +40,19 @@ function SaveExplorer(props: any) {
         return getPaths(trackedTree).sort(comparePaths);
     });
 
-    const generateAutocopletePaths = (text: string) => {
+    const generateAutocompletePathsForOption = (optPath: string) => {
         if (!explorerTree || !autocompleteRef) {
             return;
         }
 
-        if (!text.startsWith('/')) {
-            text = '/' + text;
+        if (!optPath.startsWith('/')) {
+            optPath = '/' + optPath;
         }
 
         const parent = (autocompleteRef as HTMLDivElement);
-        paths().forEach((opt: string) => {
-            const parsedOption = opt.replace('/root', '');
-            if (parsedOption.startsWith(text)) {
+        paths().forEach((path: string) => {
+            const parsedOption = path.replace('/root', '');
+            if (parsedOption.startsWith(optPath)) {
                 createOption(parsedOption, parent)
             } else {
                 removeOption(parsedOption, parent);
@@ -64,28 +64,28 @@ function SaveExplorer(props: any) {
         }
     };
 
-    const createOption = (opt: string, parent: HTMLDivElement) => {
+    const createOption = (path: string, parent: HTMLDivElement) => {
         for (const node of parent.childNodes) {
-            if ((node as HTMLDivElement).id === opt) {
+            if ((node as HTMLDivElement).id === path) {
                 return;
             }
         }
 
         const el = document.createElement('div');
         el.classList = 'cursor-pointer hover:bg-secondary-bg dark:hover:bg-secondary-bg [&.active]:bg-secondary-bg dark:[&.active]:bg-secondary-bg px-2 rounded-sm';
-        el.innerText = opt;
-        el.id = opt;
+        el.innerText = path;
+        el.id = path;
         el.addEventListener('mousedown', () => {
-            props.setSavePath(() => opt);
-            updateExpandedState('/root' + opt, true);
+            props.setSavePath(() => path);
+            updateExpandedState(path.substring(path.lastIndexOf('/') + 1), true);
             setShowAutocomplete(false);
         });
         parent.appendChild(el);
     };
 
-    const removeOption = (opt: string, parent: HTMLDivElement) => {
+    const removeOption = (path: string, parent: HTMLDivElement) => {
         for (const node of parent.childNodes) {
-            if ((node as HTMLDivElement).id === opt) {
+            if ((node as HTMLDivElement).id === path) {
                 parent.removeChild(node);
             }
         }
@@ -96,14 +96,14 @@ function SaveExplorer(props: any) {
             return;
         }
 
-        const v = (e.currentTarget as HTMLInputElement).value;
-        if (v) {
-            generateAutocopletePaths(v);
-            props.setSavePath(() => v);
-            updateExpandedState('/root' + v, true);
+        const path = (e.currentTarget as HTMLInputElement).value;
+        if (path) {
+            generateAutocompletePathsForOption(path);
+            props.setSavePath(() => path);
+            updateExpandedState('/root' + path, true);
             setShowAutocomplete(autocompleteRef.children?.length > 0);
         } else {
-            generateAutocopletePaths('');
+            generateAutocompletePathsForOption('');
             setShowAutocomplete(autocompleteRef.children?.length > 0);
         }    
     };
@@ -162,8 +162,8 @@ function SaveExplorer(props: any) {
                 }
             }
         } else { // default update autocomplete
-            const v = (e.currentTarget as HTMLInputElement).value;
-            generateAutocopletePaths(v);
+            const path = (e.currentTarget as HTMLInputElement).value;
+            generateAutocompletePathsForOption(path);
         }
 
         keyStack = [];
