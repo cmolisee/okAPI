@@ -1,11 +1,11 @@
-import { explorerDataStorage } from "@/utils/utils";
+import { defaultMock, explorerDataStorage } from "@/utils/utils";
 import { trackStore } from "@solid-primitives/deep";
 import createDebounce from "./debounce";
 
 const ExplorerContext = createContext<ExplorerContext>({ 
     explorerTree: {},
     explorerTreeTransaction: () => {},
-    findMockById: () => null,
+    findMockById: () => defaultMock,
     addMock: () => {},
     removeMock: () => {},
     updateMockName: () => {},
@@ -23,16 +23,16 @@ export const useExplorer = () => {
 }
 
 function ExplorerStore(props: any) {
-    const [explorerTree, explorerTreeTransaction] = createStore<OkMock|object>({});
+    const [explorerTree, explorerTreeTransaction] = createStore<OkMock|EmptyObject>({});
 
-    const findMockById = (mock: OkMock, id: string): OkMock|null => {
+    const findMockById = (mock: OkMock|EmptyObject, id: string): OkMock => {
         if (mock.metadata.id === id) {
-            return mock;
+            return mock as OkMock;
         }
 
         if (mock.children) {
-            for (let child in mock.children) {
-                const found = findMockById(mock.children[child], id);
+            for (const child of Object.values(mock.children)) {
+                const found = findMockById(child, id);
 
                 if (found) {
                     return found;
@@ -44,15 +44,15 @@ function ExplorerStore(props: any) {
     };
 
     const addMock = (id: string, newMock: OkMock) => {
-        explorerTreeTransaction(produce((draft: OkMock) => {
+        explorerTreeTransaction(produce((draft: OkMock|EmptyObject) => {
             const parent = findMockById(draft, id);
 
-            parent!.children[newMock.metadta.id] = newMock;
+            parent!.children[newMock.metadata.id] = newMock;
         }));
     };
 
     const removeMock = (parentId: string, targetId: string) => {
-        explorerTreeTransaction(produce((draft: OkMock) => {
+        explorerTreeTransaction(produce((draft: OkMock|EmptyObject) => {
             try {
                 const parent = findMockById(draft, parentId);
                 delete parent!.children[targetId]
@@ -62,10 +62,10 @@ function ExplorerStore(props: any) {
         }));
     };
 
-    const _updateTreePaths = (mock: OkMock) => {
-        for (const child in mock.children) {
-            mock.children[child].metadata.path = `${mock.metadata.path}/${mock.children[child].name}`;
-            _updateTreePaths(mock.children[child]);
+    const _updateTreePaths = (mock: OkMock|EmptyObject) => {
+        for (const child of Object.values(mock.children)) {
+            child.metadata.path = `${mock.metadata.path}/${child.name}`;
+            _updateTreePaths(child);
         }
     };
 
@@ -84,18 +84,17 @@ function ExplorerStore(props: any) {
         explorerTreeTransaction(treeCopy);
     };
 
-    const _treeExpand = (target: OkMock, tree: OkMock) => {
-        let node: OkMock|null = target;
+    const _treeExpand = (target: OkMock|EmptyObject, tree: OkMock|EmptyObject) => {
+        let node = target;
         while (node && node?.metadata?.path !== '/root') {
             node.metadata.isExpanded = true;
             node = findMockById(tree, node?.metadata?.id);
         }
     };
 
-    const _treeCollapse = (root: OkMock) => {
+    const _treeCollapse = (root: OkMock|EmptyObject) => {
         root.metadata.isExpanded = false;
-        for (const childKey in root?.children) {
-            const child = root.children[childKey];
+        for (const child of Object.values(root.children)) {
             child.metadata.isExpanded = false;
             _treeCollapse(child);
         }
@@ -118,9 +117,8 @@ function ExplorerStore(props: any) {
         explorerTreeTransaction(treeCopy);
     }
 
-    const _updateTreeExpandedState = (node: OkMock, expanded: boolean) => {
-        for (const childKey in node?.children) {
-            const child = node.children[childKey];
+    const _updateTreeExpandedState = (node: OkMock|EmptyObject, expanded: boolean) => {
+        for (const child of Object.values(node.children)) {
             child.metadata.isExpanded = expanded;
             _updateTreeExpandedState(child, expanded);
         }
@@ -141,20 +139,20 @@ function ExplorerStore(props: any) {
     // todo: implmement this
     const moveMock = () => console.log('implement');
 
-    const handleSaveExplorerEdits = createDebounce((proxyData: OkMock) => {
+    const handleSaveExplorerEdits = createDebounce((proxyData: OkMock|EmptyObject) => {
         const data = deepCopyAndUnproxy(proxyData)
         explorerDataStorage.setValue(data)
             .catch((e: any) => console.debug("Error saving data: ", e));
     });
 
     onMount(async () => {
-        const data: OkMock = await explorerDataStorage.getValue();
+        const data: OkMock|EmptyObject = await explorerDataStorage.getValue();
         explorerTreeTransaction(() => deepCopyAndUnproxy(data));
     });
 
     createEffect(on(
-        () => trackStore(explorerTree as OkMock),
-        (proxyData: OkMock) => handleSaveExplorerEdits(proxyData),
+        () => trackStore(explorerTree as OkMock|EmptyObject),
+        (proxyData: OkMock|EmptyObject) => handleSaveExplorerEdits(proxyData),
         { defer: true }
     ));
 

@@ -1,15 +1,13 @@
 type MethodType = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 type ContextMenuRef = HTMLElement | undefined;
+type EmptyObject = Record<string, never>;
+// we use this to overcome the issue of solidjs converting arrays to a proxy object
+// key should match metadata.id
+type ObjectArray<T> = Record<string, T> | EmptyObject;
 
 interface Pos {
     x: number;
     y: number;
-}
-
-// we use this to overcome the issue of solidjs converting arrays to a proxy object
-// key should match metadata.id
-interface ObjectArray<T> {
-    [key: string]: T;
 }
 
 interface OkMetadata {
@@ -35,8 +33,8 @@ interface OkMock {
     method: MethodType;
     uri: string;
     body: string;
-    params: ObjectArray<OkParam>|object;
-    children: ObjectArray<OkMock>|object;
+    params: ObjectArray<OkParam>;
+    children: ObjectArray<OkMock>;
     metadata: OkMetadata;
 }
 
@@ -49,9 +47,9 @@ interface WorkspaceStoreContext {
 }
 
 interface ExplorerContext {
-    explorerTree: OkMock|object;
-    explorerTreeTransaction: SetStoreFunction<OkMock>;
-    findMockById: (tree: OkMock, id: string) => OkMock|null;
+    explorerTree: OkMock|EmptyObject;
+    explorerTreeTransaction: SetStoreFunction<OkMock|EmptyObject>;
+    findMockById: (tree: OkMock|EmptyObject, id: string) => OkMock;
     addMock: (parentPath: string, node: OkMock) => void;
     removeMock: (parentId: string, targetId: string) => void;
     updateMockName: (id: string, name: string) => void;

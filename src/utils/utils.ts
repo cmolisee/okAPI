@@ -6,28 +6,30 @@ export function safeParse(obj: any) {
     }
 }
 
+export const defaultMock: OkMock = {
+    name: "root",
+    description: "",
+    method: "GET",
+    uri: "",
+    body: "",
+    params: {},
+    children: {},
+    metadata: {
+        id: "root",
+        type: "root",
+        isEditing: false,
+        isEnabled: false,
+        isExpanded: false,
+        path: "/root",
+        hasEdits: false
+    }
+};
+
 export const explorerDataStorage = storage.defineItem<OkMock>(
     'local:explorerData',
     {
-        fallback: {
-            name: "root",
-            description: "",
-            method: "GET",
-            uri: "",
-            body: "",
-            params: {},
-            children: {},
-            metadata: {
-                id: "root",
-                type: "root",
-                isEditing: false,
-                isEnabled: false,
-                isExpanded: false,
-                path: "/root",
-                hasEdits: false
-            }
-        } as OkMock,
-    }
+        fallback: defaultMock,
+    },
 );
 
 export const workspaceDataStorage = storage.defineItem<ObjectArray<OkMock>>(
