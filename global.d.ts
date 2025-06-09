@@ -7,6 +7,7 @@ interface Pos {
 }
 
 // we use this to overcome the issue of solidjs converting arrays to a proxy object
+// key should match metadata.id
 interface ObjectArray<T> {
     [key: string]: T;
 }

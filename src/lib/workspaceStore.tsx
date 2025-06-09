@@ -24,11 +24,11 @@ function WorkspaceStore(props: any) {
     const addWorkspaceItem = (newItem: OkMock) => {
         workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
             for (const mockIndex in draft) {
-                draft[mockIndex].metadta.isEditing = false;
+                draft[mockIndex].metadata.isEditing = false;
             }
 
-            newItem.metadta.isEditing = true;
-            draft[newItem.metadta.id] = newItem;
+            newItem.metadata.isEditing = true;
+            draft[newItem.metadata.id] = newItem;
         }));
     };
 
@@ -45,7 +45,7 @@ function WorkspaceStore(props: any) {
     const setEditingWorkspaceItem = (id: string) => {
         workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
             for (const mockIndex in draft) {
-                draft[mockIndex].metadta.isEditing = mockIndex === id;
+                draft[mockIndex].metadata.isEditing = mockIndex === id;
             }
         }));
     };
