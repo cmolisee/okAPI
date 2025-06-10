@@ -9,11 +9,24 @@ function Tabs() {
     const { workspaceData, workspaceDataTransaction, addWorkspaceItem, removeWorkspaceItem } = useWorkspace();
     
     const handleAddTab = () => {
+        const newId = getUniqueId();
         addWorkspaceItem({ 
-            id: getUniqueId(), 
-            isEditing: true, 
-            isEnabled: false, 
-            method: 'GET' 
+            name: newId,
+            description: '',
+            method: 'GET',
+            uri: '',
+            body: '',
+            params: {},
+            children: {},
+            metadata: {
+                id: newId,
+                type: 'mock',
+                isEditing: false,
+                isEnabled: false,
+                isExpanded: false,
+                path: '',
+                hasEdits: false,
+            } 
         });
     };
 
@@ -29,27 +42,28 @@ function Tabs() {
     return (
         <div class="flex flex-col gap-2 ">
             <div class="flex flex-wrap flex-row items-center w-full">
-                <For each={workspaceData}>
+                <For each={Object.values(workspaceData)}>
                     {(thisTab) =>{
                         const setActiveTab = () => {
-                            if (thisTab.isEditing) {
+                            if (thisTab.metadata.isEditing) {
                                 return;
                             }
 
-                            workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
-                                draft = draft.reduce((updatedTabs: WorkspaceData[], currentTab: WorkspaceData) => {
-                                    updatedTabs.push({ ...currentTab, isEditing: currentTab.id === thisTab.id });
-                                    return updatedTabs;
-                                }, []);
-                            }));
+                            workspaceDataTransaction(
+                                produce((draft: ObjectArray<OkMock>) => {
+                                    for (const mock of Object.values(draft)) {
+                                        mock.metadata.isEditing = mock.metadata.id === thisTab.metadata.id;
+                                    }
+                                }
+                            ));
                         };
 
-                        const removeTab = () => handleRemoveTab(thisTab.id as string);
+                        const removeTab = () => handleRemoveTab(thisTab.metadata.id);
 
                         return (
                             <div
                                 on:click={setActiveTab}
-                                class={twMerge("group relative flex justify-center mx-[0.125rem] mb-1 text-sm font-medium text-gray-900 bg-white rounded-sm border border-gray-200 focus:ring-1 focus:ring-okPurple-500", thisTab.isEditing ? 'border-2 border-okPurple-500' : '')}>
+                                class={twMerge("group relative flex justify-center mx-[0.125rem] mb-1 text-sm font-medium text-gray-900 bg-white rounded-sm border border-gray-200 focus:ring-1 focus:ring-okPurple-500", thisTab.metadata.isEditing ? 'border-2 border-okPurple-500' : '')}>
                                 <Show when={thisTab.name}>
                                     <div>
                                         <span class="mx-2 text-ellipsis">{thisTab.name}</span>
