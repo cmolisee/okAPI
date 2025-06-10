@@ -18,62 +18,81 @@ function TabContentView() {
 
     const handleMethodUpdate = (e: Event) => {
         const value = (e.target as HTMLSelectElement).value as MethodType;
-        workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
-            const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
-            if (workspaceItem) {
-                workspaceItem.method = value;
+        workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
+            for (const mock of Object.values(draft)) {
+                if (mock.metadata.isEditing) {
+                    mock.method = value;
+                    return;
+                }
             }
         }));
     };
 
     const handleUriUpdate = (e: Event) => {
         const value = (e.target as HTMLInputElement).value;
-        workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
-            const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
-            if (workspaceItem) {
-                workspaceItem.uri = value;
+        workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
+            for (const mock of Object.values(draft)) {
+                if (mock.metadata.isEditing) {
+                    mock.uri = value;
+                    return;
+                }
             }
         }));
     };
 
     const handleIsEnabledUpdate = (e: Event) => {
         const value = (e.target as HTMLInputElement).checked;
-        workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
-            const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
-            if (workspaceItem) {
-                workspaceItem.isEnabled = value;
+        workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
+            for (const mock of Object.values(draft)) {
+                if (mock.metadata.isEditing) {
+                    mock.metadata.isEnabled = value;
+                    return;
+                }
             }
         }));
     };
     
     const handleBodyUpdate = (doc: string) => {
-        workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
-            const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
-            if (workspaceItem) {
-                workspaceItem.body = doc;
+        workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
+            for (const mock of Object.values(draft)) {
+                if (mock.metadata.isEditing) {
+                    mock.body = doc;
+                    return;
+                }
             }
         }));
     };
 
     // individual param add, delete, update is handled in <For />
     const handleAddParam = () => {
-        workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
-            const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
-            if (workspaceItem) {
-                workspaceItem.params = workspaceItem?.params?.length 
-                    ? [ ...workspaceItem.params, { id: getUniqueId() }]
-                    : [{ id: getUniqueId() }];
+        workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
+            for (const mock of Object.values(draft)) {
+                if (mock.metadata.isEditing) {
+                    const emptyParam: OkParam = {
+                        id: getUniqueId(),
+                        active: false,
+                        key: '',
+                        value: '',
+                    }
+
+                    mock.params = {
+                        ...mock.params,
+                        emptyParam
+                    };
+                    return;
+                }
             }
         }));
     };
 
     const handleRemoveParam = (paramIdToRemove: string) => {
         workspaceDataTransaction(
-            produce((draft: WorkspaceData[]) => {
-                const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
-
-                if (workspaceItem) {
-                    workspaceItem.params = workspaceItem.params?.filter((p: OkParam) => p.id !== paramIdToRemove);
+            produce((draft: ObjectArray<OkMock>) => {
+                for (const mock of Object.values(draft)) {
+                    if (mock.metadata.isEditing) {
+                        delete mock.params[paramIdToRemove];
+                        return;
+                    }
                 }
             })
         );
@@ -81,18 +100,26 @@ function TabContentView() {
 
     const handleSaveMock = () => {
         navigate('/save', { replace: true });
-    }
+    };
+
+    const isShow = createMemo(() => {
+        for (const mock of Object.values(workspaceData)) {
+            if (mock.metadata.isEditing) {
+                return mock;
+            }
+        }
+    })
 
     createEffect(() => {
         const data = trackDeep(workspaceData);
         console.log('tabContentView: ', data);
-    })
+    });
 
     return (
-        <Show when={workspaceData.find((t: WorkspaceData) => t.isEditing)} fallback={Fallback} keyed>
-            {(tab: WorkspaceData) => (
+        <Show when={isShow()} fallback={Fallback} keyed>
+            {(tab: OkMock) => (
                 <div class="flex flex-col gap-4">
-                    <Show when={!tab.path} fallback={<></>}>
+                    <Show when={!tab.metadata.path} fallback={<></>}>
                         <div class="flex flex-row p-[0.375rem] rounded-md items-center my-2 bg-okRed-200">
                             <ImNotification stroke="currentColor" size={18} class="vs mr-2 text-okRed-500 cursor-pointer" />
                             <span class="italic">
@@ -108,7 +135,7 @@ function TabContentView() {
                             <option value="DELETE" selected={tab.method === 'DELETE'}>DELETE</option>
                         </Dropdown>
                         <Text class='border-solid' id={'uri'} value={tab.uri} placeholder={'URI'} handleBlur={handleUriUpdate} />
-                        <Toggle toggleSize="m" checked={tab.isEnabled} changeCallback={handleIsEnabledUpdate} />
+                        <Toggle toggleSize="m" checked={tab.metadata.isEnabled} changeCallback={handleIsEnabledUpdate} />
                     </div>
                     <div>
                         <div class="grid grid-cols-[5fr_7fr] grid-rows-2 gap-2">
@@ -116,51 +143,51 @@ function TabContentView() {
                             <div class="text-center border">Key</div>
                             <div class="text-center border">Value</div>
                             {/* defined params */}
-                            <For each={tab.params}>
+                            <For each={Object.values(tab.params)}>
                                 {(thisParam) => {
                                     const onActiveChange = (e: Event) => {
                                         const value = (e.target as HTMLInputElement).checked;
-                                        workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
-                                            const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
-                                            if (workspaceItem) {
-                                                const updatedParams = [...workspaceItem?.params ?? []];
-                                                const paramToUpdate = updatedParams.find((p: OkParam) => p.id === thisParam.id);
-
-                                                if (paramToUpdate) {
-                                                    paramToUpdate.active = value;
-                                                }
+                                        workspaceDataTransaction(
+                                            produce((draft: ObjectArray<OkMock>) => {
+                                                for (const mock of Object.values(draft)) {
+                                                    if (mock.metadata.isEditing) {
+                                                        const paramToUpdate = mock.params[thisParam.id];
+                                                        paramToUpdate.active = value;
+                                                        return;
+                                                    }
+                                                }       
                                             }
-                                        }));
+                                        ));
                                     }
 
                                     const onKeyBlur = (e: Event) => {
                                         const value = (e.target as HTMLInputElement).value;
-                                        workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
-                                            const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
-                                            if (workspaceItem) {
-                                                const updatedParams = [...workspaceItem?.params ?? []];
-                                                const paramToUpdate = updatedParams.find((p: OkParam) => p.id === thisParam.id);
-
-                                                if (paramToUpdate) {
-                                                    paramToUpdate.key = value;
-                                                }
+                                        workspaceDataTransaction(
+                                            produce((draft: ObjectArray<OkMock>) => {
+                                                for (const mock of Object.values(draft)) {
+                                                    if (mock.metadata.isEditing) {
+                                                        const paramToUpdate = mock.params[thisParam.id];
+                                                        paramToUpdate.key = value;
+                                                        return;
+                                                    }
+                                                }       
                                             }
-                                        }));
+                                        ));
                                     }
                                 
                                     const onValueBlur = (e: Event) => {
                                         const value = (e.target as HTMLInputElement).value;
-                                        workspaceDataTransaction(produce((draft: WorkspaceData[]) => {
-                                            const workspaceItem = draft.find((t: WorkspaceData) => t.isEditing);
-                                            if (workspaceItem) {
-                                                const updatedParams = [...workspaceItem?.params ?? []];
-                                                const paramToUpdate = updatedParams.find((p: OkParam) => p.id === thisParam.id);
-
-                                                if (paramToUpdate) {
-                                                    paramToUpdate.key = value;
-                                                }
+                                        workspaceDataTransaction(
+                                            produce((draft: ObjectArray<OkMock>) => {
+                                                for (const mock of Object.values(draft)) {
+                                                    if (mock.metadata.isEditing) {
+                                                        const paramToUpdate = mock.params[thisParam.id];
+                                                        paramToUpdate.key = value;
+                                                        return;
+                                                    }
+                                                }       
                                             }
-                                        }));
+                                        ));
                                     }
 
                                     const removeParam = () => handleRemoveParam(thisParam.id);
