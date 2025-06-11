@@ -56,6 +56,7 @@ function WorkspaceStore(props: any) {
 
     onMount(async () => {
         const savedWorkspace: ObjectArray<OkMock> = await workspaceDataStorage.getValue();
+        console.log('workspaceStore.tsx ln59', [Object.keys(savedWorkspace), Object.entries(savedWorkspace), Object.values(savedWorkspace)]);
         workspaceDataTransaction(deepCopy(savedWorkspace));
     });
 

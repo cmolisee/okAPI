@@ -140,14 +140,14 @@ function ExplorerStore(props: any) {
     const moveMock = () => console.log('implement');
 
     const handleSaveExplorerEdits = createDebounce((proxyData: OkMock|EmptyObject) => {
-        const data = deepCopyAndUnproxy(proxyData)
+        const data = deepCopy(proxyData)
         explorerDataStorage.setValue(data)
             .catch((e: any) => console.debug("Error saving data: ", e));
     });
 
     onMount(async () => {
         const data: OkMock|EmptyObject = await explorerDataStorage.getValue();
-        explorerTreeTransaction(() => deepCopyAndUnproxy(data));
+        explorerTreeTransaction(() => deepCopy(data));
     });
 
     createEffect(on(

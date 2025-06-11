@@ -68,17 +68,15 @@ function TabContentView() {
         workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
             for (const mock of Object.values(draft)) {
                 if (mock.metadata.isEditing) {
+                    const paramId = getUniqueId();
                     const emptyParam: OkParam = {
-                        id: getUniqueId(),
+                        id: paramId,
                         active: false,
                         key: '',
                         value: '',
                     }
 
-                    mock.params = {
-                        ...mock.params,
-                        emptyParam
-                    };
+                    mock.params[paramId] = emptyParam;
                     return;
                 }
             }
@@ -182,7 +180,7 @@ function TabContentView() {
                                                 for (const mock of Object.values(draft)) {
                                                     if (mock.metadata.isEditing) {
                                                         const paramToUpdate = mock.params[thisParam.id];
-                                                        paramToUpdate.key = value;
+                                                        paramToUpdate.value = value;
                                                         return;
                                                     }
                                                 }       

@@ -31,10 +31,10 @@ function Explorer (props:any) {
     // creates new mock at location of the right click
     
     const handleExplorerCleanup = () => {
-        const data: OkMock = trackStore(explorerTree);
+        const data = trackStore(explorerTree);
 
         if (Object.keys(explorerTree).length) {    
-            explorerDataStorage.setValue(deepCopyAndUnproxy(data));
+            explorerDataStorage.setValue(deepCopy(data));
         }
     };
 

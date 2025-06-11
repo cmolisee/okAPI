@@ -8,7 +8,7 @@ import SaveExplorer from "@/components/explorer/SaveExplorer";
 function Save (props:any) {
     const navigate = useNavigate();
     const { workspaceData, workspaceDataTransaction } = useWorkspace();
-    const { explorerTree, explorerTreeTransaction, findMockByPath } = useExplorer();
+    const { explorerTree, explorerTreeTransaction, findMockById } = useExplorer();
     const [ savePath, setSavePath ] = createSignal('');
     const { setShowNotification, setNotificationConfig} = useNotifications();
     const [ mocksToSave, setMocksToSave ] = createSignal<{ checked: Boolean, mock: OkMock }[]>([]);
@@ -38,41 +38,34 @@ function Save (props:any) {
     };
 
     const handleSave = () => {
+        // get all mocks that are checked for save
         const mocks = mocksToSave()
             .filter((m) => m.checked)
             .map((m) => m.mock);
         
-        const updatedWorkspaceData = workspaceData.map((wsMock: OkMock) => {
-            if (mocks.some((m) => m.id === wsMock.id)) {
-                wsMock.path = `${savePath()}/${wsMock.id}`;
-            }
+        // update the workspace
+        workspaceDataTransaction(
+            produce((draft: ObjectArray<OkMock>) => {
+                for (const mock of Object.values(draft)) {
+                    if (mocks.some((m) => m.metadata.id === mock.metadata.id)) {
+                        mock.metadata.path = `${savePath()}/${mock.metadata.id}`;
+                    }
+                }
+            })
+        );
 
-            return wsMock;
-        });
-
+        // update explorer tree
         const treeCopy = JSON.parse(JSON.stringify(explorerTree));
-        const node = findMockByPath(treeCopy, '/root' + savePath());
 
-        if (node) {
-            if (!node?.children) {
-                node.children = [];
-            }
+        explorerTreeTransaction(
+            produce((draft: ObjectArray<OkMock>) => {
+                const targetNode = findMockById(treeCopy, savePath().slice(savePath().lastIndexOf('/') + 1));
 
-            node.children.push(...mocks.map((m) => ({
-                name: `${m.method}_${m.uri}`,
-                path: `${savePath()}/${m.id}`,
-                type: 'mock',
-                mock: m,
-            } as OkMock)));
-        }
-
-        workspaceDataTransaction([...updatedWorkspaceData]);
-        explorerTreeTransaction(treeCopy);
-
-        console.log('updated to:', [
-            updatedWorkspaceData,
-            treeCopy
-        ]);
+                mocks.forEach((m) => {
+                    targetNode.children[m.metadata.id] = JSON.parse(JSON.stringify(m));
+                });
+            })
+        );
     }
 
     const handleToggle = (item: { checked: Boolean, mock: OkMock }) => {
@@ -87,8 +80,11 @@ function Save (props:any) {
     };
 
     onMount(() => {
-        console.log('save view', workspaceData);
-        setMocksToSave(workspaceData.filter((d) => !d.path).map((f) => ({ checked: true, mock: f})))
+        setMocksToSave(
+            Object.values(workspaceData)
+                .filter((d) => !d.metadata.path)
+                .map((f)  => ({ checked: true, mock: f}))
+        )
     });
 
     return (

@@ -9,10 +9,10 @@ function Workspace (props: any) {
     const scrollbarStyles = '[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:transparent [&::-webkit-scrollbar-thumb]:bg-secondary-text dark:[&::-webkit-scrollbar-thumb]:bg-secondary-text';
 
     const handleWorkspaceCleanup = () => {
-        const data: WorkspaceData[] = trackDeep(workspaceData);
+        const data: ObjectArray<OkMock> = trackDeep(workspaceData);
 
         if (Object.keys(data).length) {
-            workspaceDataStorage.setValue(deepCopyAndUnproxy(data));
+            workspaceDataStorage.setValue(deepCopy(data));
         }
     }
 
