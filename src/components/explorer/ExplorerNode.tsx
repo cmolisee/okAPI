@@ -3,7 +3,6 @@ import { twMerge } from "tailwind-merge";
 import { useMenuContext } from "@/lib/contextMenuProvider";
 import { useExplorer } from "@/lib/explorerStore";
 import { useNotifications } from "@/lib/notificationProvider";
-import { createUniqueFolderName } from "@/utils/utils";
 
 function ExplorerNode(props: any) {
     const { addMock, removeMock, updateMockName, updateExpandedState } = useExplorer();
@@ -20,11 +19,11 @@ function ExplorerNode(props: any) {
         e.preventDefault();
         e.stopPropagation();
 
-        const folderName = createUniqueFolderName();
+        const newId = getUniqueId();
         addMock(
             props.node?.metadata.id, 
             {
-                name: folderName,
+                name: `newFolder_${newId}`,
                 description: '',
                 method: 'GET',
                 uri: '',
@@ -32,18 +31,18 @@ function ExplorerNode(props: any) {
                 params: {},
                 children: {},
                 metadata: {
-                    id: folderName,
+                    id: newId,
                     type: 'folder',
                     isEditing: false,
                     isEnabled: false,
                     isExpanded: false,
-                    path: props.node?.metadata?.path + '/' + folderName,
+                    path: props.node?.metadata?.path + '/' + `newFolder_${newId}`,
                     hasEdits: false,
 
                 }
             });
         handleCloseContextMenu();
-        updateExpandedState(props.node?.path, true);
+        updateExpandedState(props.node?.metadata?.path, true);
         return;
     }
 
@@ -83,7 +82,7 @@ function ExplorerNode(props: any) {
         e.stopPropagation();
 
         const value = (e.target as HTMLInputElement).value;
-        updateMockName(props.node?.path, value);
+        updateMockName(props.node?.metadata?.path, value);
         setEditName(false);
     }
 
@@ -100,8 +99,8 @@ function ExplorerNode(props: any) {
     };
 
     const toggleExpand = () => {
-        if (props.node?.type !== "mock") {
-            updateExpandedState(props.node?.path, !props.node?.expandedState);
+        if (props.node?.metadata?.type !== "mock") {
+            updateExpandedState(props.node?.metadata?.path, !props.node?.metadata?.isExpanded);
         }
     };
 
@@ -139,7 +138,7 @@ function ExplorerNode(props: any) {
     if (props.level === -1) {
         return (
             <>
-                <For each={props.node?.children} fallback={<AddFolder />}>
+                <For each={Object.values(props.node?.children)} fallback={<AddFolder />}>
                     {(child) => (
                         <ExplorerNode
                             node={child}
@@ -154,16 +153,16 @@ function ExplorerNode(props: any) {
 
     return (
         <div>
-            <Show when={props.node?.type !== 'root'}>
+            <Show when={props.node?.metadata?.type !== 'root'}>
                 <div class={twMerge("flex items-center pl-[12px] py-2 cursor-pointer", props.level > 0 ? "border-l-2" : "")}
                     style={{ "margin-left": `${props.level * 32}px` }}
-                    onClick={props.node?.type !== "mock" ? toggleExpand : undefined}
+                    onClick={props.node?.metadata?.type !== "mock" ? toggleExpand : undefined}
                     ondblclick={handleEditName}
                     onContextMenu={contextHandler} >
                     <span class="mr-2">
-                        <Dynamic component={explorerIcons[props.node?.type as keyof typeof explorerIcons]} />
+                        <Dynamic component={explorerIcons[props.node?.metadata?.type as keyof typeof explorerIcons]} />
                     </span>
-                    <span class={props.node?.type !== "mock" ? "font-semibold" : "italic"}>
+                    <span class={props.node?.metadata?.type !== "mock" ? "font-semibold" : "italic"}>
                         <Show when={!editName()}>
                             {props.node?.name}
                         </Show>
@@ -175,21 +174,21 @@ function ExplorerNode(props: any) {
                                 on:blur={handleEditNameOnBlur} />
                         </Show>
                     </span>
-                    <Show when={props.node?.expandedState}>
+                    <Show when={props.node?.metadata?.isExpanded}>
                         <span class="mr-2">
                             <VsTriangleDown size={18} class="text-secondary-text dark:text-secondary-text" />
                         </span>
                     </Show>
-                    <Show when={!props.node?.expandedState}>
+                    <Show when={!props.node?.metadata?.isExpanded}>
                         <span class="mr-2">
                             <VsTriangleRight size={18} class="text-secondary-text dark:text-secondary-text" />
                         </span>
                     </Show>
                 </div>
             </Show>
-            <Show when={props.node?.expandedState}>
+            <Show when={props.node?.metadata?.isExpanded}>
                 <div class="children">
-                    <For each={props.node?.children}>
+                    <For each={Object.values(props.node?.children)}>
                         {(child) => (
                             <ExplorerNode
                                 node={child}

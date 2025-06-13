@@ -36,7 +36,6 @@ function Tabs() {
 
     createEffect(() => {
         const data = trackDeep(workspaceData);
-        console.log('tabs: ', data);
     });
     
     return (

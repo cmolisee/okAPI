@@ -6,7 +6,7 @@ export function safeParse(obj: any) {
     }
 }
 
-export const defaultMock: OkMock = {
+export const defaultRootMock: OkMock = {
     name: "root",
     description: "",
     method: "GET",
@@ -28,7 +28,7 @@ export const defaultMock: OkMock = {
 export const explorerDataStorage = storage.defineItem<OkMock>(
     'local:explorerData',
     {
-        fallback: defaultMock,
+        fallback: defaultRootMock,
     },
 );
 
@@ -40,7 +40,6 @@ export const workspaceDataStorage = storage.defineItem<ObjectArray<OkMock>>(
 );
 
 export const getUniqueId = () => new Date().valueOf().toString(36);
-export const createUniqueFolderName = () => `newFolder_${getUniqueId()}`;
 
 export const deepCopy = (obj: any) => {
     return JSON.parse(JSON.stringify(obj));

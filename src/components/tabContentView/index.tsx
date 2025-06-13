@@ -110,7 +110,6 @@ function TabContentView() {
 
     createEffect(() => {
         const data = trackDeep(workspaceData);
-        console.log('tabContentView: ', data);
     });
 
     return (

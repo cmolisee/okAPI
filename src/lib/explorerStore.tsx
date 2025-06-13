@@ -1,11 +1,11 @@
-import { defaultMock, explorerDataStorage } from "@/utils/utils";
+import { defaultRootMock, explorerDataStorage } from "@/utils/utils";
 import { trackStore } from "@solid-primitives/deep";
 import createDebounce from "./debounce";
 
 const ExplorerContext = createContext<ExplorerContext>({ 
     explorerTree: {},
     explorerTreeTransaction: () => {},
-    findMockById: () => defaultMock,
+    findMockById: () => defaultRootMock,
     addMock: () => {},
     removeMock: () => {},
     updateMockName: () => {},
@@ -83,6 +83,32 @@ function ExplorerStore(props: any) {
 
         explorerTreeTransaction(treeCopy);
     };
+
+
+
+    function findPath(root, target, currentPath = []) {
+        if (!root) {
+            return null; // Base case: node is null, path not found
+        }
+        
+        currentPath.push(root.value); // Add current node to path
+
+        if (root.value === target) {
+            return currentPath; // Base case: target found, return path
+        }
+        
+        for (const child of root.children || []) {
+            const path = findPath(child, target, [...currentPath]); // Recursive call with a copy of the path
+            if (path) {
+                return path; // Path found in a child, return it
+            }
+        }
+        
+        return null; // Path not found in this subtree
+    }
+
+
+
 
     const _treeExpand = (target: OkMock|EmptyObject, tree: OkMock|EmptyObject) => {
         let node = target;
