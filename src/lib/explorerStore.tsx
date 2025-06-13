@@ -85,70 +85,58 @@ function ExplorerStore(props: any) {
     };
 
 
-
-    function findPath(root, target, currentPath = []) {
+    // gets all nodes in path from root to target node.
+    function _findNodesInPath(root: OkMock, target: OkMock, nodesInPath: OkMock[] = []): OkMock[]|null {
         if (!root) {
-            return null; // Base case: node is null, path not found
+            return null;
         }
         
-        currentPath.push(root.value); // Add current node to path
+        nodesInPath.push(root);
 
-        if (root.value === target) {
-            return currentPath; // Base case: target found, return path
+        if (root.metadata.id === target.metadata.id) {
+            return nodesInPath;
         }
         
-        for (const child of root.children || []) {
-            const path = findPath(child, target, [...currentPath]); // Recursive call with a copy of the path
-            if (path) {
-                return path; // Path found in a child, return it
+        for (const child of Object.values(root.children)) {
+            const result: OkMock[]|null = _findNodesInPath(child, target, [...nodesInPath]);
+            if (result) {
+                return result;
             }
         }
         
-        return null; // Path not found in this subtree
+        return null;
     }
 
-
-
-
-    const _treeExpand = (target: OkMock|EmptyObject, tree: OkMock|EmptyObject) => {
-        let node = target;
-        while (node && node?.metadata?.path !== '/root') {
-            node.metadata.isExpanded = true;
-            node = findMockById(tree, node?.metadata?.id);
+    function _collapseChildren(root: OkMock) {
+        if (!root) {
+            return;
         }
-    };
 
-    const _treeCollapse = (root: OkMock|EmptyObject) => {
         root.metadata.isExpanded = false;
-        for (const child of Object.values(root.children)) {
-            child.metadata.isExpanded = false;
-            _treeCollapse(child);
+        for (const child of Object.values(root?.children)) {
+            _collapseChildren(child);
         }
-    };
+    }
 
     const updateExpandedState = (id: string, expanded: boolean) => {
-        const treeCopy = JSON.parse(JSON.stringify(explorerTree));
-        let node = findMockById(treeCopy, id);
+        const root = JSON.parse(JSON.stringify(explorerTree));
+        let node = findMockById(root, id);
 
         if (!node) {
             return;
         }
 
         if (expanded) {
-            _treeExpand(node, treeCopy);
+            const nodesInPath = _findNodesInPath(root, node);
+                nodesInPath?.forEach((node) => {
+                node.metadata.isExpanded = expanded;
+            });
         } else {
-            _treeCollapse(node)
+            _collapseChildren(node);
         }
 
-        explorerTreeTransaction(treeCopy);
+        explorerTreeTransaction(root);
     }
-
-    const _updateTreeExpandedState = (node: OkMock|EmptyObject, expanded: boolean) => {
-        for (const child of Object.values(node.children)) {
-            child.metadata.isExpanded = expanded;
-            _updateTreeExpandedState(child, expanded);
-        }
-    };
 
     const toggleAllExpandedState = (expanded: boolean) => {
         const treeCopy = JSON.parse(JSON.stringify(explorerTree));
