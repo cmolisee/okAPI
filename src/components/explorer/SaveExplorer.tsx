@@ -6,7 +6,7 @@ import Text from '@/components/inputs/text';
 import ExplorerNode from "./ExplorerNode";
 
 function SaveExplorer(props: any) {
-    const { explorerTree, updateExpandedState, toggleAllExpandedState } = useExplorer();
+    const { explorerTree, updateExpandedState } = useExplorer();
     const [ showAutocomplete, setShowAutocomplete ] = createSignal(false);
     const scrollbarStyles = '[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:transparent [&::-webkit-scrollbar-thumb]:bg-secondary-text dark:[&::-webkit-scrollbar-thumb]:bg-secondary-text';
 
@@ -170,7 +170,7 @@ function SaveExplorer(props: any) {
     };
 
     onMount(() => {
-        toggleAllExpandedState(false);
+        updateExpandedState('root', false);
     });
 
     return (

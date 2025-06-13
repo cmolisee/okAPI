@@ -54,7 +54,6 @@ interface ExplorerContext {
     removeMock: (parentId: string, targetId: string) => void;
     updateMockName: (id: string, name: string) => void;
     updateExpandedState: (id: string, expanded: boolean) => void;
-    toggleAllExpandedState: (expanded: boolean) => void;
     moveMock: () => void;
 }
 

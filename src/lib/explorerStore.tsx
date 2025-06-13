@@ -10,7 +10,6 @@ const ExplorerContext = createContext<ExplorerContext>({
     removeMock: () => {},
     updateMockName: () => {},
     updateExpandedState: () => {},
-    toggleAllExpandedState: () => {},
     moveMock: () => {},
 });
 
@@ -138,18 +137,6 @@ function ExplorerStore(props: any) {
         explorerTreeTransaction(root);
     }
 
-    const toggleAllExpandedState = (expanded: boolean) => {
-        const treeCopy = JSON.parse(JSON.stringify(explorerTree));
-        const node = findMockById(treeCopy, 'root');
-
-        if (!node) {
-            return;
-        }
-
-        _updateTreeExpandedState(node, expanded);
-        explorerTreeTransaction(treeCopy);
-    }
-
     // todo: implmement this
     const moveMock = () => console.log('implement');
 
@@ -179,7 +166,6 @@ function ExplorerStore(props: any) {
             removeMock,
             updateMockName,
             updateExpandedState,
-            toggleAllExpandedState,
             moveMock,
         }}>
             {props.children}
