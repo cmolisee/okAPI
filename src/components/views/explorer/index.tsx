@@ -51,7 +51,7 @@ function Explorer (props:any) {
     return (
         <div class={twMerge('h-full', scrollbarStyles)}>
             <ExplorerTree>
-                <ExplorerNode node={explorerTree} level={props.level ?? -1} />
+                {Object.values(explorerTree?.children ?? {})}
             </ExplorerTree>
         </div>
     )

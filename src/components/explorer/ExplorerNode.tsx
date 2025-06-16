@@ -3,6 +3,7 @@ import { twMerge } from "tailwind-merge";
 import { useMenuContext } from "@/lib/contextMenuProvider";
 import { useExplorer } from "@/lib/explorerStore";
 import { useNotifications } from "@/lib/notificationProvider";
+import AddFolder from "./AddFolder";
 
 function ExplorerNode(props: any) {
     const { addMock, removeMock, updateMockName, updateExpandedState } = useExplorer();
@@ -42,7 +43,7 @@ function ExplorerNode(props: any) {
                 }
             });
         handleCloseContextMenu();
-        updateExpandedState(props.node?.metadata?.path, true);
+        updateExpandedState(props.node?.metadata?.id, true);
         return;
     }
 
@@ -99,8 +100,8 @@ function ExplorerNode(props: any) {
     };
 
     const toggleExpand = () => {
-        if (props.node?.metadata?.type !== "mock") {
-            updateExpandedState(props.node?.metadata?.path, !props.node?.metadata?.isExpanded);
+        if (props.node?.metadata?.type === "folder") {
+            updateExpandedState(props.node?.metadata?.id, !props.node?.metadata?.isExpanded);
         }
     };
 
@@ -115,16 +116,16 @@ function ExplorerNode(props: any) {
         );
     };
 
-    const AddFolder = () => {
-        return (
-            <div class='flex items-center italic pl-[12px] py-2 cursor-pointer text-sm font-thin' 
-                style={{ "margin-left": `${(props.level + 1) * 32}px` }}
-                on:click={handleAddFolder}>
-                Add Folder
-                <VsAdd size={16} color="currentColor" class="vs text-okPurple-500 dark:text-okGreen-500 mx-2 cursor-pointer" />
-            </div>
-        )
-    }
+    // const AddFolder = () => {
+    //     return (
+    //         <div class='flex items-center italic pl-[12px] py-2 cursor-pointer text-sm font-thin' 
+    //             style={{ "margin-left": `${(props.level + 1) * 32}px` }}
+    //             on:click={handleAddFolder}>
+    //             Add Folder
+    //             <VsAdd size={16} color="currentColor" class="vs text-okPurple-500 dark:text-okGreen-500 mx-2 cursor-pointer" />
+    //         </div>
+    //     )
+    // }
 
     createEffect(() => {
         if (editName()) {
@@ -135,21 +136,21 @@ function ExplorerNode(props: any) {
     });
 
     // Do not show the root node
-    if (props.level === -1) {
-        return (
-            <>
-                <For each={Object.values(props.node?.children)} fallback={<AddFolder />}>
-                    {(child) => (
-                        <ExplorerNode
-                            node={child}
-                            level={props.level + 1}
-                        />
-                    )}
-                </For>
-                <AddFolder />
-            </>
-        )
-    }
+    // if (props.level === -1) {
+    //     return (
+    //         <>
+    //             <For each={Object.values(props.node?.children)} fallback={<AddFolder />}>
+    //                 {(child) => (
+    //                     <ExplorerNode
+    //                         node={child}
+    //                         level={props.level + 1}
+    //                     />
+    //                 )}
+    //             </For>
+    //             <AddFolder />
+    //         </>
+    //     )
+    // }
 
     return (
         <div>
@@ -196,7 +197,9 @@ function ExplorerNode(props: any) {
                             />
                         )}
                     </For>
-                    <AddFolder />
+                    <AddFolder path={props.node?.metadata?.path} 
+                        parentId={props.node?.metadata?.id} 
+                        nestLevel={props.level + 1} />
                 </div>
             </Show>
         </div>

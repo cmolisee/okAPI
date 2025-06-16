@@ -24,27 +24,33 @@ export const useExplorer = () => {
 function ExplorerStore(props: any) {
     const [explorerTree, explorerTreeTransaction] = createStore<OkMock|EmptyObject>({});
 
-    const findMockById = (mock: OkMock|EmptyObject, id: string): OkMock => {
+    const findMockById = (mock: OkMock|EmptyObject, id: string): OkMock|null => {
         if (mock.metadata.id === id) {
             return mock as OkMock;
         }
 
+        let result = null;
         if (mock.children) {
             for (const child of Object.values(mock.children)) {
-                const found = findMockById(child, id);
+                result = findMockById(child, id);
 
-                if (found) {
-                    return found;
+                // early exit when found
+                if (result) {
+                    return result;
                 }
             }
         }
 
-        throw Error(`unable to find mock with 'id': ${id}.`);
+        return result;
     };
 
     const addMock = (id: string, newMock: OkMock) => {
         explorerTreeTransaction(produce((draft: OkMock|EmptyObject) => {
             const parent = findMockById(draft, id);
+
+            if (!parent) {
+                throw Error(`unable to find mock with 'id': ${id}.`);
+            }
 
             parent!.children[newMock.metadata.id] = newMock;
         }));
@@ -54,6 +60,11 @@ function ExplorerStore(props: any) {
         explorerTreeTransaction(produce((draft: OkMock|EmptyObject) => {
             try {
                 const parent = findMockById(draft, parentId);
+
+                if (!parent) {
+                    throw Error(`unable to find mock with 'id': ${parentId}.`);
+                }
+
                 delete parent!.children[targetId]
             } catch {
                 return; // node DNE
@@ -73,6 +84,7 @@ function ExplorerStore(props: any) {
         const node = findMockById(treeCopy, id);
 
         if (!node) {
+            console.debug(`unable to find mock with 'id': ${id}.`);
             return;
         }
 
@@ -83,26 +95,27 @@ function ExplorerStore(props: any) {
         explorerTreeTransaction(treeCopy);
     };
 
-
-    // gets all nodes in path from root to target node.
-    function _findNodesInPath(root: OkMock, target: OkMock, nodesInPath: OkMock[] = []): OkMock[]|null {
-        if (!root) {
+    function _dfs(node: OkMock, target: OkMock, nodesInPath: OkMock[] = []): OkMock[]|null {
+        if (!node) {
             return null;
         }
-        
-        nodesInPath.push(root);
 
-        if (root.metadata.id === target.metadata.id) {
-            return nodesInPath;
+        nodesInPath.push(node);
+
+        if (node.metadata.id === target.metadata.id) {
+            return [...nodesInPath];
         }
-        
-        for (const child of Object.values(root.children)) {
-            const result: OkMock[]|null = _findNodesInPath(child, target, [...nodesInPath]);
+
+        for (const childNode of Object.values(node.children)) {
+            const result = _dfs(childNode, target, [...nodesInPath]);
+
+            // early exit when found
             if (result) {
                 return result;
             }
         }
-        
+
+        nodesInPath.pop();
         return null;
     }
 
@@ -122,11 +135,12 @@ function ExplorerStore(props: any) {
         let node = findMockById(root, id);
 
         if (!node) {
+            console.debug(`unable to find mock with 'id': ${id}.`)
             return;
         }
 
         if (expanded) {
-            const nodesInPath = _findNodesInPath(root, node);
+            const nodesInPath = _dfs(root, node);
                 nodesInPath?.forEach((node) => {
                 node.metadata.isExpanded = expanded;
             });

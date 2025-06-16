@@ -100,7 +100,7 @@ function SaveExplorer(props: any) {
         if (path) {
             generateAutocompletePathsForOption(path);
             props.setSavePath(() => path);
-            updateExpandedState('/root' + path, true);
+            updateExpandedState(path.substring(path.lastIndexOf('/') + 1), true);
             setShowAutocomplete(autocompleteRef.children?.length > 0);
         } else {
             generateAutocompletePathsForOption('');
@@ -139,7 +139,7 @@ function SaveExplorer(props: any) {
             return;
         } else if (isEnter) { // if Enter key is pressed (active element is garunteed to exist)
             props.setSavePath(() => currentEle.id);
-            updateExpandedState('/root' + currentEle.id, true);
+            updateExpandedState(currentEle.id, true);
             setShowAutocomplete(false);
         } else if (isArrowDown && lastEle?.classList.contains('active')) { // if arrowDown on last element, loop to top
             lastEle?.classList.remove('active');

@@ -49,7 +49,7 @@ interface WorkspaceStoreContext {
 interface ExplorerContext {
     explorerTree: OkMock|EmptyObject;
     explorerTreeTransaction: SetStoreFunction<OkMock|EmptyObject>;
-    findMockById: (tree: OkMock|EmptyObject, id: string) => OkMock;
+    findMockById: (tree: OkMock|EmptyObject, id: string) => OkMock|null;
     addMock: (parentId: string, node: OkMock) => void;
     removeMock: (parentId: string, targetId: string) => void;
     updateMockName: (id: string, name: string) => void;
