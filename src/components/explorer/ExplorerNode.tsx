@@ -51,10 +51,8 @@ function ExplorerNode(props: any) {
         e.preventDefault();
         e.stopPropagation();
 
-        const parentId = props.node?.metadata?.path?.slice(
-            0, 
-            props.node?.metadata?.path?.lastIndexOf('/')
-        );
+        const nodesFromPath = props.node?.metadata?.path?.split('/');
+        const parentId = nodesFromPath[nodesFromPath.length - 2];
 
         removeMock(parentId, props.node?.metadata?.id);
         handleCloseContextMenu();
@@ -62,6 +60,7 @@ function ExplorerNode(props: any) {
     }
 
     const removeFolderNotification = (e: MouseEvent) => {
+        handleCloseContextMenu();
         setNotificationConfig({
             continueCallback: () => handleRemoveFolder(e),
             content: <div>Are you sure you want to delete this folder and all its content?</div>,
@@ -116,17 +115,6 @@ function ExplorerNode(props: any) {
         );
     };
 
-    // const AddFolder = () => {
-    //     return (
-    //         <div class='flex items-center italic pl-[12px] py-2 cursor-pointer text-sm font-thin' 
-    //             style={{ "margin-left": `${(props.level + 1) * 32}px` }}
-    //             on:click={handleAddFolder}>
-    //             Add Folder
-    //             <VsAdd size={16} color="currentColor" class="vs text-okPurple-500 dark:text-okGreen-500 mx-2 cursor-pointer" />
-    //         </div>
-    //     )
-    // }
-
     createEffect(() => {
         if (editName()) {
             const editNameField = document.getElementById('editNameField') as HTMLInputElement;
@@ -134,23 +122,6 @@ function ExplorerNode(props: any) {
             editNameField?.select();
         }
     });
-
-    // Do not show the root node
-    // if (props.level === -1) {
-    //     return (
-    //         <>
-    //             <For each={Object.values(props.node?.children)} fallback={<AddFolder />}>
-    //                 {(child) => (
-    //                     <ExplorerNode
-    //                         node={child}
-    //                         level={props.level + 1}
-    //                     />
-    //                 )}
-    //             </For>
-    //             <AddFolder />
-    //         </>
-    //     )
-    // }
 
     return (
         <div>
