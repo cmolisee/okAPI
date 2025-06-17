@@ -4,6 +4,7 @@ type EmptyObject = Record<string, never>;
 // we use this to overcome the issue of solidjs converting arrays to a proxy object
 // key should match metadata.id
 type ObjectArray<T> = Record<string, T> | EmptyObject;
+type AutofillData = { id: string, path: string };
 
 interface Pos {
     x: number;
@@ -16,7 +17,7 @@ interface OkMetadata {
     isEditing: boolean;
     isEnabled: boolean;
     isExpanded: boolean;
-    path: string;
+    path: string; // uri path comprised of each nodes name field
     hasEdits: boolean;
 }
 
@@ -28,7 +29,10 @@ interface OkParam {
 }
 
 interface OkMock {
-    name: string;
+    // folder: default or user defined (e.g. mySiteMocks, newFolder_mzawe23, etc...)
+    // mock: default or <method>_<uri> (e.g. mzawe23, GET_www.website.com, etc...)
+    // the name field represents this node in metadata.path
+    name: string; 
     description: string;
     method: MethodType;
     uri: string;

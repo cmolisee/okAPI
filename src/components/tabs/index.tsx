@@ -11,7 +11,7 @@ function Tabs() {
     const handleAddTab = () => {
         const newId = getUniqueId();
         addWorkspaceItem({ 
-            name: newId,
+            name: `GET_${newId}`,
             description: '',
             method: 'GET',
             uri: '',
@@ -66,12 +66,6 @@ function Tabs() {
                                 <Show when={thisTab.name}>
                                     <div>
                                         <span class="mx-2 text-ellipsis">{thisTab.name}</span>
-                                    </div>
-                                </Show>
-                                <Show when={!thisTab?.name}>
-                                    <div>
-                                        <span class="size-fit m-2">{thisTab?.method ?? 'GET'}</span>
-                                        <span class="mx-2 text-ellipsis">{`${thisTab.uri ? thisTab.uri : 'untitled'}`}</span>
                                     </div>
                                 </Show>
                                 <div class='absolute w-full h-full rounded-sm z-10 hidden group-hover:flex'>

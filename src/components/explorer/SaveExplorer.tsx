@@ -3,92 +3,76 @@ import ExplorerTree from "./ExplorerTree";
 import { twMerge } from "tailwind-merge";
 import { trackStore } from "@solid-primitives/deep";
 import Text from '@/components/inputs/text';
-import ExplorerNode from "./ExplorerNode";
+import { bfsFrom } from "@/utils/utils";
+import { Accessor } from "solid-js";
 
 function SaveExplorer(props: any) {
-    const { explorerTree, updateExpandedState } = useExplorer();
+    const { explorerTree, updateExpandedState, findMockById } = useExplorer();
     const [ showAutocomplete, setShowAutocomplete ] = createSignal(false);
     const scrollbarStyles = '[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:transparent [&::-webkit-scrollbar-thumb]:bg-secondary-text dark:[&::-webkit-scrollbar-thumb]:bg-secondary-text';
 
     let autocompleteRef: any;
 
-    const comparePaths = (a: string, b: string) => {
-        const x = a.split('/');
-        const y = b.split('/');
+    const sortByPathPredicate = (a: AutofillData, b: AutofillData) => {
+        const x = a.path.split('/');
+        const y = b.path.split('/');
     
         return x.pop()! < y.pop()! ? -1 : 1;
     };
 
-    const getPaths = (node: OkMock|EmptyObject, paths: string[] = []) => {
-        if (!node?.metadata?.path || Object.keys(node).length < 1) {
-            return paths;
-        }
-
-        if (node.metadata.path !== '/root') {
-            paths.push(node.metadata.path);
-        }
-
-        for (const child of Object.values(node.children)) {
-            return getPaths(child, paths);
-        }
-
-        return paths;
-    };
-
-    const paths = createMemo(() => {
-        const trackedTree = trackStore(explorerTree);
-        return getPaths(trackedTree).sort(comparePaths);
+    const autofillData: Accessor<AutofillData[]> = createMemo(() => {
+        const root = trackStore(explorerTree);
+        const flatMappedNodes = bfsFrom(root as OkMock);
+        return flatMappedNodes.map((n) => ({ id: n.metadata.id, path: n.metadata.path })).sort(sortByPathPredicate);
     });
 
-    const generateAutocompletePathsForOption = (optPath: string) => {
-        if (!explorerTree || !autocompleteRef) {
+    const generateAutocompleteOptions = (id: string) => {
+        if (!autocompleteRef) {
             return;
         }
 
-        if (!optPath.startsWith('/')) {
-            optPath = '/' + optPath;
-        }
-
-        const parent = (autocompleteRef as HTMLDivElement);
-        paths().forEach((path: string) => {
-            const parsedOption = path.replace('/root', '');
-            if (parsedOption.startsWith(optPath)) {
-                createOption(parsedOption, parent)
-            } else {
-                removeOption(parsedOption, parent);
-            }
-        });
-
-        if (!parent.querySelector('.active')) {
-            parent.firstElementChild?.classList.add('active');
-        }
+        const autocompleteEle = (autocompleteRef as HTMLDivElement);
+        const targetNode = findMockById(explorerTree, id);
+        clearOptions();
+        autofillData()
+            .filter((i) => (new RegExp(targetNode?.metadata.path ?? '')).test(i.path)) // get all children of current path
+            .forEach((i) => createOption(i)); // clean path for UI
+        
+        autocompleteEle.firstElementChild?.classList.add('active');
+        return;
     };
 
-    const createOption = (path: string, parent: HTMLDivElement) => {
-        for (const node of parent.childNodes) {
-            if ((node as HTMLDivElement).id === path) {
-                return;
-            }
+    const clearOptions = () => {
+        if (!autocompleteRef) {
+            return;
         }
 
+        const autocompleteEle = (autocompleteRef as HTMLDivElement);
+        autocompleteEle.innerHTML = '';
+        return;
+    };
+
+    const createOption = (opt: AutofillData) => {
+        if (!autocompleteRef) {
+            return;
+        }
+
+        const autocompleteEle = (autocompleteRef as HTMLDivElement);
         const el = document.createElement('div');
+
         el.classList = 'cursor-pointer hover:bg-secondary-bg dark:hover:bg-secondary-bg [&.active]:bg-secondary-bg dark:[&.active]:bg-secondary-bg px-2 rounded-sm';
-        el.innerText = path;
-        el.id = path;
+        el.innerText = opt.path;
+        el.id = opt.id;
+        el.setAttribute('data-id', opt.id);
+        el.setAttribute('data-path', opt.path);
         el.addEventListener('mousedown', () => {
-            props.setSavePath(() => path);
-            updateExpandedState(path.substring(path.lastIndexOf('/') + 1), true);
+            const targetNode = findMockById(explorerTree, opt.id);
+            props.setSaveToNode(targetNode);
+            updateExpandedState(targetNode?.metadata.id as string, true);
             setShowAutocomplete(false);
         });
-        parent.appendChild(el);
-    };
-
-    const removeOption = (path: string, parent: HTMLDivElement) => {
-        for (const node of parent.childNodes) {
-            if ((node as HTMLDivElement).id === path) {
-                parent.removeChild(node);
-            }
-        }
+        autocompleteEle.appendChild(el);
+        return;
     };
 
     const handleFocusAndEdit = (e: Event) => {
@@ -96,21 +80,31 @@ function SaveExplorer(props: any) {
             return;
         }
 
-        const path = (e.currentTarget as HTMLInputElement).value;
-        if (path) {
-            generateAutocompletePathsForOption(path);
-            props.setSavePath(() => path);
-            updateExpandedState(path.substring(path.lastIndexOf('/') + 1), true);
-            setShowAutocomplete(autocompleteRef.children?.length > 0);
-        } else {
-            generateAutocompletePathsForOption('');
-            setShowAutocomplete(autocompleteRef.children?.length > 0);
-        }    
+        const inputEle = e.currentTarget as HTMLInputElement
+        const targetId = inputEle.getAttribute('data-id') ?? 'root';
+        const mock = findMockById(explorerTree, targetId ?? 'root');
+
+        if (targetId !== 'root') {
+            props.setSaveToNode({ id: mock?.metadata.id, path: mock?.metadata.path });
+            updateExpandedState(mock?.metadata.id as string, true);
+        }
+
+        generateAutocompleteOptions(mock?.metadata.id as string);
+        setShowAutocomplete(autocompleteRef.children?.length > 0);
+        return; 
     };
 
     const handleBlur = (e: Event) => {
-        props.setSavePath((e.currentTarget as HTMLInputElement).value);
+        const inputEle = (e.currentTarget as HTMLInputElement);
+        const targetId = inputEle.getAttribute('data-id');
+
+        if (targetId) {
+            const targetNode = findMockById(explorerTree, targetId);
+            props.setSaveToNode(targetNode);
+        }
+
         setShowAutocomplete(false)
+        return;
     };
 
     let keyStack: string[] = [];
@@ -118,55 +112,63 @@ function SaveExplorer(props: any) {
         if (!e.repeat) {
             keyStack.push(e.key);
         }
+        
+        return;
     }
 
     const handleKeyUp = (e: KeyboardEvent) => {
-        const parent = autocompleteRef as HTMLDivElement;
-        const currentEle = parent?.querySelector('.active');
-        const firstEle = parent?.firstElementChild;
-        const lastEle = parent?.lastElementChild;
+        if (!autocompleteRef) {
+            return;
+        }
+
+        const autocompleteEle = autocompleteRef as HTMLDivElement;
+        const currentOption = autocompleteEle?.querySelector('.active');
+        const firstOption = autocompleteEle?.firstElementChild;
+        const lastOption = autocompleteEle?.lastElementChild;
 
         const isEnter = e.key === 'Enter' || keyStack.slice(-1)[0] === 'Enter';
         const isArrowDown = e.key === 'ArrowDown' || keyStack.slice(-1)[0] === 'ArrowDown';
         const isArrowUp = e.key === 'ArrowUp' || keyStack.slice(-1)[0] === 'ArrowUp';
 
-        if (!parent) {
-            return;
-        }
+        
 
-        if (!currentEle) {  // set the active element if not yet set
-            parent.firstElementChild?.classList.add('active');
-            return;
+        if (!currentOption) {  // set the active element if not yet set
+            firstOption!.classList.add('active');
         } else if (isEnter) { // if Enter key is pressed (active element is garunteed to exist)
-            props.setSavePath(() => currentEle.id);
-            updateExpandedState(currentEle.id, true);
+            const targetNode = findMockById(explorerTree, currentOption.getAttribute('data-id') as string);
+
+            props.setSaveToNode(targetNode);
+            updateExpandedState(targetNode?.metadata.id as string, true);
             setShowAutocomplete(false);
-        } else if (isArrowDown && lastEle?.classList.contains('active')) { // if arrowDown on last element, loop to top
-            lastEle?.classList.remove('active');
-            firstEle?.classList.add('active');
-            firstEle?.scrollIntoView({ behavior: 'smooth', block: 'end'});
-        } else if (isArrowUp && firstEle?.classList.contains('active')) { // if arrowUp on last element, loop to end
-            firstEle?.classList.remove('active');
-            lastEle?.classList.add('active');
-            lastEle?.scrollIntoView({ behavior: 'smooth', block: 'end'});
+        } else if (isArrowDown && lastOption?.classList.contains('active')) { // if arrowDown on last element, loop to top
+            lastOption!.classList.remove('active');
+            firstOption!.classList.add('active');
+            firstOption!.scrollIntoView({ behavior: 'smooth', block: 'end'});
+        } else if (isArrowUp && firstOption?.classList.contains('active')) { // if arrowUp on last element, loop to end
+            firstOption!.classList.remove('active');
+            lastOption!.classList.add('active');
+            lastOption!.scrollIntoView({ behavior: 'smooth', block: 'end'});
         } else if (isArrowDown || isArrowUp) { // if arrowDown or arrowUp, no loop
-            const children = parent.children;
+            const children = autocompleteEle.children;
             for (let i = 0; i < children.length; ++i) {
-                if (children[i] === currentEle) {
-                    currentEle.classList.remove('active');
+                if (children[i] === currentOption) {
                     const delta = e.key === 'ArrowDown' ? 1 : -1;
                     const newActiveEle = children[i + delta];
+
+                    currentOption.classList.remove('active');
                     newActiveEle.classList.add('active');
                     newActiveEle.scrollIntoView({ behavior: 'smooth', block: 'end'});
                     return;
                 }
             }
         } else { // default update autocomplete
-            const path = (e.currentTarget as HTMLInputElement).value;
-            generateAutocompletePathsForOption(path);
+            const targetEle = e.currentTarget as HTMLInputElement;
+            const targetNode = findMockById(explorerTree, targetEle.getAttribute('data-id') as string);
+            generateAutocompleteOptions(targetNode?.metadata.id as string);
         }
 
         keyStack = [];
+        return;
     };
 
     onMount(() => {
@@ -176,7 +178,7 @@ function SaveExplorer(props: any) {
     return (
         <div>
             <div class="relative flex">
-                <Text value={props.savePath()}
+                <Text value={props.saveToNode()?.metadata?.path ?? ''}
                     class={'border border-solid leading-[2em]'}
                     handleFocus={handleFocusAndEdit}
                     handleBlur={handleBlur}
@@ -194,7 +196,7 @@ function SaveExplorer(props: any) {
             </div>
             <div class={twMerge('h-full', scrollbarStyles)}>
                 <ExplorerTree>
-                    <ExplorerNode node={explorerTree} level={props.level ?? -1} />
+                    {Object.values(explorerTree?.children ?? {})}
                 </ExplorerTree>
             </div>
         </div>

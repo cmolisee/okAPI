@@ -21,6 +21,7 @@ function TabContentView() {
         workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
             for (const mock of Object.values(draft)) {
                 if (mock.metadata.isEditing) {
+                    mock.name = mock.name.replace(mock.method, value);
                     mock.method = value;
                     return;
                 }
@@ -33,6 +34,8 @@ function TabContentView() {
         workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
             for (const mock of Object.values(draft)) {
                 if (mock.metadata.isEditing) {
+                    const toReplace = mock.uri ? mock.uri : mock.metadata.id;
+                    mock.name = mock.name.replace(toReplace, value);
                     mock.uri = value;
                     return;
                 }

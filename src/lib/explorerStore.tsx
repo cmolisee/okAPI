@@ -95,30 +95,6 @@ function ExplorerStore(props: any) {
         explorerTreeTransaction(treeCopy);
     };
 
-    function _dfs(node: OkMock, target: OkMock, nodesInPath: OkMock[] = []): OkMock[]|null {
-        if (!node) {
-            return null;
-        }
-
-        nodesInPath.push(node);
-
-        if (node.metadata.id === target.metadata.id) {
-            return [...nodesInPath];
-        }
-
-        for (const childNode of Object.values(node.children)) {
-            const result = _dfs(childNode, target, [...nodesInPath]);
-
-            // early exit when found
-            if (result) {
-                return result;
-            }
-        }
-
-        nodesInPath.pop();
-        return null;
-    }
-
     function _collapseChildren(root: OkMock) {
         if (!root) {
             return;
@@ -140,7 +116,7 @@ function ExplorerStore(props: any) {
         }
 
         if (expanded) {
-            const nodesInPath = _dfs(root, node);
+            const nodesInPath = dfsFromTo(root, node);
                 nodesInPath?.forEach((node) => {
                 node.metadata.isExpanded = expanded;
             });

@@ -39,8 +39,48 @@ export const workspaceDataStorage = storage.defineItem<ObjectArray<OkMock>>(
     }
 );
 
-export const getUniqueId = () => new Date().valueOf().toString(36);
+export function getUniqueId(){
+    return new Date().valueOf().toString(36);
+}
 
-export const deepCopy = (obj: any) => {
+export function deepCopy(obj: any) {
     return JSON.parse(JSON.stringify(obj));
+}
+
+export function dfsFromTo(from: OkMock, to: OkMock, nodes: OkMock[] = []): OkMock[]|null {
+    if (!from) {
+        return null;
+    }
+
+    nodes.push(from);
+
+    if (JSON.stringify(from) === JSON.stringify(to)) {
+        return [...nodes];
+    }
+
+    for (const childNode of Object.values(from.children)) {
+        const result = dfsFromTo(childNode, to, [...nodes]);
+
+        // early exit when found
+        if (result) {
+            return result;
+        }
+    }
+
+    nodes.pop();
+    return null;
+}
+
+export function bfsFrom(from: OkMock): OkMock[] {
+    if (!from || !from.children || Object.values(from.children).length === 0) {
+        return [];
+    }
+
+    const result = [];
+    for (const childNode of Object.values(from.children)) {
+        result.push(childNode);
+        result.push(...bfsFrom(childNode, ))
+    }
+
+    return result;
 }
