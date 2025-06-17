@@ -4,6 +4,7 @@ import { useMenuContext } from "@/lib/contextMenuProvider";
 import { useExplorer } from "@/lib/explorerStore";
 import { useNotifications } from "@/lib/notificationProvider";
 import AddFolder from "./AddFolder";
+import { pathBuilder } from "@/utils/utils";
 
 function ExplorerNode(props: any) {
     const { addMock, removeMock, updateMockName, updateExpandedState } = useExplorer();
@@ -37,7 +38,7 @@ function ExplorerNode(props: any) {
                     isEditing: false,
                     isEnabled: false,
                     isExpanded: false,
-                    path: props.node?.metadata?.path + '/' + `newFolder_${newId}`,
+                    path: pathBuilder(props.node?.metadata?.path, `newFolder_${newId}`),
                     hasEdits: false,
 
                 }

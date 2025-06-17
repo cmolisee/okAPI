@@ -4,6 +4,7 @@ import { useNotifications } from "@/lib/notificationProvider";
 import { useNavigate } from "@solidjs/router";
 import Checkbox from "@/components/inputs/checkbox";
 import SaveExplorer from "@/components/explorer/SaveExplorer";
+import { pathBuilder } from "@/utils/utils";
 
 function Save (props:any) {
     const navigate = useNavigate();
@@ -49,7 +50,7 @@ function Save (props:any) {
                 // workspace is a 1D-array of mocks
                 for (const mock of Object.values(draft)) {
                     if (mocksToSave.some((m) => m.metadata.id === mock.metadata.id)) {
-                        mock.metadata.path = `${saveToNode().metadata.path}/${mock.name}`;
+                        mock.metadata.path = pathBuilder(saveToNode().metadata.path, mock.name);
                     }
                 }
             })
@@ -59,8 +60,11 @@ function Save (props:any) {
         const treeCopy = JSON.parse(JSON.stringify(explorerTree));
 
         explorerTreeTransaction(
-            produce((draft: ObjectArray<OkMock>) => {
-                const parentNode = findMockById(treeCopy, saveToNode().metadata.id);
+            produce((draft: OkMock) => {
+                // figure out how to use draft here so it actually updates
+                // /root needs to be removed from the autocomplete paths elements
+                // autocoplete needs to update based on current value
+                const parentNode = findMockById(draft, saveToNode().metadata.id);
 
                 if (!parentNode) {
                     return;
@@ -71,6 +75,9 @@ function Save (props:any) {
                 });
             })
         );
+
+        setShowNotification(false);
+        navigate('/', { replace: true });
     }
 
     const handleToggle = (item: { checked: Boolean, mock: OkMock }) => {

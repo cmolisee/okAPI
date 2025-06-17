@@ -20,7 +20,7 @@ export const defaultRootMock: OkMock = {
         isEditing: false,
         isEnabled: false,
         isExpanded: false,
-        path: "/root",
+        path: "",
         hasEdits: false
     }
 };
@@ -83,4 +83,8 @@ export function bfsFrom(from: OkMock): OkMock[] {
     }
 
     return result;
+}
+
+export function pathBuilder(...args: string[]) {
+    return args.filter(Boolean).join('/');
 }

@@ -1,4 +1,4 @@
-import { defaultRootMock, explorerDataStorage } from "@/utils/utils";
+import { defaultRootMock, explorerDataStorage, pathBuilder } from "@/utils/utils";
 import { trackStore } from "@solid-primitives/deep";
 import createDebounce from "./debounce";
 
@@ -74,7 +74,7 @@ function ExplorerStore(props: any) {
 
     const _updateTreePaths = (mock: OkMock|EmptyObject) => {
         for (const child of Object.values(mock.children)) {
-            child.metadata.path = `${mock.metadata.path}/${child.name}`;
+            child.metadata.path = pathBuilder(mock.metadata.path, child.name);
             _updateTreePaths(child);
         }
     };
@@ -88,10 +88,13 @@ function ExplorerStore(props: any) {
             return;
         }
 
+        const pathParts = node.metadata.path.split('/');
+        pathParts.pop();
+        
+        node.metadata.path = pathBuilder(...pathParts, name);
         node.name = name;
-        node.metadata.path = node?.metadata?.path?.slice(0, node?.metadata?.path?.lastIndexOf('/')) + '/' + name;
+        
         _updateTreePaths(node);
-
         explorerTreeTransaction(treeCopy);
     };
 

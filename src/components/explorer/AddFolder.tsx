@@ -1,5 +1,6 @@
 import { useMenuContext } from "@/lib/contextMenuProvider";
 import { useExplorer } from "@/lib/explorerStore";
+import { pathBuilder } from "@/utils/utils";
 import { VsAdd } from "solid-icons/vs"
 import { twMerge } from "tailwind-merge";
 
@@ -30,7 +31,7 @@ function AddFolder(props: any) {
                     isEditing: false,
                     isEnabled: false,
                     isExpanded: false,
-                    path: props.path + '/' + `newFolder_${newId}`,
+                    path: pathBuilder(props.path, `newFolder_${newId}`),
                     hasEdits: false,
 
                 }
