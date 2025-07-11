@@ -26,6 +26,7 @@ function SaveExplorer(props: any) {
         return flatMappedNodes.map((n) => ({ id: n.metadata.id, path: n.metadata.path })).sort(sortByPathPredicate);
     });
 
+    // generate all options but hide the ones that are irrelevent 
     const generateAutocompleteOptions = (id: string) => {
         if (!autocompleteRef) {
             return;
@@ -58,16 +59,18 @@ function SaveExplorer(props: any) {
         }
 
         const autocompleteEle = (autocompleteRef as HTMLDivElement);
+        const inputEle = document.getElementById('autocompleteInput');
         const el = document.createElement('div');
 
         el.classList = 'cursor-pointer hover:bg-secondary-bg dark:hover:bg-secondary-bg [&.active]:bg-secondary-bg dark:[&.active]:bg-secondary-bg px-2 rounded-sm';
-        el.innerText = opt.path;
+        el.innerText = opt.path.replace('/root', '');
         el.id = opt.id;
         el.setAttribute('data-id', opt.id);
         el.setAttribute('data-path', opt.path);
         el.addEventListener('mousedown', () => {
             const targetNode = findMockById(explorerTree, opt.id);
             props.setSaveToNode(targetNode);
+            inputEle?.setAttribute('data-id', targetNode?.metadata?.id ?? '');
             updateExpandedState(targetNode?.metadata.id as string, true);
             setShowAutocomplete(false);
         });
@@ -80,16 +83,16 @@ function SaveExplorer(props: any) {
             return;
         }
 
-        const inputEle = e.currentTarget as HTMLInputElement
-        const targetId = inputEle.getAttribute('data-id') ?? 'root';
-        const mock = findMockById(explorerTree, targetId ?? 'root');
+        const inputEle = document.getElementById('autocompleteInput');
+        const targetId = inputEle?.getAttribute('data-id') ?? 'root';
+        const targetNode = findMockById(explorerTree, targetId ?? 'root');
 
         if (targetId !== 'root') {
-            props.setSaveToNode({ id: mock?.metadata.id, path: mock?.metadata.path });
-            updateExpandedState(mock?.metadata.id as string, true);
+            props.setSaveToNode(targetNode);
+            updateExpandedState(targetNode?.metadata.id as string, true);
         }
 
-        generateAutocompleteOptions(mock?.metadata.id as string);
+        generateAutocompleteOptions(targetNode?.metadata.id as string);
         setShowAutocomplete(autocompleteRef.children?.length > 0);
         return; 
     };
@@ -122,6 +125,7 @@ function SaveExplorer(props: any) {
         }
 
         const autocompleteEle = autocompleteRef as HTMLDivElement;
+        const inputEle = document.getElementById('autocompleteInput') as HTMLInputElement;
         const currentOption = autocompleteEle?.querySelector('.active');
         const firstOption = autocompleteEle?.firstElementChild;
         const lastOption = autocompleteEle?.lastElementChild;
@@ -138,6 +142,7 @@ function SaveExplorer(props: any) {
             const targetNode = findMockById(explorerTree, currentOption.getAttribute('data-id') as string);
 
             props.setSaveToNode(targetNode);
+            inputEle?.setAttribute('data-id', targetNode?.metadata?.id ?? '');
             updateExpandedState(targetNode?.metadata.id as string, true);
             setShowAutocomplete(false);
         } else if (isArrowDown && lastOption?.classList.contains('active')) { // if arrowDown on last element, loop to top
@@ -161,10 +166,8 @@ function SaveExplorer(props: any) {
                     return;
                 }
             }
-        } else { // default update autocomplete
-            const targetEle = e.currentTarget as HTMLInputElement;
-            const targetNode = findMockById(explorerTree, targetEle.getAttribute('data-id') as string);
-            generateAutocompleteOptions(targetNode?.metadata.id as string);
+        } else {
+            generateAutocompleteOptions(inputEle.value);
         }
 
         keyStack = [];
@@ -178,13 +181,15 @@ function SaveExplorer(props: any) {
     return (
         <div>
             <div class="relative flex">
-                <Text value={props.saveToNode()?.metadata?.path ?? ''}
+                <Text value={props.saveToNode()?.metadata?.path.replace('/root', '') ?? ''}
+                    id={'autocompleteInput'}
                     class={'border border-solid leading-[2em]'}
                     handleFocus={handleFocusAndEdit}
                     handleBlur={handleBlur}
                     handleChange={handleFocusAndEdit}
                     handleKeyDown={handleKeyDown}
-                    handleKeyUp={handleKeyUp} />
+                    handleKeyUp={handleKeyUp} 
+                    autocomplete={'off'} />
                 <div ref={autocompleteRef} 
                     class={twMerge(
                         'absolute z-20 top-full left-[0] right-[0] max-h-[8em] bg-primary-bg shadow-lg overflow-scroll mt-2 p-2', 

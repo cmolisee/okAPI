@@ -60,6 +60,7 @@ declare global {
   const onCleanup: typeof import('solid-js')['onCleanup']
   const onError: typeof import('solid-js')['onError']
   const onMount: typeof import('solid-js')['onMount']
+  const pathBuilder: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/utils')['pathBuilder']
   const produce: typeof import('solid-js/store')['produce']
   const reconcile: typeof import('solid-js/store')['reconcile']
   const render: typeof import('solid-js/web')['render']

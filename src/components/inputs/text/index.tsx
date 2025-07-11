@@ -13,7 +13,8 @@ function Text(props: any) {
             on:blur={props?.handleBlur}
             on:change={props?.handleChange}
             on:keydown={props?.handleKeyDown}
-            on:keyup={props?.handleKeyUp} /> 
+            on:keyup={props?.handleKeyUp} 
+            autocomplete={props.autocomplete} /> 
     );
 }
 

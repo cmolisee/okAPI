@@ -18,6 +18,7 @@ interface OkMetadata {
     isEnabled: boolean;
     isExpanded: boolean;
     path: string; // uri path comprised of each nodes name field
+    // consider parent
     hasEdits: boolean;
 }
 
