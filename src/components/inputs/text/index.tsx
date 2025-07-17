@@ -11,7 +11,7 @@ function Text(props: any) {
             placeholder={props?.placeholder ?? ''}
             on:focus={props?.handleFocus}
             on:blur={props?.handleBlur}
-            on:change={props?.handleChange}
+            on:input={props?.handleInput}
             on:keydown={props?.handleKeyDown}
             on:keyup={props?.handleKeyUp} 
             autocomplete={props.autocomplete} /> 
