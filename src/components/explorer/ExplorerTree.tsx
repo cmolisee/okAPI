@@ -1,4 +1,4 @@
-import AddFolder from "./AddFolder";
+import AddFolder from "./AddFolderButton";
 import ExplorerNode from "./ExplorerNode";
 
 function ExplorerTree(props: any) {

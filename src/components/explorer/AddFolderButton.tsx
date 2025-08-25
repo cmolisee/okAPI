@@ -42,12 +42,16 @@ function AddFolder(props: any) {
     }
 
     return (
-        <div class={twMerge('flex items-center italic pl-[12px] py-2 cursor-pointer text-sm font-thin', props.leftBorder ? 'border-l-2' : '')}
-            style={{ "margin-left": nestedStyles }}
+        // <div class={twMerge('flex items-center italic pl-[12px] py-2 cursor-pointer text-sm font-thin', props.leftBorder ? 'border-l-2' : '')}
+        //     style={{ "margin-left": nestedStyles }}
+        //     on:click={handleAddFolder}>
+                
+            
+        // </div>
+        <button class={twMerge('flex items-center italic pl-[12px] py-2 cursor-pointer text-sm font-thin', props.leftBorder ? 'border-l-2' : '')} 
             on:click={handleAddFolder}>
-                Add Folder
-            <VsAdd size={16} color="currentColor" class="vs text-okPurple-500 dark:text-okGreen-500 mx-2 cursor-pointer" />
-        </div>
+            Add Folder <VsAdd size={16} color="currentColor" class="vs text-okPurple-500 dark:text-okGreen-500 mx-2 cursor-pointer" />
+        </button>
     );
 }
 

@@ -17,7 +17,7 @@ export function setThemeVariables(theme: 'light' | 'dark') {
         '--color-primary-border': '#134B70',
 
         '--color-secondary-bg': '#508C9B',
-        '--color-secondary-text': '#EEEEEE',
+        '--color-secondary-text': '#323232',
         '--color-secondary-border': '#134B70',
     };
 

@@ -1,5 +1,6 @@
 import ExplorerNode from "@/components/explorer/ExplorerNode";
 import ExplorerTree from "@/components/explorer/ExplorerTree";
+import Tree from "@/components/explorer/Tree";
 import { useExplorer } from "@/lib/explorerStore";
 import { trackStore } from "@solid-primitives/deep";
 import { twMerge } from "tailwind-merge";
@@ -48,11 +49,15 @@ function Explorer (props:any) {
         })
     });
 
+    // console.log(explorerTree);
+
     return (
         <div class={twMerge('h-full', scrollbarStyles)}>
-            <ExplorerTree>
+            {/* <ExplorerTree>
                 {Object.values(explorerTree?.children ?? {})}
-            </ExplorerTree>
+            </ExplorerTree> */}
+
+            <Tree />
         </div>
     )
 }

@@ -1,5 +1,5 @@
 import Button from "@/components/inputs/button";
-import ContextMenu from "@/components/contextMenu/ContextMenu";
+import ContextMenu from "@/components/contextMenu/CustomContextMenu";
 
 export const contextMenuContext = createContext<ContextMenuContext>({
     showContextMenu: () => { },

@@ -1,3 +1,4 @@
+import CustomContextMenu from "@/components/contextMenu/CustomContextMenu";
 import TabContentView from "@/components/tabContentView";
 import Tabs from "@/components/tabs";
 import { useWorkspace } from "@/lib/workspaceStore";
@@ -28,10 +29,12 @@ function Workspace (props: any) {
 
     return (
         <div class='flex flex-col h-full'>
+            <CustomContextMenu text={'some text'} menuItems={[{text: 'one', callback: () => console.log('one')}]} />
             <Tabs />
             <div class={twMerge('p-2 h-full border border-primary-border rounded-md overflow-y-auto', scrollbarStyles)}>
                 <TabContentView />
             </div>
+            
         </div>
     );
 }

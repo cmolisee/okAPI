@@ -1,0 +1,87 @@
+[data-scope="tree-view"][data-part="tree"] {
+    margin: 24px;
+}
+
+[data-scope="tree-view"][data-part="item"],
+[data-scope="tree-view"][data-part="branch-control"] {
+    --padding-inline: 16px;
+    padding-inline-start: calc(var(--depth) * var(--padding-inline));
+    padding-inline-end: var(--padding-inline);
+}
+
+/* [data-scope="tree-view"][data-part="item"] svg,
+[data-scope="tree-view"][data-part="branch-control"] svg {
+  @apply w-4 h-4 opacity-50;
+} */
+
+[data-scope="tree-view"][data-part="item"]:hover,
+[data-scope="tree-view"][data-part="branch-control"]:hover {
+    background: rgba(194, 194, 194, 0.3);
+}
+
+[data-scope="tree-view"][data-part="item"][data-selected],
+[data-scope="tree-view"][data-part="branch-control"][data-selected] {
+    background: rgba(226, 226, 226, 0.3);
+}
+
+[data-scope="tree-view"][data-part="item"]:focus,
+[data-scope="tree-view"][data-part="branch-control"]:focus {
+    outline: 1px solid rgba(148, 148, 148, 0.3);
+}
+
+/* [data-scope="tree-view"][data-part="item-text"],
+[data-scope="tree-view"][data-part="branch-text"] {
+  @apply flex-1;
+} */
+
+/* [data-scope="tree-view"][data-part="branch-content"] {
+  @apply relative isolate overflow-hidden max-w-[400px];
+} */
+
+[data-scope="tree-view"][data-part="branch-indent-guide"] {
+    translate: calc(var(--depth) * 1.25rem);
+}
+
+/* [data-scope="tree-view"][data-part="branch-indicator"] {
+  @apply flex items-center;
+} */
+
+[data-scope="tree-view"][data-part="branch-indicator"][data-state="open"] svg {
+    transform: rotate(90deg);
+}
+
+[data-scope='tree-view'][data-part='branch-content'][data-state='open'] {
+    animation: slideDown 250ms cubic-bezier(0, 0, 0.38, 0.9);
+}
+
+[data-scope='tree-view'][data-part='branch-content'][data-state='closed'] {
+    animation: slideUp 200ms cubic-bezier(0, 0, 0.38, 0.9);
+}
+
+/* [data-scope="tree-view"][data-part="item-checkbox"] {
+  @apply flex items-center justify-center;
+} */
+
+@keyframes slideDown {
+    from {
+        opacity: 0.01;
+        height: 0;
+    }
+
+    to {
+        opacity: 1;
+        height: var(--height);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        height: var(--height);
+    }
+
+    to {
+        opacity: 0.01;
+        height: 0;
+    }
+}

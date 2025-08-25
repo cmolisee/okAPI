@@ -47,6 +47,24 @@ export function deepCopy(obj: any) {
     return JSON.parse(JSON.stringify(obj));
 }
 
+export function deepMapObject(obj: any, callback: Function): any {
+    if (typeof obj !== 'object' || obj === null) {
+        return callback(obj);
+    }
+
+    if (Array.isArray(obj)) {
+        return obj.map((item: any) => deepMapObject(item, callback));
+    }
+
+    const newObj: any = {};
+    for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            newObj[key] = deepMapObject(obj[key], callback);
+        }
+    }
+    return newObj;
+}
+
 export function dfsFromTo(from: OkMock, to: OkMock, nodes: OkMock[] = []): OkMock[]|null {
     if (!from) {
         return null;

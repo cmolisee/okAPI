@@ -36,6 +36,7 @@ declare global {
   const createStore: typeof import('solid-js/store')['createStore']
   const customEventMessenger: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/webpageMessaging')['customEventMessenger']
   const deepCopy: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/utils')['deepCopy']
+  const deepMapObject: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/utils')['deepMapObject']
   const defaultRootMock: typeof import('/Users/cmolisee/Documents/okAPI/src/utils/utils')['defaultRootMock']
   const defineAppConfig: typeof import('wxt/sandbox')['defineAppConfig']
   const defineBackground: typeof import('wxt/sandbox')['defineBackground']

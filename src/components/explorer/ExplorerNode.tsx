@@ -3,12 +3,13 @@ import { twMerge } from "tailwind-merge";
 import { useMenuContext } from "@/lib/contextMenuProvider";
 import { useExplorer } from "@/lib/explorerStore";
 import { useNotifications } from "@/lib/notificationProvider";
-import AddFolder from "./AddFolder";
+import AddFolder from "./AddFolderButton";
 import { pathBuilder } from "@/utils/utils";
+import CustomContextMenu from "../contextMenu/CustomContextMenu";
 
 function ExplorerNode(props: any) {
     const { addMock, removeMock, updateMockName, updateExpandedState } = useExplorer();
-    const { handleContextMenu, handleCloseContextMenu } = useMenuContext();
+    // const { handleContextMenu, handleCloseContextMenu } = useMenuContext();
     const { setNotificationConfig, setShowNotification } = useNotifications();
     const [editName, setEditName] = createSignal(false);
     const explorerIcons = {
@@ -43,7 +44,7 @@ function ExplorerNode(props: any) {
 
                 }
             });
-        handleCloseContextMenu();
+        // handleCloseContextMenu();
         updateExpandedState(props.node?.metadata?.id, true);
         return;
     }
@@ -56,12 +57,12 @@ function ExplorerNode(props: any) {
         const parentId = nodesFromPath[nodesFromPath.length - 2];
 
         removeMock(parentId, props.node?.metadata?.id);
-        handleCloseContextMenu();
+        // handleCloseContextMenu();
         return;
     }
 
     const removeFolderNotification = (e: MouseEvent) => {
-        handleCloseContextMenu();
+        // handleCloseContextMenu();
         setNotificationConfig({
             continueCallback: () => handleRemoveFolder(e),
             content: <div>Are you sure you want to delete this folder and all its content?</div>,
@@ -74,7 +75,7 @@ function ExplorerNode(props: any) {
         e.stopPropagation();
 
         setEditName(true);
-        handleCloseContextMenu();
+        // handleCloseContextMenu();
         return;
     }
 
@@ -105,16 +106,22 @@ function ExplorerNode(props: any) {
         }
     };
 
-    const contextHandler = (e: MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
+    // const contextHandler = (e: MouseEvent) => {
+    //     e.preventDefault();
+    //     e.stopPropagation();
         
-        handleContextMenu(e, 
-            { text: 'Add Folder', callback: handleAddFolder }, 
-            { text: 'Remove Folder', callback: removeFolderNotification },
-            { text: 'Edit Folder Name', callback: handleEditName },
-        );
-    };
+    //     handleContextMenu(e, 
+    //         { text: 'Add Folder', callback: handleAddFolder }, 
+    //         { text: 'Remove Folder', callback: removeFolderNotification },
+    //         { text: 'Edit Folder Name', callback: handleEditName },
+    //     );
+    // };
+
+    const contextMenuItems = [
+        { text: 'Add Folder', callback: handleAddFolder }, 
+        { text: 'Remove Folder', callback: removeFolderNotification },
+        { text: 'Edit Folder Name', callback: handleEditName },
+    ]
 
     createEffect(() => {
         if (editName()) {
@@ -127,7 +134,8 @@ function ExplorerNode(props: any) {
     return (
         <div>
             <Show when={props.node?.metadata?.type !== 'root'}>
-                <div class={twMerge("flex items-center pl-[12px] py-2 cursor-pointer", props.level > 0 ? "border-l-2" : "")}
+                <CustomContextMenu title={props.node?.name} menuItems={contextMenuItems}/>
+                {/* <div class={twMerge("flex items-center pl-[12px] py-2 cursor-pointer", props.level > 0 ? "border-l-2" : "")}
                     style={{ "margin-left": `${props.level * 32}px` }}
                     onClick={props.node?.metadata?.type !== "mock" ? toggleExpand : undefined}
                     ondblclick={handleEditName}
@@ -157,7 +165,7 @@ function ExplorerNode(props: any) {
                             <VsTriangleRight size={18} class="text-secondary-text dark:text-secondary-text" />
                         </span>
                     </Show>
-                </div>
+                </div> */}
             </Show>
             <Show when={props.node?.metadata?.isExpanded}>
                 <div class="children">
