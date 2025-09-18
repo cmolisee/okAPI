@@ -6,36 +6,36 @@ export function safeParse(obj: any) {
     }
 }
 
-export const defaultRootMock: OkMock = {
+export const defaultRootMock: MockApiNode = {
     name: "root",
-    description: "",
-    method: "GET",
-    uri: "",
-    body: "",
-    params: {},
-    children: {},
-    metadata: {
-        id: "root",
-        type: "root",
+    id: "root",
+    data: {
+        description: "",
+        method: "GET",
+        uri: "",
+        body: "",
+        params: {},
+        hasEdits: false,
         isEditing: false,
         isEnabled: false,
         isExpanded: false,
         path: "",
-        hasEdits: false
-    }
+        type: "root"
+    },
+    children: {},
 };
 
-export const explorerDataStorage = storage.defineItem<OkMock>(
+export const explorerDataStorage = storage.defineItem<MockApiNode>(
     'local:explorerData',
     {
         fallback: defaultRootMock,
     },
 );
 
-export const workspaceDataStorage = storage.defineItem<ObjectArray<OkMock>>(
+export const workspaceDataStorage = storage.defineItem<ObjectArray<MockApiNode>>(
     'local:workspaceData',
     {
-        fallback: {} as ObjectArray<OkMock>,
+        fallback: {} as ObjectArray<MockApiNode>,
     }
 );
 
@@ -65,7 +65,7 @@ export function deepMapObject(obj: any, callback: Function): any {
     return newObj;
 }
 
-export function dfsFromTo(from: OkMock, to: OkMock, nodes: OkMock[] = []): OkMock[]|null {
+export function dfsFromTo(from: MockApiNode, to: MockApiNode, nodes: MockApiNode[] = []): MockApiNode[]|null {
     if (!from) {
         return null;
     }
@@ -89,7 +89,7 @@ export function dfsFromTo(from: OkMock, to: OkMock, nodes: OkMock[] = []): OkMoc
     return null;
 }
 
-export function bfsFrom(from: OkMock): OkMock[] {
+export function bfsFrom(from: MockApiNode): MockApiNode[] {
     if (!from || !from.children || Object.values(from.children).length === 0) {
         return [];
     }

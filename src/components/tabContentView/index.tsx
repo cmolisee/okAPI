@@ -18,11 +18,11 @@ function TabContentView() {
 
     const handleMethodUpdate = (e: Event) => {
         const value = (e.target as HTMLSelectElement).value as MethodType;
-        workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
+        workspaceDataTransaction(produce((draft: ObjectArray<MockApiNode>) => {
             for (const mock of Object.values(draft)) {
-                if (mock.metadata.isEditing) {
-                    mock.name = mock.name.replace(mock.method, value);
-                    mock.method = value;
+                if (mock.data.isEditing) {
+                    mock.name = mock.name.replace(mock.data.method, value);
+                    mock.data.method = value;
                     return;
                 }
             }
@@ -31,12 +31,12 @@ function TabContentView() {
 
     const handleUriUpdate = (e: Event) => {
         const value = (e.target as HTMLInputElement).value;
-        workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
+        workspaceDataTransaction(produce((draft: ObjectArray<MockApiNode>) => {
             for (const mock of Object.values(draft)) {
-                if (mock.metadata.isEditing) {
-                    const toReplace = mock.uri ? mock.uri : mock.metadata.id;
+                if (mock.data.isEditing) {
+                    const toReplace = mock.data.uri ? mock.data.uri : mock.id;
                     mock.name = mock.name.replace(toReplace, value);
-                    mock.uri = value;
+                    mock.data.uri = value;
                     return;
                 }
             }
@@ -45,10 +45,10 @@ function TabContentView() {
 
     const handleIsEnabledUpdate = (e: Event) => {
         const value = (e.target as HTMLInputElement).checked;
-        workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
+        workspaceDataTransaction(produce((draft: ObjectArray<MockApiNode>) => {
             for (const mock of Object.values(draft)) {
-                if (mock.metadata.isEditing) {
-                    mock.metadata.isEnabled = value;
+                if (mock.data.isEditing) {
+                    mock.data.isEnabled = value;
                     return;
                 }
             }
@@ -56,10 +56,10 @@ function TabContentView() {
     };
     
     const handleBodyUpdate = (doc: string) => {
-        workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
+        workspaceDataTransaction(produce((draft: ObjectArray<MockApiNode>) => {
             for (const mock of Object.values(draft)) {
-                if (mock.metadata.isEditing) {
-                    mock.body = doc;
+                if (mock.data.isEditing) {
+                    mock.data.body = doc;
                     return;
                 }
             }
@@ -68,18 +68,18 @@ function TabContentView() {
 
     // individual param add, delete, update is handled in <For />
     const handleAddParam = () => {
-        workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
+        workspaceDataTransaction(produce((draft: ObjectArray<MockApiNode>) => {
             for (const mock of Object.values(draft)) {
-                if (mock.metadata.isEditing) {
+                if (mock.data.isEditing) {
                     const paramId = getUniqueId();
-                    const emptyParam: OkParam = {
+                    const emptyParam: MockApiParam = {
                         id: paramId,
                         active: false,
                         key: '',
                         value: '',
                     }
 
-                    mock.params[paramId] = emptyParam;
+                    mock.data.params[paramId] = emptyParam;
                     return;
                 }
             }
@@ -88,10 +88,10 @@ function TabContentView() {
 
     const handleRemoveParam = (paramIdToRemove: string) => {
         workspaceDataTransaction(
-            produce((draft: ObjectArray<OkMock>) => {
+            produce((draft: ObjectArray<MockApiNode>) => {
                 for (const mock of Object.values(draft)) {
-                    if (mock.metadata.isEditing) {
-                        delete mock.params[paramIdToRemove];
+                    if (mock.data.isEditing) {
+                        delete mock.data.params[paramIdToRemove];
                         return;
                     }
                 }
@@ -105,7 +105,7 @@ function TabContentView() {
 
     const isShow = createMemo(() => {
         for (const mock of Object.values(workspaceData)) {
-            if (mock.metadata.isEditing) {
+            if (mock.data.isEditing) {
                 return mock;
             }
         }
@@ -117,9 +117,9 @@ function TabContentView() {
 
     return (
         <Show when={isShow()} fallback={Fallback} keyed>
-            {(tab: OkMock) => (
+            {(tab: MockApiNode) => (
                 <div class="flex flex-col gap-4">
-                    <Show when={!tab.metadata.path} fallback={<></>}>
+                    <Show when={!tab.data.path} fallback={<></>}>
                         <div class="flex flex-row p-[0.375rem] rounded-md items-center my-2 bg-okRed-200">
                             <ImNotification stroke="currentColor" size={18} class="vs mr-2 text-okRed-500 cursor-pointer" />
                             <span class="italic">
@@ -129,13 +129,13 @@ function TabContentView() {
                     </Show>
                     <div class="flex flex-row justify-between gap-2 align-center">
                         <Dropdown class={'border-solid'} name={'method'} handleChange={handleMethodUpdate}>
-                            <option value="GET" selected={tab.method === 'GET'}>GET</option>
-                            <option value="POST" selected={tab.method === 'POST'}>POST</option>
-                            <option value="PUT" selected={tab.method === 'PUT'}>PUT</option>
-                            <option value="DELETE" selected={tab.method === 'DELETE'}>DELETE</option>
+                            <option value="GET" selected={tab.data.method === 'GET'}>GET</option>
+                            <option value="POST" selected={tab.data.method === 'POST'}>POST</option>
+                            <option value="PUT" selected={tab.data.method === 'PUT'}>PUT</option>
+                            <option value="DELETE" selected={tab.data.method === 'DELETE'}>DELETE</option>
                         </Dropdown>
-                        <Text class='border-solid' id={'uri'} value={tab.uri} placeholder={'URI'} handleBlur={handleUriUpdate} />
-                        <Toggle toggleSize="m" checked={tab.metadata.isEnabled} changeCallback={handleIsEnabledUpdate} />
+                        <Text class='border-solid' id={'uri'} value={tab.data.uri} placeholder={'URI'} handleBlur={handleUriUpdate} />
+                        <Toggle toggleSize="m" checked={tab.data.isEnabled} changeCallback={handleIsEnabledUpdate} />
                     </div>
                     <div>
                         <div class="grid grid-cols-[5fr_7fr] grid-rows-2 gap-2">
@@ -143,15 +143,15 @@ function TabContentView() {
                             <div class="text-center border">Key</div>
                             <div class="text-center border">Value</div>
                             {/* defined params */}
-                            <For each={Object.values(tab.params)}>
+                            <For each={Object.values(tab.data.params)}>
                                 {(thisParam) => {
                                     const onActiveChange = (e: Event) => {
                                         const value = (e.target as HTMLInputElement).checked;
                                         workspaceDataTransaction(
-                                            produce((draft: ObjectArray<OkMock>) => {
+                                            produce((draft: ObjectArray<MockApiNode>) => {
                                                 for (const mock of Object.values(draft)) {
-                                                    if (mock.metadata.isEditing) {
-                                                        const paramToUpdate = mock.params[thisParam.id];
+                                                    if (mock.data.isEditing) {
+                                                        const paramToUpdate = mock.data.params[thisParam.id];
                                                         paramToUpdate.active = value;
                                                         return;
                                                     }
@@ -163,10 +163,10 @@ function TabContentView() {
                                     const onKeyBlur = (e: Event) => {
                                         const value = (e.target as HTMLInputElement).value;
                                         workspaceDataTransaction(
-                                            produce((draft: ObjectArray<OkMock>) => {
+                                            produce((draft: ObjectArray<MockApiNode>) => {
                                                 for (const mock of Object.values(draft)) {
-                                                    if (mock.metadata.isEditing) {
-                                                        const paramToUpdate = mock.params[thisParam.id];
+                                                    if (mock.data.isEditing) {
+                                                        const paramToUpdate = mock.data.params[thisParam.id];
                                                         paramToUpdate.key = value;
                                                         return;
                                                     }
@@ -178,10 +178,10 @@ function TabContentView() {
                                     const onValueBlur = (e: Event) => {
                                         const value = (e.target as HTMLInputElement).value;
                                         workspaceDataTransaction(
-                                            produce((draft: ObjectArray<OkMock>) => {
+                                            produce((draft: ObjectArray<MockApiNode>) => {
                                                 for (const mock of Object.values(draft)) {
-                                                    if (mock.metadata.isEditing) {
-                                                        const paramToUpdate = mock.params[thisParam.id];
+                                                    if (mock.data.isEditing) {
+                                                        const paramToUpdate = mock.data.params[thisParam.id];
                                                         paramToUpdate.value = value;
                                                         return;
                                                     }
@@ -211,7 +211,7 @@ function TabContentView() {
                         </div>
                     </div>
                     <div>
-                        <CodeField value={tab?.body ?? '{}'} setValue={handleBodyUpdate} />
+                        <CodeField value={tab?.data?.body ?? '{}'} setValue={handleBodyUpdate} />
                     </div>
                 </div>
             )}

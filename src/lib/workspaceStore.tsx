@@ -20,21 +20,21 @@ export const useWorkspace = () => {
 
 // workspace object is expected to reflect the structure of a single level array
 function WorkspaceStore(props: any) {
-    const [workspaceData, workspaceDataTransaction] = createStore<ObjectArray<OkMock>>({});
+    const [workspaceData, workspaceDataTransaction] = createStore<ObjectArray<MockApiNode>>({});
 
-    const addWorkspaceItem = (newItem: OkMock) => {
-        workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
+    const addWorkspaceItem = (newItem: MockApiNode) => {
+        workspaceDataTransaction(produce((draft: ObjectArray<MockApiNode>) => {
             for (const mock of Object.values(draft)) {
-                mock.metadata.isEditing = false;
+                mock.data.isEditing = false;
             }
 
-            newItem.metadata.isEditing = true;
-            draft[newItem.metadata.id] = newItem;
+            newItem.data.isEditing = true;
+            draft[newItem.id] = newItem;
         }));
     };
 
     const removeWorkspaceItem = (id: string) => {
-        workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
+        workspaceDataTransaction(produce((draft: ObjectArray<MockApiNode>) => {
             if (id in draft) {
                 delete draft[id];
             }
@@ -42,26 +42,26 @@ function WorkspaceStore(props: any) {
     };
 
     const setEditingWorkspaceItem = (id: string) => {
-        workspaceDataTransaction(produce((draft: ObjectArray<OkMock>) => {
+        workspaceDataTransaction(produce((draft: ObjectArray<MockApiNode>) => {
             for (const mock of Object.values(draft)) {
-                mock.metadata.isEditing = mock.metadata.id === id;
+                mock.data.isEditing = mock.id === id;
             }
         }));
     };
 
-    const handleSaveWorkspace = createDebounce((data: ObjectArray<OkMock>) => {
+    const handleSaveWorkspace = createDebounce((data: ObjectArray<MockApiNode>) => {
         workspaceDataStorage.setValue(deepCopy(data))
             .catch((e: any) => console.debug("Error saving workspace data: ", e));
     });
 
     onMount(async () => {
-        const savedWorkspace: ObjectArray<OkMock> = await workspaceDataStorage.getValue();
+        const savedWorkspace: ObjectArray<MockApiNode> = await workspaceDataStorage.getValue();
         workspaceDataTransaction(deepCopy(savedWorkspace));
     });
 
     createEffect(on(
         () => trackStore(workspaceData),
-        (data: ObjectArray<OkMock>) => handleSaveWorkspace(data),
+        (data: ObjectArray<MockApiNode>) => handleSaveWorkspace(data),
         { defer: true }
     ));
 

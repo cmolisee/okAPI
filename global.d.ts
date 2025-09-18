@@ -11,84 +11,78 @@ interface Pos {
     y: number;
 }
 
-interface OkMetadata {
-    id: string;
-    type: "mock" | "folder" | "root";
+interface MockApiData {
+    body: string;
+    description: string;
+    hasEdits: boolean;
     isEditing: boolean;
     isEnabled: boolean;
     isExpanded: boolean;
+    method: MethodType;
+    params: ObjectArray<MockApiParam>;
     path: string; // uri path comprised of each nodes name field
-    // consider parent
-    hasEdits: boolean;
+    type: "mock" | "folder" | "root";
+    uri: string;
 }
 
-interface OkParam {
-    id: string;
+interface MockApiParam {
     active: boolean;
+    id: string;
     key: string;
     value: string;
 }
 
-interface OkMock {
-    // folder: default or user defined (e.g. mySiteMocks, newFolder_mzawe23, etc...)
-    // mock: default or <method>_<uri> (e.g. mzawe23, GET_www.website.com, etc...)
-    // the name field represents this node in metadata.path
-    name: string; 
-    description: string;
-    method: MethodType;
-    uri: string;
-    body: string;
-    params: ObjectArray<OkParam>;
-    children: ObjectArray<OkMock>;
-    metadata: OkMetadata;
+interface MockApiNode {
+    children: ObjectArray<MockApiNode>
+    data: MockApiData,
+    id: string,
+    name: string,
 }
 
 interface WorkspaceStoreContext {
-    workspaceData: ObjectArray<OkMock>;
-    workspaceDataTransaction: SetStoreFunction<ObjectArray<OkMock>>;
-    addWorkspaceItem: (newItem: OkMock) => void;
+    addWorkspaceItem: (newItem: MockApiNode) => void;
     removeWorkspaceItem: (id: string) => void;
     setEditingWorkspaceItem: (id: string) => void;
+    workspaceData: ObjectArray<MockApiNode>;
+    workspaceDataTransaction: SetStoreFunction<ObjectArray<MockApiNode>>;
 }
 
-interface ExplorerContext {
-    explorerTree: OkMock|EmptyObject;
-    explorerTreeTransaction: SetStoreFunction<OkMock|EmptyObject>;
-    findMockById: (tree: OkMock|EmptyObject, id: string) => OkMock|null;
-    addMock: (parentId: string, node: OkMock) => void;
-    removeMock: (parentId: string, targetId: string) => void;
-    updateMockName: (id: string, name: string) => void;
-    updateExpandedState: (id: string, expanded: boolean) => void;
-    moveMock: () => void;
+interface MockApiTreeContext {
+    find: (id: string) => MockApiNode|null|undefined;
+    forEach: (callback: (node: MockApiNode) => boolean) => boolean;
+    insert: (parentNodeId: string, node: MockApiNode) => MockApiNode|null|undefined;
+    remove: (id: string) => MockApiNode|null|undefined;
+    tree: MockApiNode|EmptyObject;
+    treeTransaction: SetStoreFunction<MockApiNode|EmptyObject>;
 }
 
 interface ContextMenuContext {
-    showContextMenu: Accessor<boolean>;
-    position: Accessor<Pos>;
     contextMenuChildren: Accessor<any>;
-    setContextMenuRef: Setter<ContextMenuRef>;
-    setContextMenuChildren: Setter<any>;
-    handleContextMenu: (e: MouseEvent, ...children: {text:string,callback:(e:MouseEvent)=>void}[]) => void;
     handleCloseContextMenu: () => void;
+    handleContextMenu: (e: MouseEvent, ...children: {text:string,callback:(e:MouseEvent)=>void}[]) => void;
+    position: Accessor<Pos>;
+    setContextMenuChildren: Setter<any>;
+    setContextMenuRef: Setter<ContextMenuRef>;
+    showContextMenu: Accessor<boolean>;
 }
 
 interface NotificationContext {
-    setShowNotification: Setter<boolean>;
     setNotificationConfig: Setter<NotificationConfiguration>;
+    setShowNotification: Setter<boolean>;
 }
 
 interface NotificationConfiguration {
-    cancelText?: string;
-    continueText?: string;
     cancelCallback?: Function;
-    continueCallback?: Function;
+    cancelText?: string;
     content?: any;
+    continueCallback?: Function;
+    continueText?: string;
 };
 
 interface EditorPanelState {
+    change: boolean;
     initialDoc: string;
     saveCallback: (doc: string) => void;
-    change: boolean;
 }
 
 interface InternalMessengerProtocolMap {
@@ -96,18 +90,18 @@ interface InternalMessengerProtocolMap {
 }
 
 interface BackgroundMessengerProtocolMap {
-    toContent(data: any): MessengerResponse;
     fromContent(data: any): MessengerResponse;
+    toContent(data: any): MessengerResponse;
 }
 
 interface CustomEventMessengerProtocolMap {
-    toInject(data: any): MessengerResponse;
     fromInject(data: any): MessengerResponse;
     toBackground(data: any): MessengerResponse;
+    toInject(data: any): MessengerResponse;
 }
 
 interface MessengerResponse {
-    status: number;
-    error?: string;
     description?: string;
+    error?: string;
+    status: number;
 }

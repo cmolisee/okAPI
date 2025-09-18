@@ -10,7 +10,7 @@ function Workspace (props: any) {
     const scrollbarStyles = '[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:transparent [&::-webkit-scrollbar-thumb]:bg-secondary-text dark:[&::-webkit-scrollbar-thumb]:bg-secondary-text';
 
     const handleWorkspaceCleanup = () => {
-        const data: ObjectArray<OkMock> = trackDeep(workspaceData);
+        const data: ObjectArray<MockApiNode> = trackDeep(workspaceData);
 
         if (Object.keys(data).length) {
             workspaceDataStorage.setValue(deepCopy(data));
@@ -34,7 +34,6 @@ function Workspace (props: any) {
             <div class={twMerge('p-2 h-full border border-primary-border rounded-md overflow-y-auto', scrollbarStyles)}>
                 <TabContentView />
             </div>
-            
         </div>
     );
 }

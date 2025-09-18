@@ -1,9 +1,10 @@
-import { useExplorer } from "@/lib/explorerStore";
+import { useMockApiTree } from "@/lib/mockApiTreeProvider";
 import ExplorerTree from "./ExplorerTree";
 import { twMerge } from "tailwind-merge";
 import { trackStore } from "@solid-primitives/deep";
 import Text from '@/components/inputs/text';
 import { bfsFrom } from "@/utils/utils";
+import Tree from "./Tree";
 
 function sortByPathPredicate(a: AutofillData, b: AutofillData) {
     const x = a.path.split('/');
@@ -13,7 +14,7 @@ function sortByPathPredicate(a: AutofillData, b: AutofillData) {
 };
 
 function SaveExplorer(props: any) {
-    const { explorerTree, updateExpandedState, findMockById } = useExplorer();
+    const { tree, forEach, find } = useMockApiTree();
     const [value, setValue] = createSignal(props.saveToNode()?.metadata?.path.replace('/root', '') ?? '');
     const [optionIndex, setOptionIndex] = createSignal(-1);
     const [ isOpen, setIsOpen ] = createSignal(false);
@@ -25,9 +26,9 @@ function SaveExplorer(props: any) {
 
     const filteredOptions = createMemo(() => {
         const inputValue = value().trim().toLowerCase();
-        const rootNode = trackStore(explorerTree);
-        const flatMappedNodes = bfsFrom(rootNode as OkMock);
-        return flatMappedNodes.map((n) => ({ id: n.metadata.id, path: n.metadata.path }))
+        const rootNode = trackStore(tree);
+        const flatMappedNodes = bfsFrom(rootNode as MockApiNode);
+        return flatMappedNodes.map((n) => ({ id: n.id, path: n.data.path }))
             .filter((opt) => opt.path.toLowerCase().includes(inputValue))
             .sort(sortByPathPredicate);
     });
@@ -43,16 +44,21 @@ function SaveExplorer(props: any) {
         setIsOpen(true);
 
         if (eventTarget.id) {
-            const targetNode = findMockById(explorerTree, eventTarget.id);
-            props.setSaveToNode(targetNode);
-            updateExpandedState(targetNode?.metadata.id as string, true);
+            props.setSaveToNode(find(eventTarget.id));
+            forEach((node) => {
+                if (node.id !== eventTarget.id) {
+                    return true;
+                }
+                node.data.isExpanded = true;
+                return false;
+            });
         }
     };
 
     const handleBlur = (e: Event) => {
         setTimeout(() => {
             const inputValueId = filteredOptions().find((opt) => opt.path.includes(value()))?.id;
-            const targetNode = findMockById(explorerTree, inputValueId ?? '');
+            const targetNode = find(inputValueId ?? '');
             props.setSaveToNode(targetNode);
             setIsOpen(false);
             optionRefList = [];
@@ -63,9 +69,15 @@ function SaveExplorer(props: any) {
         const eventTarget = (e?.target as HTMLInputElement);
 
         if (eventTarget) {
-            const targetNode = findMockById(explorerTree, eventTarget.getAttribute('data-id') as string);
+            const targetNode = find(eventTarget.getAttribute('data-id') as string);
             props.setSaveToNode(targetNode);
-            updateExpandedState(targetNode?.metadata.id as string, true);
+            forEach((node) => {
+                if (node.id !== targetNode?.id) {
+                    return true;
+                }
+                node.data.isExpanded = true;
+                return false;
+            });
             setIsOpen(false);
         }
     };
@@ -130,7 +142,10 @@ function SaveExplorer(props: any) {
     };
 
     onMount(() => {
-        updateExpandedState('root', false);
+        forEach((node) => {
+            node.data.isExpanded = false;
+            return true;
+        });
     });
 
     return (
@@ -163,9 +178,10 @@ function SaveExplorer(props: any) {
                 </div>
             </div>
             <div class={twMerge('h-full', scrollbarStyles)}>
-                <ExplorerTree>
-                    {Object.values(explorerTree?.children ?? {})}
-                </ExplorerTree>
+                {/* <ExplorerTree>
+                    {Object.values(tree?.children ?? {})}
+                </ExplorerTree> */}
+                <Tree />
             </div>
         </div>
     )

@@ -8,7 +8,7 @@ import Explorer from '@/components/views/explorer';
 import Save from '@/components/views/save';
 import Options from '@/components/views/options';
 import NotificationProvider from '@/lib/notificationProvider';
-import ExplorerStore from '@/lib/explorerStore';
+import ExplorerStore from '@/lib/mockApiTreeProvider';
 import NoNavigation from '@/components/layouts/noNavigation';
 import WorkspaceStore from '@/lib/workspaceStore';
 import { Menu } from '@ark-ui/solid';

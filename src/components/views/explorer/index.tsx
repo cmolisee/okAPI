@@ -1,12 +1,12 @@
 import ExplorerNode from "@/components/explorer/ExplorerNode";
 import ExplorerTree from "@/components/explorer/ExplorerTree";
 import Tree from "@/components/explorer/Tree";
-import { useExplorer } from "@/lib/explorerStore";
+import { useMockApiTree } from "@/lib/mockApiTreeProvider";
 import { trackStore } from "@solid-primitives/deep";
 import { twMerge } from "tailwind-merge";
 
 function Explorer (props:any) {
-    const { explorerTree } = useExplorer();
+    const { tree } = useMockApiTree();
     const scrollbarStyles = '[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:transparent [&::-webkit-scrollbar-thumb]:bg-secondary-text dark:[&::-webkit-scrollbar-thumb]:bg-secondary-text';
 
     // 1. each mock should have a save button
@@ -32,9 +32,9 @@ function Explorer (props:any) {
     // creates new mock at location of the right click
     
     const handleExplorerCleanup = () => {
-        const data = trackStore(explorerTree);
+        const data = trackStore(tree);
 
-        if (Object.keys(explorerTree).length) {    
+        if (Object.keys(tree).length) {    
             explorerDataStorage.setValue(deepCopy(data));
         }
     };

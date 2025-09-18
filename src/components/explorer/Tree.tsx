@@ -2,7 +2,7 @@ import { createTreeCollection, TreeView } from "@ark-ui/solid";
 import { VsFolder, VsFile, VsChevronRight } from "solid-icons/vs";
 import './styles.css';
 import EditableName from "./EditableName";
-import { useExplorer } from "@/lib/explorerStore";
+import { useMockApiTree } from "@/lib/mockApiTreeProvider";
 import { deepMapObject } from "@/utils/utils";
 
 interface Node {
@@ -13,7 +13,7 @@ interface Node {
 }
 
 function Tree(props: any) {
-    const { explorerTree } = useExplorer();
+    const { tree } = useMockApiTree();
     // Add new mock file
     // add new folder
     // update folder name
@@ -30,6 +30,12 @@ function Tree(props: any) {
     //     children: []
     // }
     // !!!!!!!!
+
+    const collection = createTreeCollection<Node>({
+      nodeToValue: (node: Node) => node.id,
+      nodeToString: (node: Node) => node.name,
+      rootNode: tree as any,
+    });
 
     return (
         <TreeView.Root collection={collection} selectionMode={props.multiselect ? 'multiple' : 'single'}>
@@ -79,45 +85,45 @@ function TreeNode (props: TreeView.NodeProviderProps<Node>) {
   )
 }
 
-const collection = createTreeCollection<Node>({
-  nodeToValue: (node: Node) => node.id,
-  nodeToString: (node: Node) => node.name,
-  rootNode: {
-    id: 'root',
-    name: '',
-    data: { item: true },
-    children: [
-      {
-        id: 'node_modules',
-        name: 'node_modules',
-        data: { item: true },
-        children: [
-          { id: 'node_modules/zag-js', name: 'zag-js', data: { item: true } },
-          { id: 'node_modules/pandacss', name: 'panda', data: { item: true }  },
-          {
-            id: 'node_modules/@types',
-            name: '@types',
-            children: [
-              { id: 'node_modules/@types/react', name: 'react', data: { item: true }  },
-              { id: 'node_modules/@types/react-dom', name: 'react-dom', data: { item: true }  },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'src',
-        name: 'src',
-        children: [
-          { id: 'src/app.tsx', name: 'app.tsx', data: { item: true }  },
-          { id: 'src/index.ts', name: 'index.ts', data: { item: true }  },
-        ],
-      },
-      { id: 'panda.config', name: 'panda.config.ts' },
-      { id: 'package.json', name: 'package.json', data: { item: true }  },
-      { id: 'renovate.json', name: 'renovate.json', data: { item: true }  },
-      { id: 'readme.md', name: 'README.md' },
-    ],
-  },
-})
+// const collection = createTreeCollection<Node>({
+//   nodeToValue: (node: Node) => node.id,
+//   nodeToString: (node: Node) => node.name,
+//   rootNode: {
+//     id: 'root',
+//     name: '',
+//     data: { item: true },
+//     children: [
+//       {
+//         id: 'node_modules',
+//         name: 'node_modules',
+//         data: { item: true },
+//         children: [
+//           { id: 'node_modules/zag-js', name: 'zag-js', data: { item: true } },
+//           { id: 'node_modules/pandacss', name: 'panda', data: { item: true }  },
+//           {
+//             id: 'node_modules/@types',
+//             name: '@types',
+//             children: [
+//               { id: 'node_modules/@types/react', name: 'react', data: { item: true }  },
+//               { id: 'node_modules/@types/react-dom', name: 'react-dom', data: { item: true }  },
+//             ],
+//           },
+//         ],
+//       },
+//       {
+//         id: 'src',
+//         name: 'src',
+//         children: [
+//           { id: 'src/app.tsx', name: 'app.tsx', data: { item: true }  },
+//           { id: 'src/index.ts', name: 'index.ts', data: { item: true }  },
+//         ],
+//       },
+//       { id: 'panda.config', name: 'panda.config.ts' },
+//       { id: 'package.json', name: 'package.json', data: { item: true }  },
+//       { id: 'renovate.json', name: 'renovate.json', data: { item: true }  },
+//       { id: 'readme.md', name: 'README.md' },
+//     ],
+//   },
+// })
 
 export default Tree;

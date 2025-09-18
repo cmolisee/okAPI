@@ -1,14 +1,14 @@
 import { VsAdd, VsBracketDot, VsFolder, VsTriangleDown, VsTriangleRight } from "solid-icons/vs";
 import { twMerge } from "tailwind-merge";
 import { useMenuContext } from "@/lib/contextMenuProvider";
-import { useExplorer } from "@/lib/explorerStore";
+import { useMockApiTree } from "@/lib/mockApiTreeProvider";
 import { useNotifications } from "@/lib/notificationProvider";
 import AddFolder from "./AddFolderButton";
 import { pathBuilder } from "@/utils/utils";
 import CustomContextMenu from "../contextMenu/CustomContextMenu";
 
 function ExplorerNode(props: any) {
-    const { addMock, removeMock, updateMockName, updateExpandedState } = useExplorer();
+    const { insert, remove, forEach } = useMockApiTree();
     // const { handleContextMenu, handleCloseContextMenu } = useMenuContext();
     const { setNotificationConfig, setShowNotification } = useNotifications();
     const [editName, setEditName] = createSignal(false);
@@ -23,29 +23,33 @@ function ExplorerNode(props: any) {
         e.stopPropagation();
 
         const newId = getUniqueId();
-        addMock(
-            props.node?.metadata.id, 
+        insert(
+            props.node?.id, 
             {
                 name: `newFolder_${newId}`,
-                description: '',
-                method: 'GET',
-                uri: '',
-                body: '',
-                params: {},
+                id: newId,
                 children: {},
-                metadata: {
-                    id: newId,
-                    type: 'folder',
+                data: {
+                    body: '',
+                    description: '',
+                    hasEdits: false,
                     isEditing: false,
                     isEnabled: false,
                     isExpanded: false,
+                    method: 'GET',
+                    params: {},
                     path: pathBuilder(props.node?.metadata?.path, `newFolder_${newId}`),
-                    hasEdits: false,
+                    type: 'folder',
+                    uri: '',
 
                 }
             });
         // handleCloseContextMenu();
-        updateExpandedState(props.node?.metadata?.id, true);
+        forEach((node) => {
+            node.data.isExpanded = node.id === props.node.id;
+            return true;
+        });
+
         return;
     }
 
@@ -53,10 +57,7 @@ function ExplorerNode(props: any) {
         e.preventDefault();
         e.stopPropagation();
 
-        const nodesFromPath = props.node?.metadata?.path?.split('/');
-        const parentId = nodesFromPath[nodesFromPath.length - 2];
-
-        removeMock(parentId, props.node?.metadata?.id);
+        remove(props.node.id);
         // handleCloseContextMenu();
         return;
     }
@@ -84,7 +85,13 @@ function ExplorerNode(props: any) {
         e.stopPropagation();
 
         const value = (e.target as HTMLInputElement).value;
-        updateMockName(props.node?.metadata?.path, value);
+        forEach((node) => {
+            if (node.id === props.node.id) {
+                node.name = value;
+                return false;
+            }
+            return true;
+        });
         setEditName(false);
     }
 
@@ -94,7 +101,13 @@ function ExplorerNode(props: any) {
             e.stopPropagation();
     
             const value = (e.target as HTMLInputElement).value;
-            updateMockName(props.node?.path, value);
+            forEach((node) => {
+                if (node.id === props.node.id) {
+                    node.name = value;
+                    return false;
+                }
+                return true;
+            });
             setEditName(false);
         }
         return;
@@ -102,7 +115,13 @@ function ExplorerNode(props: any) {
 
     const toggleExpand = () => {
         if (props.node?.metadata?.type === "folder") {
-            updateExpandedState(props.node?.metadata?.id, !props.node?.metadata?.isExpanded);
+            forEach((node) => {
+                if (node.id !== props.node.id) {
+                    return true;
+                }
+                node.data.isExpanded = true;
+                return false;
+            });
         }
     };
 
@@ -178,7 +197,7 @@ function ExplorerNode(props: any) {
                         )}
                     </For>
                     <AddFolder path={props.node?.metadata?.path} 
-                        parentId={props.node?.metadata?.id} 
+                        parentId={props.node?.id} 
                         nestLevel={props.level + 1} />
                 </div>
             </Show>

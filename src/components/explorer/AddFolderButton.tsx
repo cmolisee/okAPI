@@ -1,11 +1,11 @@
 import { useMenuContext } from "@/lib/contextMenuProvider";
-import { useExplorer } from "@/lib/explorerStore";
+import { useMockApiTree } from "@/lib/mockApiTreeProvider";
 import { pathBuilder } from "@/utils/utils";
 import { VsAdd } from "solid-icons/vs"
 import { twMerge } from "tailwind-merge";
 
 function AddFolder(props: any) {
-    const { addMock, updateExpandedState } = useExplorer();
+    const { insert, forEach } = useMockApiTree();
     const { handleCloseContextMenu } = useMenuContext();
     const nestedStyles = `${(props.nestLevel) * 32}px`;
     
@@ -15,29 +15,31 @@ function AddFolder(props: any) {
         e.stopPropagation();
 
         const newId = getUniqueId();
-        addMock(
+        insert(
             props.parentId, 
             {
                 name: `newFolder_${newId}`,
-                description: '',
-                method: 'GET',
-                uri: '',
-                body: '',
-                params: {},
+                id: newId,
                 children: {},
-                metadata: {
-                    id: newId,
-                    type: 'folder',
+                data: {
+                    body: '',
+                    description: '',
+                    hasEdits: false,
                     isEditing: false,
                     isEnabled: false,
-                    isExpanded: false,
+                    isExpanded: true,
+                    method: 'GET',
+                    params: {},
                     path: pathBuilder(props.path, `newFolder_${newId}`),
-                    hasEdits: false,
-
+                    type: 'folder',
+                    uri: '',
                 }
             });
         handleCloseContextMenu();
-        updateExpandedState(newId, true);
+        forEach((node) => {
+            node.data.isExpanded = node.id !== newId;
+            return true;
+        });
         return;
     }
 

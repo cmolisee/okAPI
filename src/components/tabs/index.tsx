@@ -12,21 +12,21 @@ function Tabs() {
         const newId = getUniqueId();
         addWorkspaceItem({ 
             name: `GET_${newId}`,
-            description: '',
-            method: 'GET',
-            uri: '',
-            body: '',
-            params: {},
+            id: newId,
             children: {},
-            metadata: {
-                id: newId,
-                type: 'mock',
+            data: {
+                body: '',
+                description: '',
+                hasEdits: false,
                 isEditing: false,
                 isEnabled: false,
                 isExpanded: false,
+                method: 'GET',
+                params: {},
                 path: '',
-                hasEdits: false,
-            } 
+                type: 'mock',
+                uri: '',
+            }
         });
     };
 
@@ -34,6 +34,7 @@ function Tabs() {
         removeWorkspaceItem(tabIdToRemove);
     };
 
+    // force rerender when workspace changes. i think.
     createEffect(() => {
         const data = trackDeep(workspaceData);
     });
@@ -44,25 +45,25 @@ function Tabs() {
                 <For each={Object.values(workspaceData)}>
                     {(thisTab) =>{
                         const setActiveTab = () => {
-                            if (thisTab.metadata.isEditing) {
+                            if (thisTab.data.isEditing) {
                                 return;
                             }
 
                             workspaceDataTransaction(
-                                produce((draft: ObjectArray<OkMock>) => {
+                                produce((draft: ObjectArray<MockApiNode>) => {
                                     for (const mock of Object.values(draft)) {
-                                        mock.metadata.isEditing = mock.metadata.id === thisTab.metadata.id;
+                                        mock.data.isEditing = mock.id === thisTab.id;
                                     }
                                 }
                             ));
                         };
 
-                        const removeTab = () => handleRemoveTab(thisTab.metadata.id);
+                        const removeTab = () => handleRemoveTab(thisTab.id);
 
                         return (
                             <div
                                 on:click={setActiveTab}
-                                class={twMerge("group relative flex justify-center mx-[0.125rem] mb-1 text-sm font-medium text-gray-900 bg-white rounded-sm border border-gray-200 focus:ring-1 focus:ring-okPurple-500", thisTab.metadata.isEditing ? 'border-2 border-okPurple-500' : '')}>
+                                class={twMerge("group relative flex justify-center mx-[0.125rem] mb-1 text-sm font-medium text-gray-900 bg-white rounded-sm border border-gray-200 focus:ring-1 focus:ring-okPurple-500", thisTab.data.isEditing ? 'border-2 border-okPurple-500' : '')}>
                                 <Show when={thisTab.name}>
                                     <div>
                                         <span class="mx-2 text-ellipsis">{thisTab.name}</span>

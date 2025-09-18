@@ -1,4 +1,4 @@
-import { useExplorer } from "@/lib/explorerStore";
+import { useMockApiTree } from "@/lib/mockApiTreeProvider";
 import { useWorkspace } from "@/lib/workspaceStore";
 import { useNotifications } from "@/lib/notificationProvider";
 import { useNavigate } from "@solidjs/router";
@@ -9,10 +9,10 @@ import { pathBuilder } from "@/utils/utils";
 function Save (props:any) {
     const navigate = useNavigate();
     const { workspaceData, workspaceDataTransaction } = useWorkspace();
-    const { explorerTree, explorerTreeTransaction, findMockById } = useExplorer();
-    const [ saveToNode, setSaveToNode ] = createSignal<OkMock|EmptyObject>({});
+    const { forEach } = useMockApiTree();
+    const [ saveToNode, setSaveToNode ] = createSignal<MockApiNode|EmptyObject>({});
     const { setShowNotification, setNotificationConfig} = useNotifications();
-    const [ mocks, setMocks ] = createSignal<{ checked: Boolean, mock: OkMock }[]>([]);
+    const [ mocks, setMocks ] = createSignal<{ checked: Boolean, mock: MockApiNode }[]>([]);
 
     const saveNotification = () => {
         setNotificationConfig({
@@ -46,41 +46,55 @@ function Save (props:any) {
         
         // update the workspace
         workspaceDataTransaction(
-            produce((draft: ObjectArray<OkMock>) => {
+            produce((draft: ObjectArray<MockApiNode>) => {
                 // workspace is a 1D-array of mocks
                 for (const mock of Object.values(draft)) {
-                    if (mocksToSave.some((m) => m.metadata.id === mock.metadata.id)) {
-                        mock.metadata.path = pathBuilder(saveToNode().metadata.path, mock.name);
+                    if (mocksToSave.some((m) => m.id === mock.id)) {
+                        mock.data.path = pathBuilder(saveToNode().data.path, mock.name);
                     }
                 }
             })
         );
 
         // update explorer tree
-        const treeCopy = JSON.parse(JSON.stringify(explorerTree));
+        // const treeCopy = JSON.parse(JSON.stringify(tree));
 
-        explorerTreeTransaction(
-            produce((draft: OkMock) => {
-                // figure out how to use draft here so it actually updates
-                // /root needs to be removed from the autocomplete paths elements
-                // autocoplete needs to update based on current value
-                const parentNode = findMockById(draft, saveToNode().metadata.id);
+        // if node === saveToNode().id
+            // append the children
 
-                if (!parentNode) {
-                    return;
-                }
+        forEach((node) => {
+            if (node.id !== saveToNode().id) {
+                return true; // continue until it is found
+            }
 
-                mocksToSave.forEach((m) => {
-                    parentNode.children[m.metadata.id] = JSON.parse(JSON.stringify(m));
-                });
-            })
-        );
+            mocksToSave.forEach((m) => {
+                node.children[m.id] = JSON.parse(JSON.stringify(m));
+            });
+            return false; // stop after found
+        });
+
+        // treeTransaction(
+        //     produce((draft: MockApiNode) => {
+        //         // figure out how to use draft here so it actually updates
+        //         // /root needs to be removed from the autocomplete paths elements
+        //         // autocoplete needs to update based on current value
+        //         const parentNode = find(saveToNode().id);
+
+        //         if (!parentNode) {
+        //             return;
+        //         }
+
+        //         mocksToSave.forEach((m) => {
+        //             parentNode.children[m.id] = JSON.parse(JSON.stringify(m));
+        //         });
+        //     })
+        // );
 
         setShowNotification(false);
         navigate('/', { replace: true });
     }
 
-    const handleToggle = (item: { checked: Boolean, mock: OkMock }) => {
+    const handleToggle = (item: { checked: Boolean, mock: MockApiNode }) => {
         setMocks((prev) => {
             return prev.map((m) => {
                 if (JSON.stringify(m.mock).replace(/\s+/g, '') === JSON.stringify(item.mock).replace(/\s+/g, '')) {
@@ -94,7 +108,7 @@ function Save (props:any) {
     onMount(() => {
         setMocks(
             Object.values(workspaceData)
-                .filter((m) => !m?.metadata?.path)
+                .filter((m) => !m?.data?.path)
                 .map((m)  => ({ checked: true, mock: m}))
         )
     });
