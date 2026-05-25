@@ -1,8 +1,6 @@
 {
   "name": "okapi",
-  "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",
@@ -11,14 +9,15 @@
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
-    "postinstall": "wxt prepare"
+    "postinstall": "wxt prepare",
+    "format": "npx @biomejs/biome format --write",
+    "lint": "npx @biomejs/biome lint --write",
+    "check": "npx @biomejs/biome check --write"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cmolisee/okAPI.git"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
   "type": "module",
   "bugs": {
@@ -26,6 +25,8 @@
   },
   "homepage": "https://github.com/cmolisee/okAPI#readme",
   "devDependencies": {
+    "@biomejs/biome": "2.4.15",
+    "@types/chrome": "^0.1.42",
     "typescript": "^6.0.3",
     "wxt": "^0.20.26"
   }

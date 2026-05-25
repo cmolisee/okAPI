@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>okAPI: API Mocking</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <!-- 
+    1. right click API in network tab
+    2. select mock with okAPI
+    3. initialize mock that is 1-1 with the original
+        - include all metadata
+        - also include the env the request was made on
+    4. allow user to modify the request url
+        - priority on most specific matching request URL first via regex
+        - method must match or wont be mocked
+        - allows wild card
+        - allows "env" variables that can be created and referenced in both url and request for hot swapping
+    5. allow user to modify request body
+        - json only to start maybe expand elsewhere later
+    6. allow user to modify headers
+        - enable/disable
+        - future enhancement to use script that generates a header based on certain criteria
+    7. allow user to modify request body
+        - JSON only (future enhancment for other formats possibly)
+  -->
+  <body>
+    <header class="toolbar">
+      <button id="btn-toggle">▶ Start</button>
+      <span id="status-badge" class="badge badge--off">Off</span>
+      <button id="btn-clear">Clear</button>
+      <span class="engine-label" id="engine-label"></span>
+    </header>
+
+    <main class="layout">
+      <!-- Request list -->
+      <section class="pane pane--list" id="request-list">
+        <p class="empty-hint">No requests captured yet.</p>
+      </section>
+
+      <!-- Detail / editor -->
+      <section class="pane pane--detail" id="detail-panel">
+        <div class="detail-placeholder">Select a request to inspect or modify it.</div>
+
+        <div class="detail-content hidden">
+          <div class="detail-meta" id="detail-meta"></div>
+
+          <div class="tabs">
+            <button class="tab active" data-tab="response">Response</button>
+            <button class="tab" data-tab="request">Request</button>
+            <button class="tab" data-tab="headers">Headers</button>
+          </div>
+
+          <div class="tab-body" id="tab-response">
+            <textarea id="editor-body" spellcheck="false" placeholder="Response body"></textarea>
+          </div>
+          <div class="tab-body hidden" id="tab-request">
+            <pre id="view-request-body"></pre>
+          </div>
+          <div class="tab-body hidden" id="tab-headers">
+            <pre id="view-headers"></pre>
+          </div>
+
+          <div class="detail-actions">
+            <button id="btn-override">Apply Override</button>
+            <button id="btn-passthrough">Pass Through</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
