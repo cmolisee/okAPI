@@ -50,7 +50,8 @@ The service worker (via `background.ts`) communicates to the devtools entrypoint
 ## Execution context lifecycle
 
 Background service worker
-```
+
+```text
 Extension installed/updated
     ↓
 service worker registered -> background.ts runs top-level code
@@ -67,7 +68,8 @@ service worker idles again -> may be killed by browser
 __Cannot rely on in-memmory state to persist in the background across events. See storage for ephemeral state options/implementation.__
 
 Content script
-```
+
+```text
 navigation starts for a matching url
     ↓
 content.ts injected into the page's isolated environment
@@ -80,7 +82,8 @@ page navigates or closes -> content script torn down
 ```
 
 Devtools + Devtools-panel + Devtools-pane
-```
+
+```text
 user opens devtools for a tab
     ↓
 devtools loads -> devtools.ts runs
@@ -97,7 +100,8 @@ devtools closed -> port disconnects -> background cleans up
 ```
 
 Popup
-```
+
+```text
 user clikcs the extension icon in the toolbar
     ↓
 popup loades -> popup.ts runs
@@ -109,3 +113,50 @@ user clicks away -> popup destroyed, all state lost
 
 ## libs/interceptor/chromium.ts
 
+## Inputs
+
+```html
+<div class="input-container">
+    <input 
+        type="text" 
+        id="txt" 
+        name="txt" 
+        placeholder=" " 
+        required
+        aria-describedby="txt-hint"
+    />
+    <label for="txt">text input</label>
+    <span id="txt-hint" class="input-hint">Enter some text.</span>
+</div>
+```
+
+```html
+<div class="checkbox-item">
+    <input type="checkbox" id="notify-sms" name="notifications" value="sms">
+    <label for="notify-sms">SMS text messages</label>
+</div>
+```
+
+```html
+<div class="select-container">
+    <label for="country-select" id="country-label" class="select-label">
+        Choose a country
+    </label>
+    <div class="select-wrapper">
+        <select 
+            id="country-select" 
+            name="country" 
+            aria-labelledby="country-label"
+            required
+        >
+        <button value="" disabled selected hidden>Select an option...</button>
+        <option value="us">United States</option>
+        <option value="ca">Canada</option>
+        <option value="uk">United Kingdom</option>
+        <option value="au">Australia</option>
+        </select>
+        <!-- Custom accessible chevron indicator -->
+        <span class="select-arrow" aria-hidden="true"></span>
+    </div>
+</div>
+```

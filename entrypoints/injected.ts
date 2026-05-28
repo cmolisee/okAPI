@@ -279,7 +279,7 @@ type PendingDecisionMap = Map<string, (decision: object) => void>;
 						break;
 					}
 					case 'modify': {
-						response = await _fetch(decision.modifiedUrl ?? url, {
+						response = await _OriginalFetch(decision.modifiedUrl ?? url, {
 							method: decision.modifiedMethod ?? method,
 							headers: decision.modifiedHeaders ?? reqHeaders,
 							body: decision.modifiedBody ?? originalBody,

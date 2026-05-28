@@ -9,20 +9,28 @@
   </head>
   <body>
     <div>
-        <div>
-            <a href="https://wxt.dev" target="_blank">
-                WXT
-            </a>
-            <a href="https://www.typescriptlang.org/" target="_blank">
-                Typescript
-            </a>
-            <h1>WXT + TypeScript</h1>
-            <div class="card">
-                <button id="counter" type="button"></button>
+        <div class="checkbox-item">
+            <input type="checkbox" id="enableNotifications" name="enableNotifications" value="enableNotifications">
+            <label for="notify-email">Enable Popup Notifications</label>
+        </div>
+        <div class="select-container">
+            <label for="theme-select" id="theme-label" class="select-label">
+                Choose Theme
+            </label>
+            <div class="select-wrapper">
+                <select 
+                    id="theme-select" 
+                    name="theme" 
+                    aria-labelledby="theme-label"
+                    required
+                >
+                <button value="" disabled selected hidden>Select an option...</button>
+                <option value="system">System</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                </select>
+                <span class="select-arrow" aria-hidden="true"></span>
             </div>
-            <p class="read-the-docs">
-                Click on the WXT and TypeScript logos to learn more
-            </p>
         </div>
     </div>
     <script type="module" src="./main.ts"></script>

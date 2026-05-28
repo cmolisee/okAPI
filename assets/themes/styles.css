@@ -1,0 +1,308 @@
+:root {
+    /* indicate support for browser system preference */
+    color-scheme: light dark;
+
+    /* light */
+    --okapi-primary-a0: #0711c6;
+    --okapi-primary-a10: #050dac;
+    --okapi-primary-a20: #040992;
+    --okapi-primary-a30: #02067a;
+    --okapi-primary-a40: #020462;
+    --okapi-primary-a50: #01024b;
+
+    --okapi-surface-a0: #fff;
+    --okapi-surface-a10: #f2f2f2;
+    --okapi-surface-a20: #e4e4e4;
+    --okapi-surface-a30: #d7d7d7;
+    --okapi-surface-a40: #cacaca;
+    --okapi-surface-a50: #bdbdbd;
+
+    --okapi-surface-tonal-a0: #e2ebfc;
+    --okapi-surface-tonal-a10: #d8e0ef;
+    --okapi-surface-tonal-a20: #ced5e2;
+    --okapi-surface-tonal-a30: #c4cad5;
+    --okapi-surface-tonal-a40: #babfc9;
+    --okapi-surface-tonal-a50: #b0b4bc;
+
+    --okapi-success-a0: #4aff6b;
+    --okapi-success-a10: #74ff86;
+    --okapi-success-a20: #94ff9d;
+
+    --okapi-warning-a0: #ffac38;
+    --okapi-warning-a10: #ffb961;
+    --okapi-warning-a20: #ffc681;
+
+    --okapi-danger-a0: #ff6161;
+    --okapi-danger-a10: #ff7c79;
+    --okapi-danger-a20: #ff9590;
+
+    --okapi-info-a0: #61c2ff;
+    --okapi-info-a10: #7dccff;
+    --okapi-info-a20: #96d5ff;
+
+    --okapi-text: #000000;
+}
+
+/* dark theme override via system preference */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* dark */
+        --okapi-primary-a0: #023ae9;
+        --okapi-primary-a10: #1c56ee;
+        --okapi-primary-a20: #356df2;
+        --okapi-primary-a30: #4e81f6;
+        --okapi-primary-a40: #6695f9;
+        --okapi-primary-a50: #7fa7fb;
+
+        --okapi-surface-a0: #121212;
+        --okapi-surface-a10: #252525;
+        --okapi-surface-a20: #393939;
+        --okapi-surface-a30: #4f4f4f;
+        --okapi-surface-a40: #666;
+        --okapi-surface-a50: #7d7d7d;
+
+        --okapi-surface-tonal-a0: #121e38;
+        --okapi-surface-tonal-a10: #25314a;
+        --okapi-surface-tonal-a20: #3a455c;
+        --okapi-surface-tonal-a30: #505a6f;
+        --okapi-surface-tonal-a40: #667083;
+        --okapi-surface-tonal-a50: #7e8697;
+
+        --okapi-success-a0: #7dff95;
+        --okapi-success-a10: #9dffac;
+        --okapi-success-a20: #b8ffc1;
+
+        --okapi-warning-a0: #ffbc5e;
+        --okapi-warning-a10: #ffca83;
+        --okapi-warning-a20: #ffd8a4;
+
+        --okapi-danger-a0: #ff8080;
+        --okapi-danger-a10: #ff9b99;
+        --okapi-danger-a20: #ffb5b2;
+
+        --okapi-info-a0: #87d1ff;
+        --okapi-info-a10: #a1dbff;
+        --okapi-info-a20: #b9e4ff;
+
+        --okapi-text: #ffffff;
+    }
+}
+
+/* dark theme manual override via html attribute */
+:root[data-theme="dark"] {
+    /* dark */
+    --okapi-primary-a0: #023ae9;
+    --okapi-primary-a10: #1c56ee;
+    --okapi-primary-a20: #356df2;
+    --okapi-primary-a30: #4e81f6;
+    --okapi-primary-a40: #6695f9;
+    --okapi-primary-a50: #7fa7fb;
+
+    --okapi-surface-a0: #121212;
+    --okapi-surface-a10: #252525;
+    --okapi-surface-a20: #393939;
+    --okapi-surface-a30: #4f4f4f;
+    --okapi-surface-a40: #666;
+    --okapi-surface-a50: #7d7d7d;
+
+    --okapi-surface-tonal-a0: #121e38;
+    --okapi-surface-tonal-a10: #25314a;
+    --okapi-surface-tonal-a20: #3a455c;
+    --okapi-surface-tonal-a30: #505a6f;
+    --okapi-surface-tonal-a40: #667083;
+    --okapi-surface-tonal-a50: #7e8697;
+
+    --okapi-success-a0: #7dff95;
+    --okapi-success-a10: #9dffac;
+    --okapi-success-a20: #b8ffc1;
+
+    --okapi-warning-a0: #ffbc5e;
+    --okapi-warning-a10: #ffca83;
+    --okapi-warning-a20: #ffd8a4;
+
+    --okapi-danger-a0: #ff8080;
+    --okapi-danger-a10: #ff9b99;
+    --okapi-danger-a20: #ffb5b2;
+
+    --okapi-info-a0: #87d1ff;
+    --okapi-info-a10: #a1dbff;
+    --okapi-info-a20: #b9e4ff;
+
+    --okapi-text: #ffffff;
+}
+
+/* light theme manual override via html attribute */
+:root[data-theme="light"] {
+    /* light */
+    --okapi-primary-a0: #0711c6;
+    --okapi-primary-a10: #050dac;
+    --okapi-primary-a20: #040992;
+    --okapi-primary-a30: #02067a;
+    --okapi-primary-a40: #020462;
+    --okapi-primary-a50: #01024b;
+
+    --okapi-surface-a0: #fff;
+    --okapi-surface-a10: #f2f2f2;
+    --okapi-surface-a20: #e4e4e4;
+    --okapi-surface-a30: #d7d7d7;
+    --okapi-surface-a40: #cacaca;
+    --okapi-surface-a50: #bdbdbd;
+
+    --okapi-surface-tonal-a0: #e2ebfc;
+    --okapi-surface-tonal-a10: #d8e0ef;
+    --okapi-surface-tonal-a20: #ced5e2;
+    --okapi-surface-tonal-a30: #c4cad5;
+    --okapi-surface-tonal-a40: #babfc9;
+    --okapi-surface-tonal-a50: #b0b4bc;
+
+    --okapi-success-a0: #4aff6b;
+    --okapi-success-a10: #74ff86;
+    --okapi-success-a20: #94ff9d;
+
+    --okapi-warning-a0: #ffac38;
+    --okapi-warning-a10: #ffb961;
+    --okapi-warning-a20: #ffc681;
+
+    --okapi-danger-a0: #ff6161;
+    --okapi-danger-a10: #ff7c79;
+    --okapi-danger-a20: #ff9590;
+
+    --okapi-info-a0: #61c2ff;
+    --okapi-info-a10: #7dccff;
+    --okapi-info-a20: #96d5ff;
+    
+    --okapi-text: #000000;
+}
+
+
+* {
+    color: var(--okapi-text);
+    background-color: var(--okapi-surface-tonal-a0);
+    font-family: monospace;
+}
+
+/* TEXT INPUT */
+.input-container {
+  display: flex;
+  flex-direction: column-reverse;
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.input-container input {
+  padding: 0.75rem;
+  border: 2px solid var(--okapi-surface-a10);
+  border-radius: 4px;
+  font-size: 1rem;
+  background: transparent;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-container label {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+  transform-origin: left top;
+  transition: transform 0.2s, color 0.2s;
+  cursor: text;
+}
+
+/* Floating effect using the placeholder-shown trick */
+.input-container input:focus ~ label,
+.input-container input:not(:placeholder-shown) ~ label {
+  transform: translateY(-0.25rem) scale(0.85);
+  color: var(--okapi-primary-a20);
+}
+
+.input-container input:focus {
+  border-color: var(--okapi-primary-a20);
+}
+
+.input-hint {
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+/* Ensure high contrast focus indicators for keyboard users */
+@media (prefers-reduced-motion: reduce) {
+  .input-container input,
+  .input-container label {
+    transition: none;
+  }
+}
+
+/* CHECKBOX */
+.checkbox-group {
+  border: 1px solid var(--okapi-surface-a10);
+  border-radius: 6px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  max-width: 400px;
+  font-family: system-ui, sans-serif;
+}
+
+.checkbox-group legend {
+  font-weight: 600;
+  padding: 0 0.5rem;
+}
+
+.group-hint {
+  font-size: 0.85rem;
+  margin: 0 0 1rem 0;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  position: relative;
+}
+
+.checkbox-item:last-child {
+  margin-bottom: 0;
+}
+
+.checkbox-item input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--okapi-surface-a10);
+  border-radius: 4px;
+  margin-right: 0.75rem;
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+  background-color: transparent;
+}
+
+/* Custom checkmark pattern */
+.checkbox-item input[type="checkbox"]::before {
+  content: "";
+  width: 0.65rem;
+  height: 0.65rem;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  background-color: CanvasText;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.checkbox-item input[type="checkbox"]:checked {
+  background-color: var(--okapi-primary-a20);
+  border-color: var(--okapi-primary-a20);
+}
+
+.checkbox-item input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+.checkbox-item input[type="checkbox"]:focus-visible {
+  outline: 3px solid var(--okapi-primary-a20);
+  outline-offset: 2px;
+}
+
+.checkbox-item label {
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1.25rem;
+}
