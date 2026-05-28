@@ -9,10 +9,6 @@
   </head>
   <body>
     <div>
-        <div class="checkbox-item">
-            <input type="checkbox" id="enableNotifications" name="enableNotifications" value="enableNotifications">
-            <label for="notify-email">Enable Popup Notifications</label>
-        </div>
         <div class="select-container">
             <label for="theme-select" id="theme-label" class="select-label">
                 Choose Theme
@@ -24,14 +20,29 @@
                     aria-labelledby="theme-label"
                     required
                 >
-                <button value="" disabled selected hidden>Select an option...</button>
-                <option value="system">System</option>
+                <option value="system" selected>System</option>
                 <option value="light">Light</option>
                 <option value="dark">Dark</option>
                 </select>
                 <span class="select-arrow" aria-hidden="true"></span>
             </div>
         </div>
+
+        <div class="checkbox-item">
+            <input type="checkbox" id="enableNotifications" name="enableNotifications" value="enableNotifications">
+            <label for="enableNotifications">Enable Popup Notifications</label>
+        </div>
+
+        <div class="checkbox-item">
+            <input type="checkbox" id="enableMocking" name="enableMocking" value="enableMocking">
+            <label for="enableMocking">Enable Mocking</label>
+        </div>
+
+        <div class="checkbox-item">
+            <input type="checkbox" id="enableNetworkViewer" name="enableNetworkViewer" value="enableNetworkViewer">
+            <label for="enableNetworkViewer">Enable Network Viewer</label>
+        </div>
+        
     </div>
     <script type="module" src="./main.ts"></script>
   </body>

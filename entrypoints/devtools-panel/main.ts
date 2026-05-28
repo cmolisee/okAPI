@@ -5,30 +5,19 @@ import type {
   PausedPayload,
   ResponseOverride,
 } from '../../lib/interceptor/types';
-
-/**
- * runs inside the devtools.
- * links to the background worker and drives the UI.
- */
-
-// --- STATE ---
+import { getMockingEnabledSetting, getNetworkViewerEnabledSetting, getNotificationsEnabledSetting, setMockingEnabledSetting, setMockingEnabledSettingSetting, setNetworkViewerEnabledSetting, setNotificationsEnabledSetting } from '../../utils/storage';
 
 const tabId = browser.devtools.inspectedWindow.tabId;
+const port = browser.runtime.connect({ name: `okapi-${tabId}` });
 const requests = new Map<string, InterceptedRequest>();
 let selected: InterceptedRequest | null = null;
-let attached = false;
 
-// --- CONNECT TO BACKGROUND WORKER ---
-
-const port = browser.runtime.connect({ name: `okapi-${tabId}` });
-// listen for messages from background worker
+// --- message bus to background service worker ---
 port.onMessage.addListener((msg: Message) => {
   switch (msg.type) {
     case 'INTERCEPTOR_STATUS': {
-      const { attached: a, strategy } = msg.payload as StatusPayload;
-      attached = a;
-      setEngineLabel(strategy);
-      setToggleButton(a);
+      const { attached, strategy } = msg.payload as StatusPayload;
+      updatePanelUI(attached, strategy);
       break;
     }
     case 'REQUEST_PAUSED': {
@@ -53,7 +42,9 @@ port.onMessage.addListener((msg: Message) => {
 });
 
 port.onDisconnect.addListener(() => {
-  setToggleButton(false);
+  setNotificationsEnabledSetting(false);
+  setMockingEnabledSettingSetting(false);
+  setNetworkViewerEnabledSetting(false);
 });
 
 // --- MSG HELPERS ---
@@ -78,7 +69,105 @@ function passthrough(requestId: string): void {
   send({ type: 'RESPONSE_PASSTHROUGH', payload: { requestId } });
 }
 
-// --- UI HELPERS ---
+// --- panel ui ---
+const enableNetworkViewerButton = document.getElementById('toggle-network-viewer-enabled') as HTMLButtonElement | null;
+const enableMockingButton = document.getElementById('toggle-mocking-enabled') as HTMLButtonElement | null;
+const enableNotificationsButton = document.getElementById('toggle-notifications-enabled') as HTMLButtonElement | null;
+const networkViewerTabButton = document.getElementById('tab-network-viewer') as HTMLButtonElement | null;
+const mockViewerTabButton = document.getElementById('tab-mock-viewer') as HTMLButtonElement | null;
+
+const engineLabelElement = document.getElementById('engine-label') as HTMLSpanElement | null;
+const viewPanel = document.getElementById('viewer-panel') as HTMLElement | null;
+const detailPanel = document.getElementById('detail-panel') as HTMLElement | null;
+
+const networkViewPanel = document.getElementById('network-viewer') as HTMLElement | null;
+const networkDetailPanel = document.getElementById('network-details') as HTMLElement | null;
+const mockViewPanel = document.getElementById('mock-viewer') as HTMLElement | null;
+const mockDetailPanel = document.getElementById('mock-details') as HTMLElement | null;
+
+const detailContentPlaceholderSelector = '[data-active] .detail-placeholder';
+const detailContentSelector = '[data-active] .detail-content';
+const detailContentMetaSelector = '[data-active] .detail-meta';
+const detailContentResponseTabSelector = '[data-active] [data-tab="response"]';
+const detailContentRequestTabSelector = '[data-active] [data-tab="request"]';
+const detailContentHeadersTabSelector = '[data-active] [data-tab="headers"]';
+const detailContentResponeEditorSelector = '[data-active] textarea';
+const detailContentRequestBodySelector = '[data-active] #view-request-body';
+const detailContentHeadersSelector = '[data-active] #view-headers';
+const detailContentOverrideButtonSelector = '[data-active] #btn-override';
+const detailContentpassthroughButtonSelector = '[data-active] #btn-passthrough';
+
+function updatePanelUI(attached: boolean, strategy: string): void {
+  if (engineLabelElement) engineLabelElement.innerText = strategy;
+  const method = attached ? 'removeAttribute' : 'setAttribute';
+  if (enableNetworkViewerButton) enableNetworkViewerButton.disabled = !attached
+  if (enableMockingButton) enableMockingButton.disabled = !attached
+  if (enableNotificationsButton) enableNotificationsButton.disabled = !attached
+}
+
+async function updateScriptStatus(): Promise<void> {
+  if (
+    !(await getNetworkViewerEnabledSetting()) ||
+    !(await getMockingEnabledSetting())
+  ) {
+    detach();
+  } else {
+    attach();
+  }
+}
+
+async function toggleEnableNetworkViewer(event: Event): Promise<void> {
+  if (!enableNetworkViewerButton) return;
+  if (enableNetworkViewerButton?.disabled) return;
+  const isActive = await getNetworkViewerEnabledSetting();
+  enableNetworkViewerButton.textContent = isActive ? '⏹ Stop' : '▶ Start';
+  setNetworkViewerEnabledSetting(!isActive);
+  updateScriptStatus();
+}
+
+async function toggleEnableMocking(event: Event): Promise<void> {
+  if (!enableMockingButton) return;
+  if (enableMockingButton?.disabled) return;
+  const isActive = await getMockingEnabledSetting();
+  enableMockingButton.textContent = isActive ? '⏹ Stop' : '▶ Start';
+  setMockingEnabledSetting(!isActive);
+  updateScriptStatus();
+}
+
+async function toggleEnableNotifications(event: Event): Promise<void> {
+  if (!enableNotificationsButton) return;
+  if (enableNotificationsButton?.disabled) return;
+  const isActive = await getNotificationsEnabledSetting();
+  enableNotificationsButton.textContent = isActive ? '⏹ Stop' : '▶ Start';
+  setNotificationsEnabledSetting(!isActive);
+}
+
+async function toggleActiveClickEvent(event: Event): Promise<void> {
+  if (!toggleActiveButton) return;
+  const isActive = await getMockingEnabledSettingSetting();
+
+  isActive ? detach() : attach();
+  toggleActiveButton.textContent = isActive ? '⏹ Stop' : '▶ Start';
+  setMockingEnabledSettingSetting(!isActive);
+}
+
+if (toggleActiveButton) {
+  const isActive = await getMockingEnabledSettingSetting();
+
+  toggleActiveButton.textContent = isActive ? '⏹ Stop' : '▶ Start';
+  isActive ? attach() : detach();
+
+  toggleActiveButton.removeEventListener('click', toggleActiveClickEvent)
+  toggleActiveButton.addEventListener('click', toggleActiveClickEvent);
+}
+
+// --- engine lable ---
+if (engingLabel) {
+  engineElement.textContent = strategy !== 'none' ? `[${strategy}]` : '';
+}
+
+
+
 
 const listElement = document.getElementById('request-list')!;
 const detailElement = document.getElementById('detail-panel')!;
@@ -93,11 +182,7 @@ const btnPassthroughElement = document.getElementById('btn-passthrough')!;
 const badgeElement = document.getElementById('status-badge')!;
 const engineElement = document.getElementById('engine-label')!;
 
-function setToggleButton(on: boolean): void {
-  btnToggleElement.textContent = on ? '⏹ Stop' : '▶ Start';
-  badgeElement.textContent = on ? 'On' : 'Off';
-  badgeElement.className = `badge ${on ? 'badge--on' : 'badge--off'}`;
-}
+
 
 function setEngineLabel(strategy: string): void {
   engineElement.textContent = strategy !== 'none' ? `[${strategy}]` : '';
@@ -176,10 +261,6 @@ document.querySelectorAll('.tab').forEach((tab) => {
 });
 
 // ─── Toolbar actions ─────────────────────────────────────────────────────────
-
-btnToggleElement.addEventListener('click', () => {
-  attached ? detach() : attach();
-});
 
 btnClearElement.addEventListener('click', () => {
   requests.clear();

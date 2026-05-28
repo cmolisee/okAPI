@@ -6,12 +6,13 @@ export default defineConfig({
     description: 'Intercept and modify API requests and responses from DevTools.',
     version: '0.1.0',
     permissions: [
-      'debugger',            // Chromium: attach CDP to tabs via chrome.debugger
-      'webRequest',          // Firefox: observe request lifecycle
-      'webRequestBlocking',  // Firefox MV3: required for filterResponseData blocking mode
-                             //   Chrome removed this in MV3; Firefox kept it intentionally
-      'storage',             // All: chrome.storage.session for SW-restart-safe state
+      'debugger',
+      'webRequest',
+      'webRequestBlocking',
+      'storage',
+      'unlimitedStorage',
       'activeTab',
+      'contextMenus',
     ],
     host_permissions: ['<all_urls>'],
   },

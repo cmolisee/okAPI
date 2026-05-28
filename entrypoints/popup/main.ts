@@ -1,22 +1,52 @@
-import { setSettings, setTheme, Theme } from "../../utils/storage";
+import { getMockingEnabledSetting, getNetworkViewerEnabledSetting, getNotificationsEnabledSetting, getThemeSetting, setMockingEnabledSettingSetting, setNetworkViewerEnabledSetting, setNotificationsEnabledSetting, setThemeSetting, Theme } from "../../utils/storage";
 
-(() => {
-    const enableNotificationsCheckbox = document.getElementById('enableNotifications');
-    const themeSelect = document.getElementById('theme-select');
+(async () => {
+    const themeSelect = document.getElementById('theme-select') as HTMLSelectElement | null;
+    const enableNotificationsCheckbox = document.getElementById('enableNotifications') as HTMLInputElement | null;
+    const enableMockingCheckbox = document.getElementById('enableMocking') as HTMLInputElement | null;
+    const enableNetworkViewerCheckbox = document.getElementById('enableNetworkViewer') as HTMLInputElement | null;
 
-    const notificationChangeEventListener = (event: Event) => {
-        const target = event.target as HTMLInputElement;
-        if (target) setSettings({ notificationsEnabled: target.checked, syncInterval: 15 })
-    }
-
-    const themeSelectEventListener = (event: Event) => {
+    const themeChangeListener = (event: Event) => {
         const target = event.currentTarget as HTMLSelectElement;
-        if (target) setTheme(target.value as Theme);
+        if (target) setThemeSetting(target.value as Theme);
     }
 
-    enableNotificationsCheckbox?.removeEventListener('change', notificationChangeEventListener);
-    enableNotificationsCheckbox?.addEventListener('change', notificationChangeEventListener);
+    const notifcationsEnabledChangeListener = (event: Event) => {
+        const target = event.target as HTMLInputElement;
+        if (target) setNotificationsEnabledSetting(target.checked);
+    }
 
-    themeSelect?.removeEventListener('change', themeSelectEventListener);
-    themeSelect?.addEventListener('change', themeSelectEventListener);
+    const mockingEnabledChangeListener = (event: Event) => {
+        const target = event.target as HTMLInputElement;
+        if (target) setMockingEnabledSettingSetting(target.checked);
+    }
+
+    const networkViewerChangeListener = (event: Event) => {
+        const target = event.target as HTMLInputElement;
+        if (target) setNetworkViewerEnabledSetting(target.checked);
+    }
+
+    if (themeSelect) {
+        themeSelect.value = await getThemeSetting();
+        themeSelect.removeEventListener('change', themeChangeListener);
+        themeSelect.addEventListener('change', themeChangeListener);
+    }
+
+    if (enableNotificationsCheckbox) {
+        enableNotificationsCheckbox.checked = await getNotificationsEnabledSetting();
+        enableNotificationsCheckbox.removeEventListener('change', notifcationsEnabledChangeListener);
+        enableNotificationsCheckbox.addEventListener('change', notifcationsEnabledChangeListener);
+    }
+
+    if (enableMockingCheckbox) {
+        enableMockingCheckbox.checked = await getMockingEnabledSetting();
+        enableMockingCheckbox.removeEventListener('change', mockingEnabledChangeListener);
+        enableMockingCheckbox.addEventListener('change', mockingEnabledChangeListener);
+    }
+
+    if (enableNetworkViewerCheckbox) {
+        enableNetworkViewerCheckbox.checked = await getNetworkViewerEnabledSetting();
+        enableNetworkViewerCheckbox.removeEventListener('change', networkViewerChangeListener);
+        enableNetworkViewerCheckbox.addEventListener('change', networkViewerChangeListener);
+    }
 })();

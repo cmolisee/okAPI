@@ -2,25 +2,6 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
-  --bg:           #1e1e2e;
-  --bg-panel:     #181825;
-  --bg-row:       #1e1e2e;
-  --bg-row-hover: #313244;
-  --bg-active:    #45475a;
-  --accent:       #89b4fa;
-  --accent-err:   #f38ba8;
-  --accent-ok:    #a6e3a1;
-  --text:         #cdd6f4;
-  --text-muted:   #6c7086;
-  --border:       #313244;
-  --radius:       4px;
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: 13px;
-  color: var(--text);
-  background: var(--bg);
-}
-
 /* ── Toolbar ─────────────────────────────────────────────────────────────── */
 
 .toolbar {
