@@ -22,24 +22,20 @@ import type {
  * DevTools panel automatically reconnects, repopulating the map.
  */
 
+/**
+ * MV3 service workers are not persistant.
+ * all memory/state that must survive restarting a sw should be placed in browser.storage.session
+ * 
+ * ports cannot be serialised and it is intended for the port map to be repopulated on every restart.
+ */
 export default defineBackground(() => {
-
-  // ─── Browser detection ──────────────────────────────────────────────────
-  // import.meta.env.BROWSER is replaced at build time by WXT/Vite.
-  // Never use globalThis.__BROWSER__ — that is an internal WXT detail.
-
   type Engine = 'chromium' | 'firefox' | 'safari';
   const ENGINE: Engine =
     import.meta.env.BROWSER === 'firefox' ? 'firefox'
     : import.meta.env.BROWSER === 'safari'  ? 'safari'
     : 'chromium';
-
-  // ─── Storage helpers (SW-restart-safe state) ───────────────────────────
-  // browser.storage.session persists for the browser session but not across
-  // browser restarts. It survives service worker kill/restart cycles, which
-  // is exactly what we need for "is this tab being intercepted?" state.
-
   const SESSION_KEY = 'interceptor_attached_tabs';
+  const panelPorts = new Map<number, Browser.runtime.Port>();
 
   async function getAttachedTabs(): Promise<Set<number>> {
     const result: any = await browser.storage.session.get(SESSION_KEY);
@@ -52,12 +48,6 @@ export default defineBackground(() => {
     await browser.storage.session.set({ [SESSION_KEY]: [...tabs] });
   }
 
-  // ─── In-memory port registry ────────────────────────────────────────────
-  // Ports are lost on SW restart, but the panel reconnects automatically on
-  // its next message, which re-populates this map.
-
-  const panelPorts = new Map<number, Browser.runtime.Port>();
-
   function getTabIdFromPortName(name: string): number | null {
     const match = name.match(/^devtools-(\d+)$/);
     return match ? parseInt(match[1], 10) : null;
@@ -67,22 +57,18 @@ export default defineBackground(() => {
     panelPorts.get(tabId)?.postMessage(msg);
   }
 
-  // ─── Firefox: register filterResponseData listener once at startup ──────
-  // Firefox MV3 retains blocking webRequest (unlike Chrome). The listener is
-  // global — override rules are registered per-request by the panel.
+  // firefox blocks webRequest
+  // override rules are registered per-request by panl
+  if (ENGINE === 'firefox') {
+      Firefox.enable((msg: Message<PausedPayload>) => {
+      // map request back to the correct port.
+      const tabId = Firefox.getLastCapturedTabId();
+      if (tabId !== null) sendToPanel(tabId, msg);
+      });
+  }
 
-    if (ENGINE === 'firefox') {
-        Firefox.enable((msg: Message<PausedPayload>) => {
-        // Map the captured request back to the correct panel port.
-        const tabId = Firefox.getLastCapturedTabId();
-        if (tabId !== null) sendToPanel(tabId, msg);
-        });
-    }
-
-  // ─── Chromium: CDP event listeners ──────────────────────────────────────
-  // These must be registered at the top level of the SW — not inside a
-  // connect handler — so they are re-registered on every SW startup.
-
+  // chrome even listeners must be registered at top level of service worker
+  // to be correctly re-registered on every startup
   if (ENGINE === 'chromium') {
     browser.debugger.onEvent.addListener(async (source, method, params) => {
       const tabId = source.tabId;
@@ -97,15 +83,13 @@ export default defineBackground(() => {
 
     browser.debugger.onDetach.addListener(async (source, _reason) => {
       if (!source.tabId) return;
-      // Debugger detached externally (e.g. user opened DevTools manually).
-      // Clear persisted state so we don't try to re-attach on SW restart.
+      // clear state so we don't attempt to re-attach on restart
       await setTabAttached(source.tabId, false);
       panelPorts.delete(source.tabId);
     });
   }
 
-  // ─── Safari: relay content-script captures to the panel ─────────────────
-
+  // safari message bus from content-script to panel
   if (ENGINE === 'safari') {
     browser.runtime.onMessage.addListener((msg: Message, sender) => {
       if (msg.type !== 'CONTENT_REQUEST_CAPTURED') return;
@@ -119,16 +103,13 @@ export default defineBackground(() => {
     });
   }
 
-  // ─── DevTools panel port connections ────────────────────────────────────
-
   browser.runtime.onConnect.addListener(async (port) => {
     const tabId = getTabIdFromPortName(port.name);
     if (!tabId) return;
 
     panelPorts.set(tabId, port);
 
-    // SW restart recovery: if this tab was being intercepted before the SW
-    // was killed, re-attach the debugger now that a panel has reconnected.
+    // on restart, re-attach the debugger
     if (ENGINE === 'chromium') {
       const attached = await getAttachedTabs();
       if (attached.has(tabId)) {
@@ -139,7 +120,7 @@ export default defineBackground(() => {
             payload: { tabId, attached: true, strategy: 'chromium-cdp' } satisfies StatusPayload,
           });
         } catch {
-          // Tab may have been closed or debugger already attached by DevTools.
+          // tab was closed or already re-attached
           await setTabAttached(tabId, false);
         }
       }
@@ -155,8 +136,6 @@ export default defineBackground(() => {
 
     port.onMessage.addListener(async (msg: Message) => {
       switch (msg.type) {
-
-        // ── Attach ────────────────────────────────────────────────────────
         case 'INTERCEPTOR_ATTACH': {
           const { tabId: t } = msg.payload as AttachPayload;
           let strategy = 'none';
@@ -179,8 +158,6 @@ export default defineBackground(() => {
           });
           break;
         }
-
-        // ── Detach ────────────────────────────────────────────────────────
         case 'INTERCEPTOR_DETACH': {
           const { tabId: t } = msg.payload as DetachPayload;
           if (ENGINE === 'chromium') {
@@ -193,8 +170,6 @@ export default defineBackground(() => {
           });
           break;
         }
-
-        // ── Override ──────────────────────────────────────────────────────
         case 'RESPONSE_OVERRIDE': {
           const { override } = msg.payload as OverridePayload;
           if (ENGINE === 'chromium') {
@@ -204,8 +179,6 @@ export default defineBackground(() => {
           }
           break;
         }
-
-        // ── Passthrough ───────────────────────────────────────────────────
         case 'RESPONSE_PASSTHROUGH': {
           const { requestId } = msg.payload as PassthroughPayload;
           if (ENGINE === 'chromium') {
@@ -213,16 +186,16 @@ export default defineBackground(() => {
           }
           break;
         }
-        // ── Safari decision (block / passthrough / modify) ────────────────
-        // Relay the panel's decision to the content script in the target tab,
-        // which posts it to injected.js to resolve the suspended Promise.
+        
+        // safari message bus
+        // panel to injected script to resolve suspended promise
         case 'REQUEST_DECISION': {
           const { decision } = msg.payload as DecisionPayload;
           browser.tabs.sendMessage(tabId, {
             type:    'REQUEST_DECISION',
             payload: { decision },
           }).catch(() => {
-            // Content script may not be present (e.g. extension pages)
+            // content script might not be present on startup
           });
           break;
         }

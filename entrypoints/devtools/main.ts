@@ -1,5 +1,5 @@
 browser.devtools.panels.create(
-    'API Mocking',
+    'okAPI: API Mocking',
     '', // icon (optional)
     '/devtools-panel.html',
 );

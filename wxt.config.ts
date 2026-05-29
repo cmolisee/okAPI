@@ -2,7 +2,7 @@ import { defineConfig } from 'wxt';
 
 export default defineConfig({
   manifest: {
-    name: 'API Interceptor',
+    name: 'okAPI: API Mocking',
     description: 'Intercept and modify API requests and responses from DevTools.',
     version: '0.1.0',
     permissions: [
@@ -16,13 +16,9 @@ export default defineConfig({
     ],
     host_permissions: ['<all_urls>'],
   },
-
-  // Build Firefox as MV2 — filterResponseData requires blocking webRequest (MV2 only)
-  // Chromium and Safari use MV3
-  browser: undefined, // set per build via CLI flag
-
+  browser: undefined,
   webExt: {
-    disabled: true, // we manage running ourselves
+    disabled: true,
     startUrls: ["https://wxt.dev/"],
   },
 });

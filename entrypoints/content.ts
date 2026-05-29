@@ -18,7 +18,7 @@ export default defineContentScript({
     // inject script into the pages main JS context to patch the fetch()
     injectScript('/injected.js');
 
-    // --- PAGE → EXTENSION ---
+    // --- page -> extension ---
     window.addEventListener('message', (event) => {
       if (event.source !== window) return;
       if (event.data?.type !== 'SAFARI_INTERCEPTED') return;
@@ -30,7 +30,7 @@ export default defineContentScript({
       });
     });
 
-    // --- EXTENSION → PAGE ---
+    // --- extension -> page ---
     browser.runtime.onMessage.addListener((message) => {
       if (message.type === 'REQUEST_DECISION') {
         window.postMessage({ type: 'SAFARI_DECISION', payload: message.payload }, '*');

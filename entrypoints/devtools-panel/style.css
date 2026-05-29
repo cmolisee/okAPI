@@ -2,27 +2,41 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Toolbar ─────────────────────────────────────────────────────────────── */
-
 .toolbar {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  background: var(--bg-panel);
-  border-bottom: 1px solid var(--border);
+  background: var(--okapi-surface-tonal-a20);
+  border-bottom: 1px solid var(--okapi-surface-tonal-a40);
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  background: var(--okapi-surface-tonal-a20);
+  width: 100%;
+  border-bottom: 1px solid var(--okapi-surface-tonal-a40);
 }
 
 .toolbar button {
-  padding: 3px 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg-row);
-  color: var(--text);
-  cursor: pointer;
-  font-size: 12px;
+  background-color: transparent;
+  border: none;
+  font-size: 0.7rem;
+  min-width: 5rem;
+  min-height: 2rem;
+  padding: 0.25rem;
 }
-.toolbar button:hover { background: var(--bg-row-hover); }
+
+.toolbar button:hover { 
+  background-color: var(--okapi-surface-tonal-a40);
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 1rem;
+  border-left: 1px solid var(--okapi-surface-tonal-a40);
+  background-color: transparent;
+}
 
 .badge {
   padding: 2px 8px;
@@ -51,7 +65,7 @@
 
 /* ── Request list ────────────────────────────────────────────────────────── */
 
-.pane--list { background: var(--bg-panel); }
+.pane-list { background: var(--bg-panel); }
 
 .request-row {
   display: grid;
@@ -63,11 +77,11 @@
   cursor: pointer;
   transition: background 0.1s;
 }
-.request-row:hover  { background: var(--bg-row-hover); }
+.request-row:hover { background: var(--bg-row-hover); }
 .request-row.active { background: var(--bg-active); }
 
-.request-row.row--updated   { border-left: 3px solid var(--accent); }
-.request-row.row--overridden{ border-left: 3px solid #cba6f7; }
+.request-row.updated { border-left: 3px solid var(--accent); }
+.request-row.overridden { border-left: 3px solid #cba6f7; }
 
 .row-method {
   font-size: 11px;
@@ -75,9 +89,9 @@
   color: var(--accent);
   text-align: right;
 }
-.row-url    { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+.row-url { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
 .row-status { font-size: 11px; text-align: right; color: var(--text-muted); }
-.status--error { color: var(--accent-err); }
+.status-error { color: var(--accent-err); }
 
 .empty-hint {
   padding: 20px;
@@ -87,7 +101,7 @@
 
 /* ── Detail panel ────────────────────────────────────────────────────────── */
 
-.pane--detail {
+.pane-detail {
   display: flex;
   flex-direction: column;
   background: var(--bg);

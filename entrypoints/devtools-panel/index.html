@@ -6,124 +6,95 @@
     <title>okAPI: API Mocking</title>
     <link rel="stylesheet" href="style.css" />
   </head>
-  <!-- 
-    1. right click API in network tab
-    2. copy -> copy HAR
-    3. paste in mock panel
-    3. initialize mock that is 1-1 with the original
-        - include all metadata
-        - also include the env the request was made on
-    4. allow user to modify the request url
-        - priority on most specific matching request URL first via regex
-        - method must match or wont be mocked
-        - allows wild card
-        - allows "env" variables that can be created and referenced in both url and request for hot swapping
-    5. allow user to modify request body
-        - json only to start maybe expand elsewhere later
-    6. allow user to modify headers
-        - enable/disable
-        - future enhancement to use script that generates a header based on certain criteria
-    7. allow user to modify request body
-        - JSON only (future enhancment for other formats possibly)
-  -->
   <body>
     <header class="toolbar">
-      <div>
-        <button id="toggle-network-viewer-enabled" disabled />
-        <button id="toggle-mocking-enabled" disabled />
-        <button id="toggle-notifications-enabled" disabled />
+      <div class="toolbar-row">
+        <button id="toggle-network-viewer-enabled" disabled>▶ Start</button>
+        <div class="toolbar-divider"></div>
+        <button id="toggle-mocking-enabled" disabled>▶ Start</button>
+        <div class="toolbar-divider"></div>
+        <button id="toggle-notifications-enabled" disabled>▶ Start</button>
+        <div class="toolbar-divider"></div>
         <span class="engine-label" id="engine-label"></span>
       </div>
-      <div role="tablist" aria-label="okAPI tabs">
-        <button 
-          role="tab" 
-          aria-selected="true" 
-          aria-controls="network-viewer" 
-          id="tab-network-viewer" 
-          tabindex="0">
-          Network Viewer
-        </button>
-        <button 
-          role="tab" 
-          aria-selected="true" 
-          aria-controls="mock-viewer" 
-          id="tab-mock-viewer" 
-          tabindex="0">
-          Mock Viewer
-        </button>
-    </div>
+      <!-- todo: search bar/filter -->
+      <!-- <div class="toolbar-row"></div> -->
+      <div class="toolbar-row">
+        <button id="tab-network-viewer" class="active">Network Viewer</button>
+        <div class="toolbar-divider"></div>
+        <button id="tab-mock-viewer">Mock Viewer</button>
+      </div>
     </header>
 
 
 
     <main class="layout">
-      <section class="pane pane--list" id="panel-viewer">
-        <div id="network-viewer" role="tabpanel" aria-labelledby="tab-network-viewer" tabindex="0">
+      <section id="view-pane" class="pane pane-list active">
+        <div id="network-view-pane">
           <p class="empty-hint">No requests captured yet.</p>
         </div>
 
-        <div id="mock-viewer" role="tabpanel" aria-labelledby="tab-mock-viewer" tabindex="0">
+        <div id="mock-view-pane">
           <p class="empty-hint">No mocks created yet.</p>
         </div>
       </section>
 
 
       <!-- Detail / editor -->
-      <section class="pane pane--detail" id="panel-details">
-        <div id="network-details" aria-labelledby="tab-network-details" tabindex="0">
+      <section id="details-pane" class="pane pane-detail active">
+        <div id="network-detail-pane active">
           <div class="detail-placeholder">Select a request to inspect or modify it.</div>
 
           <div class="detail-content hidden">
             <div class="detail-meta" id="detail-meta"></div>
 
             <div class="tabs">
-              <button class="tab active" data-tab="response">Response</button>
-              <button class="tab" data-tab="request">Request</button>
+              <button class="tab active" data-tab="request">Request</button>
               <button class="tab" data-tab="headers">Headers</button>
+              <button class="tab" data-tab="response">Response</button>
             </div>
 
-            <div class="tab-body" id="tab-response">
-              <textarea id="editor-body" spellcheck="false" placeholder="Response body"></textarea>
+            <div id="tab-request" lass="tab-body active" data-active >
+              <pre id="request-body"></pre>
             </div>
-            <div class="tab-body hidden" id="tab-request">
-              <pre id="view-request-body"></pre>
+            <div id="tab-headers" class="tab-body" >
+              <pre id="headers"></pre>
             </div>
-            <div class="tab-body hidden" id="tab-headers">
-              <pre id="view-headers"></pre>
+            <div id="tab-response" class="tab-body" >
+              <pre id="response-body"></pre>
             </div>
 
             <div class="detail-actions">
-              <button id="btn-override">Apply Override</button>
-              <button id="btn-passthrough">Pass Through</button>
+              <button id="create-mock">Create Mock</button>
             </div>
           </div>
         </div>
 
-        <div id="mock-details" aria-labelledby="tab-mock-details" tabindex="0">
+        <div id="mock-detail-pane">
           <div class="detail-placeholder">Select a request to inspect or modify it.</div>
 
           <div class="detail-content hidden">
             <div class="detail-meta" id="detail-meta"></div>
 
             <div class="tabs">
-              <button class="tab active" data-tab="response">Response</button>
               <button class="tab" data-tab="request">Request</button>
-              <button class="tab" data-tab="headers">Headers</button>
+              <button class="tab" data-tab="headers" disabled>Headers</button>
+              <button class="tab active" data-tab="response" disabled>Response</button>
             </div>
 
-            <div class="tab-body" id="tab-response">
-              <textarea id="editor-body" spellcheck="false" placeholder="Response body"></textarea>
-            </div>
             <div class="tab-body hidden" id="tab-request">
-              <pre id="view-request-body"></pre>
+              <textarea id="request-editor" spellcheck="false" placeholder="{}"></textarea>
             </div>
-            <div class="tab-body hidden" id="tab-headers">
-              <pre id="view-headers"></pre>
+            <div class="tab-headers hidden" id="tab-headers">
+              <textarea id="headers-editor" spellcheck="false" placeholder="{}"></textarea>
+            </div>
+            <div id="tab-response active" class="tab-response">
+              <textarea id="response-editor" spellcheck="false" placeholder="{status: 200, data: {}}"></textarea>
             </div>
 
-            <div class="detail-actions">
-              <button id="btn-override">Apply Override</button>
-              <button id="btn-passthrough">Pass Through</button>
+            <div class="checkbox-item">
+              <input type="checkbox" id="enable-mock" name="enable mock" value="enabled">
+              <label for="enable-mock">Enable Mock</label>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { getMockingEnabledSetting, getNetworkViewerEnabledSetting, getNotificationsEnabledSetting, getThemeSetting, setMockingEnabledSettingSetting, setNetworkViewerEnabledSetting, setNotificationsEnabledSetting, setThemeSetting, Theme } from "../../utils/storage";
+import { getMockingEnabledSetting, getNetworkViewerEnabledSetting, getNotificationsEnabledSetting, getThemeSetting, setMockingEnabledSetting, setNetworkViewerEnabledSetting, setNotificationsEnabledSetting, setThemeSetting, Theme } from "../../utils/storage";
 
 (async () => {
     const themeSelect = document.getElementById('theme-select') as HTMLSelectElement | null;
@@ -18,7 +18,7 @@ import { getMockingEnabledSetting, getNetworkViewerEnabledSetting, getNotificati
 
     const mockingEnabledChangeListener = (event: Event) => {
         const target = event.target as HTMLInputElement;
-        if (target) setMockingEnabledSettingSetting(target.checked);
+        if (target) setMockingEnabledSetting(target.checked);
     }
 
     const networkViewerChangeListener = (event: Event) => {

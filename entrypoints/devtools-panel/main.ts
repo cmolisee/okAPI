@@ -5,7 +5,7 @@ import type {
   PausedPayload,
   ResponseOverride,
 } from '../../lib/interceptor/types';
-import { getMockingEnabledSetting, getNetworkViewerEnabledSetting, getNotificationsEnabledSetting, setMockingEnabledSetting, setMockingEnabledSettingSetting, setNetworkViewerEnabledSetting, setNotificationsEnabledSetting } from '../../utils/storage';
+import { getMockingEnabledSetting, getNetworkViewerEnabledSetting, getNotificationsEnabledSetting, setMockingEnabledSetting, setNetworkViewerEnabledSetting, setNotificationsEnabledSetting } from '../../utils/storage';
 
 const tabId = browser.devtools.inspectedWindow.tabId;
 const port = browser.runtime.connect({ name: `okapi-${tabId}` });
@@ -43,7 +43,7 @@ port.onMessage.addListener((msg: Message) => {
 
 port.onDisconnect.addListener(() => {
   setNotificationsEnabledSetting(false);
-  setMockingEnabledSettingSetting(false);
+  setMockingEnabledSetting(false);
   setNetworkViewerEnabledSetting(false);
 });
 
@@ -70,39 +70,49 @@ function passthrough(requestId: string): void {
 }
 
 // --- panel ui ---
-const enableNetworkViewerButton = document.getElementById('toggle-network-viewer-enabled') as HTMLButtonElement | null;
-const enableMockingButton = document.getElementById('toggle-mocking-enabled') as HTMLButtonElement | null;
-const enableNotificationsButton = document.getElementById('toggle-notifications-enabled') as HTMLButtonElement | null;
-const networkViewerTabButton = document.getElementById('tab-network-viewer') as HTMLButtonElement | null;
-const mockViewerTabButton = document.getElementById('tab-mock-viewer') as HTMLButtonElement | null;
+const enableNetworkViewerButton = document.getElementById('toggle-network-viewer-enabled')! as HTMLButtonElement;
+const enableMockingButton = document.getElementById('toggle-mocking-enabled')! as HTMLButtonElement;
+const enableNotificationsButton = document.getElementById('toggle-notifications-enabled')! as HTMLButtonElement;
+const networkViewerTabButton = document.getElementById('tab-network-viewer')! as HTMLButtonElement;
+const mockViewerTabButton = document.getElementById('tab-mock-viewer')! as HTMLButtonElement;
 
-const engineLabelElement = document.getElementById('engine-label') as HTMLSpanElement | null;
-const viewPanel = document.getElementById('viewer-panel') as HTMLElement | null;
-const detailPanel = document.getElementById('detail-panel') as HTMLElement | null;
+const engineLabelElement = document.getElementById('engine-label')! as HTMLSpanElement;
+const viewPain = document.getElementById('view-pane')! as HTMLElement;
+const detailPain = document.getElementById('detail-pane')! as HTMLElement;
 
-const networkViewPanel = document.getElementById('network-viewer') as HTMLElement | null;
-const networkDetailPanel = document.getElementById('network-details') as HTMLElement | null;
-const mockViewPanel = document.getElementById('mock-viewer') as HTMLElement | null;
-const mockDetailPanel = document.getElementById('mock-details') as HTMLElement | null;
+const networkViewPane = document.getElementById('network-view-pane')! as HTMLElement;
+const networkViewPaneHint = networkViewPane.querySelector('.empty-hint')! as HTMLElement;
+const networkDetailPane = document.getElementById('network-detail-pane')! as HTMLElement;
+const networkDetailPlaceholder = networkDetailPane.querySelector('.detail-placeholder')! as HTMLElement;
+const networkDetailContent = networkDetailPane.querySelector('.detail-content')! as HTMLElement;
+const networkDetailMeta = networkDetailPane.querySelector('.detail-meta')! as HTMLElement;
+const networkDetailTabs = networkDetailPane.querySelectorAll('.tabs')! as NodeListOf<HTMLButtonElement>;
+const networkDetailRequest = networkDetailPane.querySelector('#request-body')! as HTMLPreElement;
+const networkDetailHeaders = networkDetailPane.querySelector('#headers')! as HTMLPreElement;
+const networkDetailResponse = networkDetailPane.querySelector('#response-body')! as HTMLPreElement;
+const networkDetailCreateMock = networkDetailPane.querySelector('#create-mock')! as HTMLButtonElement;
 
-const detailContentPlaceholderSelector = '[data-active] .detail-placeholder';
-const detailContentSelector = '[data-active] .detail-content';
-const detailContentMetaSelector = '[data-active] .detail-meta';
-const detailContentResponseTabSelector = '[data-active] [data-tab="response"]';
-const detailContentRequestTabSelector = '[data-active] [data-tab="request"]';
-const detailContentHeadersTabSelector = '[data-active] [data-tab="headers"]';
-const detailContentResponeEditorSelector = '[data-active] textarea';
-const detailContentRequestBodySelector = '[data-active] #view-request-body';
-const detailContentHeadersSelector = '[data-active] #view-headers';
-const detailContentOverrideButtonSelector = '[data-active] #btn-override';
-const detailContentpassthroughButtonSelector = '[data-active] #btn-passthrough';
+const mockViewPane = document.getElementById('mock-view-pane')! as HTMLElement;
+const mockViewPaneHint = mockViewPane.querySelector('empty-hint')! as HTMLElement;
+const mockDetailPane = document.getElementById('mock-detail-pane')! as HTMLElement;
+const mockDetailPlaceholder = mockDetailPane.querySelector('.detail-placeholder')! as HTMLElement;
+const mockDetailContent = mockDetailPane.querySelector('.detail-content')! as HTMLElement;
+const mockDetailMeta = mockDetailPane.querySelector('.detail-meta')! as HTMLElement;
+const mockDetailTabs = mockDetailPane.querySelectorAll('.tabs')! as NodeListOf<HTMLButtonElement>;
+const mockDetailRequestEditor = mockDetailPane.querySelector('#request-editor')! as HTMLTextAreaElement;
+const mockDetailHeadersEditor = mockDetailPane.querySelector('#headers-editor')! as HTMLTextAreaElement;
+const mockDetailResponseEditor = mockDetailPane.querySelector('#response-editor')! as HTMLTextAreaElement;
+const mockDetailEnableMock = mockDetailPane.querySelector('#enable-mock')! as HTMLButtonElement;
+
 
 function updatePanelUI(attached: boolean, strategy: string): void {
   if (engineLabelElement) engineLabelElement.innerText = strategy;
-  const method = attached ? 'removeAttribute' : 'setAttribute';
   if (enableNetworkViewerButton) enableNetworkViewerButton.disabled = !attached
   if (enableMockingButton) enableMockingButton.disabled = !attached
   if (enableNotificationsButton) enableNotificationsButton.disabled = !attached
+  toggleEnableNetworkViewer();
+  toggleEnableMocking();
+  toggleEnableNotifications();
 }
 
 async function updateScriptStatus(): Promise<void> {
@@ -116,7 +126,7 @@ async function updateScriptStatus(): Promise<void> {
   }
 }
 
-async function toggleEnableNetworkViewer(event: Event): Promise<void> {
+async function toggleEnableNetworkViewer(): Promise<void> {
   if (!enableNetworkViewerButton) return;
   if (enableNetworkViewerButton?.disabled) return;
   const isActive = await getNetworkViewerEnabledSetting();
@@ -125,7 +135,7 @@ async function toggleEnableNetworkViewer(event: Event): Promise<void> {
   updateScriptStatus();
 }
 
-async function toggleEnableMocking(event: Event): Promise<void> {
+async function toggleEnableMocking(): Promise<void> {
   if (!enableMockingButton) return;
   if (enableMockingButton?.disabled) return;
   const isActive = await getMockingEnabledSetting();
@@ -134,7 +144,7 @@ async function toggleEnableMocking(event: Event): Promise<void> {
   updateScriptStatus();
 }
 
-async function toggleEnableNotifications(event: Event): Promise<void> {
+async function toggleEnableNotifications(): Promise<void> {
   if (!enableNotificationsButton) return;
   if (enableNotificationsButton?.disabled) return;
   const isActive = await getNotificationsEnabledSetting();
@@ -142,181 +152,143 @@ async function toggleEnableNotifications(event: Event): Promise<void> {
   setNotificationsEnabledSetting(!isActive);
 }
 
-async function toggleActiveClickEvent(event: Event): Promise<void> {
-  if (!toggleActiveButton) return;
-  const isActive = await getMockingEnabledSettingSetting();
 
-  isActive ? detach() : attach();
-  toggleActiveButton.textContent = isActive ? '⏹ Stop' : '▶ Start';
-  setMockingEnabledSettingSetting(!isActive);
-}
+async function renderRequestRow(request: InterceptedRequest): Promise<void> {
+  // note: should only ever be called iff network viewer is enabled
+  if (!networkViewPane) return;
 
-if (toggleActiveButton) {
-  const isActive = await getMockingEnabledSettingSetting();
+  networkViewPaneHint.classList.toggle('hidden');
 
-  toggleActiveButton.textContent = isActive ? '⏹ Stop' : '▶ Start';
-  isActive ? attach() : detach();
-
-  toggleActiveButton.removeEventListener('click', toggleActiveClickEvent)
-  toggleActiveButton.addEventListener('click', toggleActiveClickEvent);
-}
-
-// --- engine lable ---
-if (engingLabel) {
-  engineElement.textContent = strategy !== 'none' ? `[${strategy}]` : '';
-}
-
-
-
-
-const listElement = document.getElementById('request-list')!;
-const detailElement = document.getElementById('detail-panel')!;
-const detailMetaElement = document.getElementById('detail-meta')!;
-const editorBodyElement = document.getElementById('editor-body') as HTMLTextAreaElement;
-const reqBodyElement = document.getElementById('view-request-body')!;
-const headersElement = document.getElementById('view-headers')!;
-const btnToggleElement = document.getElementById('btn-toggle')!;
-const btnClearElement = document.getElementById('btn-clear')!;
-const btnOverrideElement = document.getElementById('btn-override')!;
-const btnPassthroughElement = document.getElementById('btn-passthrough')!;
-const badgeElement = document.getElementById('status-badge')!;
-const engineElement = document.getElementById('engine-label')!;
-
-
-
-function setEngineLabel(strategy: string): void {
-  engineElement.textContent = strategy !== 'none' ? `[${strategy}]` : '';
-}
-
-function renderRequestRow(req: InterceptedRequest): void {
-  // Remove empty-hint on first item
-  listElement.querySelector('.empty-hint')?.remove();
-
-  const existing = listElement.querySelector(`[data-id="${req.id}"]`);
-  if (existing) {
-    existing.classList.add('row--updated');
+  const requestToUpdate = networkViewPane.querySelector(`[data-id="${request.id}"]`);
+  if (requestToUpdate) {
+    requestToUpdate.classList.add('updated');
     return;
   }
 
   const row = document.createElement('div');
-  row.className   = 'request-row';
-  row.dataset.id  = req.id;
+  row.className = 'request-row';
+  row.dataset.id = request.id;
 
   const method = document.createElement('span');
   method.className = 'row-method';
-  method.textContent = req.method;
+  method.textContent = request.method;
 
   const url = document.createElement('span');
   url.className = 'row-url';
-  url.textContent = req.url;
+  url.textContent = request.url;
 
   const status = document.createElement('span');
-  status.className = `row-status ${req.statusCode && req.statusCode >= 400 ? 'status--error' : ''}`;
-  status.textContent = String(req.statusCode ?? '…');
+  status.className = `row-status ${request.statusCode && request.statusCode >= 400 ? 'status-error' : ''}`;
+  status.textContent = String(request.statusCode ?? '…');
 
   row.append(method, url, status);
-  row.addEventListener('click', () => selectRequest(req.id));
-  listElement.appendChild(row);
+  row.addEventListener('click', () => selectRequest(request.id));
+
+  networkViewPane.appendChild(row);
 }
 
 function selectRequest(id: string): void {
+  // note: should only ever be called iff network viewer is enabled
+  if (!networkViewPane) return;
+
   selected = requests.get(id) ?? null;
   if (!selected) return;
 
-  listElement.querySelectorAll('.request-row').forEach(r =>
+  networkViewPane.querySelectorAll('.request-row').forEach(r =>
     r.classList.toggle('active', r.getAttribute('data-id') === id),
   );
 
-  detailElement.querySelector('.detail-placeholder')?.classList.add('hidden');
-  detailElement.querySelector('.detail-content')?.classList.remove('hidden');
+  networkDetailPlaceholder.classList.add('hidden');
+  networkDetailContent.classList.remove('hidden');
 
-  detailMetaElement.innerHTML =
+  networkDetailMeta.innerHTML =
     `<strong>${selected.method}</strong> <span class="url">${selected.url}</span> ` +
     `<span class="status">${selected.statusCode ?? '…'}</span>`;
 
-  editorBodyElement.value    = tryPrettyPrint(selected.responseBody ?? '');
-  reqBodyElement.textContent = tryPrettyPrint(selected.requestBody ?? '(none)');
-  headersElement.textContent = JSON.stringify(
-    { request: selected.requestHeaders, response: selected.responseHeaders },
-    null,
-    2,
+  networkDetailRequest.textContent = tryPrettyPrint(selected.requestBody ?? '');
+  networkDetailHeaders!.textContent = tryPrettyPrint(
+    JSON.stringify({ request: selected.requestHeaders, response: selected.responseHeaders })
   );
+  networkDetailResponse.textContent = tryPrettyPrint(JSON.stringify(selected.responseBody) ?? '');
 }
+
+// TODO: add status, response headers
 
 function tryPrettyPrint(text: string): string {
   try { return JSON.stringify(JSON.parse(text), null, 2); } catch { return text; }
 }
 
-// ─── Tab switching ────────────────────────────────────────────────────────────
+function panelTabClickEvent(event: Event) {
+  const target = event.currentTarget as HTMLButtonElement;
+  if (!target) return;
+  if (target.classList.contains('active')) return;
 
-document.querySelectorAll('.tab').forEach((tab) => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    const target = (tab as HTMLElement).dataset.tab!;
-    document.querySelectorAll('.tab-body').forEach(b => {
-      b.classList.toggle('hidden', b.id !== `tab-${target}`);
-    });
-  });
-});
+  // toggle off active elements
+  document.querySelector('.pane-tabs button.active')?.classList.toggle('active', false);
+  viewPain.querySelector(':scope > .active')?.classList.toggle('active', false);
+  detailPain.querySelector(':scope > .active')?.classList.toggle('active', false);
 
-// ─── Toolbar actions ─────────────────────────────────────────────────────────
+  target.classList.toggle('active', true);
 
-btnClearElement.addEventListener('click', () => {
-  requests.clear();
-  selected = null;
-  listElement.innerHTML = '<p class="empty-hint">No requests captured yet.</p>';
-  detailElement.querySelector('.detail-content')?.classList.add('hidden');
-  detailElement.querySelector('.detail-placeholder')?.classList.remove('hidden');
-});
-
-btnOverrideElement.addEventListener('click', () => {
-  if (!selected) return;
-  if (selected.source === 'safari-patch') {
-    // Safari: send a decision before the real request is made
-    send({
-      type: 'REQUEST_DECISION',
-      payload: {
-        decision: {
-          requestId:       selected.id,
-          action:          'block',
-          syntheticStatus: 200,
-          syntheticBody:   editorBodyElement.value,
-        },
-      },
-    });
-  } else {
-    // Chromium/Firefox: override the response after it was received
-    send({
-      type:    'RESPONSE_OVERRIDE',
-      payload: {
-        override: {
-          requestId:  selected.id,
-          body:       editorBodyElement.value,
-          statusCode: selected.statusCode ?? 200,
-        },
-      },
-    });
+  if (target.id === 'tab-network-viewer') {
+    networkViewPane.classList.toggle('active', true);
+    networkDetailPane.classList.toggle('active', true);
+  } else if (target.id === 'tab-mock-viewer') {
+    mockViewPane.classList.toggle('active', true);
+    mockDetailPane.classList.toggle('active', true);
   }
- 
-  listElement.querySelector(`[data-id="${selected.id}"]`)?.classList.add('row--overridden');
-});
+}
 
-btnPassthroughElement.addEventListener('click', () => {
-  if (!selected) return;
-  if (selected.source === 'safari-patch') {
-    send({
-      type: 'REQUEST_DECISION',
-      payload: {
-        decision: {
-          requestId: selected.id,
-          action:    'passthrough',
-        },
-      },
-    });
-  } else {
-    send({ type: 'RESPONSE_PASSTHROUGH', payload: { requestId: selected.id } });
-  }
+// todo: consider adding clear button to network viewer
+
+
+// btnOverrideElement.addEventListener('click', () => {
+//   if (!selected) return;
+//   if (selected.source === 'safari-patch') {
+//     // Safari: send a decision before the real request is made
+//     send({
+//       type: 'REQUEST_DECISION',
+//       payload: {
+//         decision: {
+//           requestId:       selected.id,
+//           action:          'block',
+//           syntheticStatus: 200,
+//           syntheticBody:   editorBodyElement.value,
+//         },
+//       },
+//     });
+//   } else {
+//     // Chromium/Firefox: override the response after it was received
+//     send({
+//       type:    'RESPONSE_OVERRIDE',
+//       payload: {
+//         override: {
+//           requestId:  selected.id,
+//           body:       editorBodyElement.value,
+//           statusCode: selected.statusCode ?? 200,
+//         },
+//       },
+//     });
+//   }
  
-  listElement.querySelector(`[data-id="${selected.id}"]`)?.classList.remove('row--updated');
-});
+//   listElement.querySelector(`[data-id="${selected.id}"]`)?.classList.add('row--overridden');
+// });
+
+// btnPassthroughElement.addEventListener('click', () => {
+//   if (!selected) return;
+//   if (selected.source === 'safari-patch') {
+//     send({
+//       type: 'REQUEST_DECISION',
+//       payload: {
+//         decision: {
+//           requestId: selected.id,
+//           action:    'passthrough',
+//         },
+//       },
+//     });
+//   } else {
+//     send({ type: 'RESPONSE_PASSTHROUGH', payload: { requestId: selected.id } });
+//   }
+ 
+//   listElement.querySelector(`[data-id="${selected.id}"]`)?.classList.remove('row--updated');
+// });

@@ -8,42 +8,33 @@
     <title>okAPI: API Mocking</title>
   </head>
   <body>
-    <div>
-        <div class="select-container">
-            <label for="theme-select" id="theme-label" class="select-label">
-                Choose Theme
-            </label>
-            <div class="select-wrapper">
-                <select 
-                    id="theme-select" 
-                    name="theme" 
-                    aria-labelledby="theme-label"
-                    required
-                >
+    <fieldset>
+        <label for="theme-select" id="theme-label">Choose Theme</label>
+        <div class="select-wrapper">
+            <select id="theme-select">
                 <option value="system" selected>System</option>
                 <option value="light">Light</option>
                 <option value="dark">Dark</option>
-                </select>
-                <span class="select-arrow" aria-hidden="true"></span>
-            </div>
-        </div>
-
-        <div class="checkbox-item">
-            <input type="checkbox" id="enableNotifications" name="enableNotifications" value="enableNotifications">
-            <label for="enableNotifications">Enable Popup Notifications</label>
-        </div>
-
-        <div class="checkbox-item">
-            <input type="checkbox" id="enableMocking" name="enableMocking" value="enableMocking">
-            <label for="enableMocking">Enable Mocking</label>
-        </div>
-
-        <div class="checkbox-item">
-            <input type="checkbox" id="enableNetworkViewer" name="enableNetworkViewer" value="enableNetworkViewer">
-            <label for="enableNetworkViewer">Enable Network Viewer</label>
+            </select>
+            <span class="arrow"/>
         </div>
         
-    </div>
+        <div class="checkbox-wrapper">
+            <label for="enableNotifications">Enable Popup Notifications</label>
+            <input id="enableNotifications" type="checkbox">
+        </div>
+        
+        <div class="checkbox-wrapper">
+            <label for="enableMocking">Enable Mocking</label>
+            <input id="enableMocking" type="checkbox">
+        </div>
+        
+        <div class="checkbox-wrapper">
+            <label for="enableNetworkViewer">Enable Network Viewer</label>
+            <input id="enableNetworkViewer" type="checkbox">
+        </div>
+        
+    </fieldset>
     <script type="module" src="./main.ts"></script>
   </body>
 </html>
