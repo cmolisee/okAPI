@@ -1,3 +1,4 @@
+import { storage } from "wxt/utils/storage";
 export type Theme = 'light' | 'dark' | 'system';
 export type StorageKeys = 
     'local:settings.theme' |
@@ -6,16 +7,16 @@ export type StorageKeys =
     'local:settings.networkViewerEnabled';
 
 // --- storage definitions ---
-export const themeSetting = browser.storage.defineItem<Theme>('local:settings.theme', {
+export const themeSetting = storage.defineItem<Theme>('local:settings.theme', {
     fallback: 'system',
 });
-export const notificationsEnabledSetting = browser.storage.defineItem<boolean>('local:settings.notificationsEnabled', {
+export const notificationsEnabledSetting = storage.defineItem<boolean>('local:settings.notificationsEnabled', {
     fallback: false,
 });
-export const mockingEnabledSetting = browser.storage.defineItem<boolean>('local:settings.mockingEnabled', {
+export const mockingEnabledSetting = storage.defineItem<boolean>('local:settings.mockingEnabled', {
     fallback: false,
 });
-export const networkViewerEnabled = browser.storage.defineItem<boolean>('local:settings.networkViewerEnabled', {
+export const networkViewerEnabled = storage.defineItem<boolean>('local:settings.networkViewerEnabled', {
     fallback: false,
 });
 
@@ -42,10 +43,10 @@ export const resetNetworkViewerEnabledSetting = async (): Promise<void> => await
  */
 export const watch = (
     key: StorageKeys,
-    callback?: (newValue: Theme | boolean, oldValue: Theme | boolean) => void,
+    callback?: (newValue: boolean | Theme | null, oldValue: boolean | Theme | null) => void,
     enableLogging: boolean = false,
 ): () => void => {
-    return browser.storage.watch<StorageKeys>(`local:${key}`, (newValue: Theme | boolean, oldValue: Theme | boolean) => {
+    return storage.watch<Theme | boolean>(`local:${key}`, (newValue, oldValue) => {
         if (callback) callback(newValue, oldValue);
         if (enableLogging) console.debug(`${key} changed from ${oldValue} to ${newValue}`);
     });

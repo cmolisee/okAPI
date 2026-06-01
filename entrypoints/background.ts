@@ -67,7 +67,7 @@ export default defineBackground(() => {
       });
   }
 
-  // chrome even listeners must be registered at top level of service worker
+  // chrome event listeners must be registered at top level of service worker
   // to be correctly re-registered on every startup
   if (ENGINE === 'chromium') {
     browser.debugger.onEvent.addListener(async (source, method, params) => {

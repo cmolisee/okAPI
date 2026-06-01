@@ -1,4 +1,4 @@
-import { setTheme, Theme } from "./storage";
+import { setThemeSetting, Theme } from "./storage";
 
 /**
  * Sets theme.
@@ -8,5 +8,5 @@ import { setTheme, Theme } from "./storage";
  */
 export const toggleTheme = (theme: Theme) => {
     document.documentElement.setAttribute('data-theme', theme);
-    setTheme(theme);
+    setThemeSetting(theme);
 };

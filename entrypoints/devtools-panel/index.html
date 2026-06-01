@@ -9,14 +9,23 @@
   <body>
     <header class="toolbar">
       <div class="toolbar-row">
-        <!-- todo: update to checkboxes... -->
-        <button id="toggle-network-viewer-enabled" disabled>▶ Start</button>
-        <div class="toolbar-divider"></div>
-        <button id="toggle-mocking-enabled" disabled>▶ Start</button>
-        <div class="toolbar-divider"></div>
-        <button id="toggle-notifications-enabled" disabled>▶ Start</button>
-        <div class="toolbar-divider"></div>
         <span class="engine-label" id="engine-label"></span>
+      </div>
+      <div class="toolbar-row">
+        <div class="checkbox-wrapper">
+          <label for="enableNetworkViewer">Enable Network Viewer</label>
+          <input id="enableNetworkViewer" type="checkbox">
+        </div>
+        <div class="toolbar-divider"></div>
+        <div class="checkbox-wrapper">
+            <label for="enableMocking">Enable Mocking</label>
+            <input id="enableMocking" type="checkbox">
+        </div>
+        <div class="toolbar-divider"></div>
+        <div class="checkbox-wrapper">
+            <label for="enableNotifications">Enable Popup Notifications</label>
+            <input id="enableNotifications" type="checkbox">
+        </div>
       </div>
       <!-- todo: search bar/filter -->
       <!-- <div class="toolbar-row"></div> -->

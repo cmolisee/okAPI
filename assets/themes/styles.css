@@ -214,6 +214,7 @@ input[type="checkbox"] {
   display: inline-grid;
   place-content: center;
   margin-right: 1rem;
+  margin-bottom: 0;
 }
 
 select {
@@ -224,7 +225,6 @@ select {
   border-radius: 4px;
   background-color: transparent;
   cursor: pointer;
-  margin-bottom: 0.75rem;
 }
 
 select::-ms-expand {
@@ -242,7 +242,7 @@ select:focus-visible + .arrow::after {
 }
 
 input[type="checkbox"]:focus-visible {
-outline: 1px solid var(--okapi-primary-a20) !important;
+  outline: 1px solid var(--okapi-primary-a20) !important;
 }
 
 .checkbox-wrapper {
@@ -250,10 +250,16 @@ outline: 1px solid var(--okapi-primary-a20) !important;
   flex-direction: row-reverse;
   justify-content: flex-end;
   align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.checkbox-wrapper label {
+  margin-bottom: 0;
 }
 
 .select-wrapper {
   position: relative;
+  margin-bottom: 0.75rem;
 }
 
 .select-wrapper > .arrow::after {

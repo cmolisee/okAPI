@@ -70,16 +70,15 @@ function passthrough(requestId: string): void {
 }
 
 // --- panel ui ---
-const enableNetworkViewerButton = document.getElementById('toggle-network-viewer-enabled')! as HTMLButtonElement;
-const enableMockingButton = document.getElementById('toggle-mocking-enabled')! as HTMLButtonElement;
-const enableNotificationsButton = document.getElementById('toggle-notifications-enabled')! as HTMLButtonElement;
+const enableNetworkViewerCheckbox = document.getElementById('toggle-network-viewer-enabled')! as HTMLInputElement;
+const enableMockingCheckbox = document.getElementById('toggle-mocking-enabled')! as HTMLInputElement;
+const enableNotificationsCheckbox = document.getElementById('toggle-notifications-enabled')! as HTMLInputElement;
 const networkViewerTabButton = document.getElementById('tab-network-viewer')! as HTMLButtonElement;
 const mockViewerTabButton = document.getElementById('tab-mock-viewer')! as HTMLButtonElement;
 
 const engineLabelElement = document.getElementById('engine-label')! as HTMLSpanElement;
 const viewPain = document.getElementById('view-pane')! as HTMLElement;
 const detailPain = document.getElementById('detail-pane')! as HTMLElement;
-
 const networkViewPane = document.getElementById('network-view-pane')! as HTMLElement;
 const networkViewPaneHint = networkViewPane.querySelector('.empty-hint')! as HTMLElement;
 const networkDetailPane = document.getElementById('network-detail-pane')! as HTMLElement;
@@ -107,49 +106,63 @@ const mockDetailEnableMock = mockDetailPane.querySelector('#enable-mock')! as HT
 
 function updatePanelUI(attached: boolean, strategy: string): void {
   if (engineLabelElement) engineLabelElement.innerText = strategy;
-  if (enableNetworkViewerButton) enableNetworkViewerButton.disabled = !attached
-  if (enableMockingButton) enableMockingButton.disabled = !attached
-  if (enableNotificationsButton) enableNotificationsButton.disabled = !attached
-  toggleEnableNetworkViewer();
-  toggleEnableMocking();
-  toggleEnableNotifications();
+  initializeEnableNetworkViewer();
+  initializeEnableMocking();
+  initializeEnableNotifications();
 }
 
-async function updateScriptStatus(): Promise<void> {
+async function checkScriptStatus(): Promise<void> {
   if (
-    !(await getNetworkViewerEnabledSetting()) ||
-    !(await getMockingEnabledSetting())
+    await getNetworkViewerEnabledSetting() ||
+    await getMockingEnabledSetting()
   ) {
-    detach();
-  } else {
     attach();
+  } else {
+    detach();
   }
 }
 
-async function toggleEnableNetworkViewer(): Promise<void> {
-  if (!enableNetworkViewerButton) return;
-  if (enableNetworkViewerButton?.disabled) return;
-  const isActive = await getNetworkViewerEnabledSetting();
-  enableNetworkViewerButton.textContent = isActive ? '⏹ Stop' : '▶ Start';
-  setNetworkViewerEnabledSetting(!isActive);
-  updateScriptStatus();
+async function setEnableNetworkViewer(event: Event): Promise<void> {
+  const target = event.currentTarget as HTMLInputElement;
+  if (!target) return;
+  setNetworkViewerEnabledSetting(target.checked);
+  checkScriptStatus();
 }
 
-async function toggleEnableMocking(): Promise<void> {
-  if (!enableMockingButton) return;
-  if (enableMockingButton?.disabled) return;
-  const isActive = await getMockingEnabledSetting();
-  enableMockingButton.textContent = isActive ? '⏹ Stop' : '▶ Start';
-  setMockingEnabledSetting(!isActive);
-  updateScriptStatus();
+async function setEnableMocking(event: Event): Promise<void> {
+  const target = event.currentTarget as HTMLInputElement;
+  if (!target) return;
+  setMockingEnabledSetting(target.checked);
+  checkScriptStatus();
 }
 
-async function toggleEnableNotifications(): Promise<void> {
-  if (!enableNotificationsButton) return;
-  if (enableNotificationsButton?.disabled) return;
-  const isActive = await getNotificationsEnabledSetting();
-  enableNotificationsButton.textContent = isActive ? '⏹ Stop' : '▶ Start';
-  setNotificationsEnabledSetting(!isActive);
+async function setEnableNotifications(event: Event): Promise<void> {
+  const target = event.currentTarget as HTMLInputElement;
+  if (!target) return;
+  setNotificationsEnabledSetting(target.checked);
+}
+
+async function initializeEnableNetworkViewer(): Promise<void> {
+  if (!enableNetworkViewerCheckbox) return;
+  enableNetworkViewerCheckbox.checked = await getNetworkViewerEnabledSetting();
+  checkScriptStatus();
+  enableNetworkViewerCheckbox.removeEventListener('change', setEnableNetworkViewer);
+  enableNetworkViewerCheckbox.addEventListener('change', setEnableNetworkViewer);
+}
+
+async function initializeEnableMocking(): Promise<void> {
+  if (!enableMockingCheckbox) return;
+  enableMockingCheckbox.checked = await getMockingEnabledSetting();
+  checkScriptStatus();
+  enableMockingCheckbox.removeEventListener('change', setEnableMocking);
+  enableMockingCheckbox.addEventListener('change', setEnableMocking);
+}
+
+async function initializeEnableNotifications(): Promise<void> {
+  if (!enableNotificationsCheckbox) return;
+  enableNotificationsCheckbox.checked = await getNotificationsEnabledSetting();
+  enableNotificationsCheckbox.removeEventListener('change', setEnableNotifications);
+  enableNotificationsCheckbox.addEventListener('change', setEnableNotifications);
 }
 
 
