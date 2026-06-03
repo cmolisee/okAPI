@@ -36,7 +36,7 @@ export default defineBackground(() => {
     : 'chromium';
   const SESSION_KEY = 'interceptor_attached_tabs';
   const panelPorts = new Map<number, Browser.runtime.Port>();
-
+   
   async function getAttachedTabs(): Promise<Set<number>> {
     const result: any = await browser.storage.session.get(SESSION_KEY);
     return new Set<number>(result[SESSION_KEY] ?? []);

@@ -1,187 +1,158 @@
 :root {
-    /* indicate support for browser system preference */
-    color-scheme: light dark;
+  /* indicate support for browser system preference */
+  color-scheme: light dark;
 
-    /* light */
-    --okapi-primary-a0: #0711c6;
-    --okapi-primary-a10: #050dac;
-    --okapi-primary-a20: #040992;
-    --okapi-primary-a30: #02067a;
-    --okapi-primary-a40: #020462;
-    --okapi-primary-a50: #01024b;
+  /* light */
+  --okapi-primary-a0: rgb(240, 241, 242);
+  --okapi-primary-a10: color-mix(in srgb, white 10%, var(--okapi-primary-a0));
+  --okapi-primary-a20: color-mix(in srgb, white 20%, var(--okapi-primary-a0));
+  --okapi-primary-a30: color-mix(in srgb, white 30%, var(--okapi-primary-a0));
+  --okapi-primary-a40: color-mix(in srgb, white 40%, var(--okapi-primary-a0));
+  --okapi-primary-a50: color-mix(in srgb, white 50%, var(--okapi-primary-a0));
 
-    --okapi-surface-a0: #fff;
-    --okapi-surface-a10: #f2f2f2;
-    --okapi-surface-a20: #e4e4e4;
-    --okapi-surface-a30: #d7d7d7;
-    --okapi-surface-a40: #cacaca;
-    --okapi-surface-a50: #bdbdbd;
+  --okapi-surface-a0: #fff;
+  --okapi-primary-a10: color-mix(in srgb, white 10%, var(--okapi-primary-a0));
+  --okapi-primary-a20: color-mix(in srgb, white 20%, var(--okapi-primary-a0));
+  --okapi-primary-a30: color-mix(in srgb, white 30%, var(--okapi-primary-a0));
+  --okapi-primary-a40: color-mix(in srgb, white 40%, var(--okapi-primary-a0));
+  --okapi-primary-a50: color-mix(in srgb, white 50%, var(--okapi-primary-a0));
 
-    --okapi-surface-tonal-a0: #e2ebfc;
-    --okapi-surface-tonal-a10: #d8e0ef;
-    --okapi-surface-tonal-a20: #ced5e2;
-    --okapi-surface-tonal-a30: #c4cad5;
-    --okapi-surface-tonal-a40: #babfc9;
-    --okapi-surface-tonal-a50: #b0b4bc;
+  --okapi-success-a0: rgb(125 255 149);
+  --okapi-success-a10: color-mix(in srgb, white 10%, var(--okapi-success-a0));
+  --okapi-success-a20: color-mix(in srgb, white 20%, var(--okapi-success-a0));
 
-    --okapi-success-a0: #4aff6b;
-    --okapi-success-a10: #74ff86;
-    --okapi-success-a20: #94ff9d;
+  --okapi-warning-a0: rgb(255 188 94);
+  --okapi-warning-a10: color-mix(in srgb, white 10%, var(--okapi-warning-a0));
+  --okapi-warning-a20: color-mix(in srgb, white 20%, var(--okapi-warning-a0));
 
-    --okapi-warning-a0: #ffac38;
-    --okapi-warning-a10: #ffb961;
-    --okapi-warning-a20: #ffc681;
+  --okapi-danger-a0: rgb(255 128 128);
+  --okapi-danger-a10: color-mix(in srgb, white 10%, var(--okapi-danger-a0));
+  --okapi-danger-a20: color-mix(in srgb, white 20%, var(--okapi-danger-a0));
 
-    --okapi-danger-a0: #ff6161;
-    --okapi-danger-a10: #ff7c79;
-    --okapi-danger-a20: #ff9590;
+  --okapi-info-a0: rgb(135 209 255);
+  --okapi-info-a10: color-mix(in srgb, white 10%, var(--okapi-info-a0));
+  --okapi-info-a20: color-mix(in srgb, white 20%, var(--okapi-info-a0));
 
-    --okapi-info-a0: #61c2ff;
-    --okapi-info-a10: #7dccff;
-    --okapi-info-a20: #96d5ff;
-
-    --okapi-text: #000000;
+  --okapi-text: rgb(0, 0, 0);
 }
 
 /* dark theme override via system preference */
 @media (prefers-color-scheme: dark) {
-    :root {
-        /* dark */
-        --okapi-primary-a0: #023ae9;
-        --okapi-primary-a10: #1c56ee;
-        --okapi-primary-a20: #356df2;
-        --okapi-primary-a30: #4e81f6;
-        --okapi-primary-a40: #6695f9;
-        --okapi-primary-a50: #7fa7fb;
+  :root {
+    /* dark */
+    --okapi-primary-a0: rgba(60, 60, 60);
+    --okapi-primary-a10: color-mix(in srgb, white 10%, var(--okapi-primary-a0));
+    --okapi-primary-a20: color-mix(in srgb, white 20%, var(--okapi-primary-a0));
+    --okapi-primary-a30: color-mix(in srgb, white 30%, var(--okapi-primary-a0));
+    --okapi-primary-a40: color-mix(in srgb, white 40%, var(--okapi-primary-a0));
+    --okapi-primary-a50: color-mix(in srgb, white 50%, var(--okapi-primary-a0));
+    
+    --okapi-surface-a0: rgba(40, 40, 40);
+    --okapi-surface-a10: color-mix(in srgb, white 10%, var(--okapi-surface-a0));
+    --okapi-surface-a20: color-mix(in srgb, white 20%, var(--okapi-surface-a0));
+    --okapi-surface-a30: color-mix(in srgb, white 30%, var(--okapi-surface-a0));
+    --okapi-surface-a40: color-mix(in srgb, white 40%, var(--okapi-surface-a0));
+    --okapi-surface-a50: color-mix(in srgb, white 50%, var(--okapi-surface-a0));
 
-        --okapi-surface-a0: #121212;
-        --okapi-surface-a10: #252525;
-        --okapi-surface-a20: #393939;
-        --okapi-surface-a30: #4f4f4f;
-        --okapi-surface-a40: #666;
-        --okapi-surface-a50: #7d7d7d;
+    --okapi-success-a0: rgb(125 255 149);
+    --okapi-success-a10: color-mix(in srgb, white 10%, var(--okapi-success-a0));
+    --okapi-success-a20: color-mix(in srgb, white 20%, var(--okapi-success-a0));
 
-        --okapi-surface-tonal-a0: #121e38;
-        --okapi-surface-tonal-a10: #25314a;
-        --okapi-surface-tonal-a20: #3a455c;
-        --okapi-surface-tonal-a30: #505a6f;
-        --okapi-surface-tonal-a40: #667083;
-        --okapi-surface-tonal-a50: #7e8697;
+    --okapi-warning-a0: rgb(255 188 94);
+    --okapi-warning-a10: color-mix(in srgb, white 10%, var(--okapi-warning-a0));
+    --okapi-warning-a20: color-mix(in srgb, white 20%, var(--okapi-warning-a0));
 
-        --okapi-success-a0: #7dff95;
-        --okapi-success-a10: #9dffac;
-        --okapi-success-a20: #b8ffc1;
+    --okapi-danger-a0: rgb(255 128 128);
+    --okapi-danger-a10: color-mix(in srgb, white 10%, var(--okapi-danger-a0));
+    --okapi-danger-a20: color-mix(in srgb, white 20%, var(--okapi-danger-a0));
 
-        --okapi-warning-a0: #ffbc5e;
-        --okapi-warning-a10: #ffca83;
-        --okapi-warning-a20: #ffd8a4;
+    --okapi-info-a0: rgb(135 209 255);
+    --okapi-info-a10: color-mix(in srgb, white 10%, var(--okapi-info-a0));
+    --okapi-info-a20: color-mix(in srgb, white 20%, var(--okapi-info-a0));
 
-        --okapi-danger-a0: #ff8080;
-        --okapi-danger-a10: #ff9b99;
-        --okapi-danger-a20: #ffb5b2;
-
-        --okapi-info-a0: #87d1ff;
-        --okapi-info-a10: #a1dbff;
-        --okapi-info-a20: #b9e4ff;
-
-        --okapi-text: #ffffff;
-    }
+    --okapi-focus: rgb(171 198 248);
+    --okapi-text: rgb(199 199 199);
+  }
 }
 
 /* dark theme manual override via html attribute */
 :root[data-theme="dark"] {
-    /* dark */
-    --okapi-primary-a0: #023ae9;
-    --okapi-primary-a10: #1c56ee;
-    --okapi-primary-a20: #356df2;
-    --okapi-primary-a30: #4e81f6;
-    --okapi-primary-a40: #6695f9;
-    --okapi-primary-a50: #7fa7fb;
+  /* dark */
+  --okapi-primary-a0: rgba(60, 60, 60);
+  --okapi-primary-a10: color-mix(in srgb, white 10%, var(--okapi-primary-a0));
+  --okapi-primary-a20: color-mix(in srgb, white 20%, var(--okapi-primary-a0));
+  --okapi-primary-a30: color-mix(in srgb, white 30%, var(--okapi-primary-a0));
+  --okapi-primary-a40: color-mix(in srgb, white 40%, var(--okapi-primary-a0));
+  --okapi-primary-a50: color-mix(in srgb, white 50%, var(--okapi-primary-a0));
+  
+  --okapi-surface-a0: rgba(40, 40, 40);
+  --okapi-surface-a10: color-mix(in srgb, white 10%, var(--okapi-surface-a0));
+  --okapi-surface-a20: color-mix(in srgb, white 20%, var(--okapi-surface-a0));
+  --okapi-surface-a30: color-mix(in srgb, white 30%, var(--okapi-surface-a0));
+  --okapi-surface-a40: color-mix(in srgb, white 40%, var(--okapi-surface-a0));
+  --okapi-surface-a50: color-mix(in srgb, white 50%, var(--okapi-surface-a0));
 
-    --okapi-surface-a0: #121212;
-    --okapi-surface-a10: #252525;
-    --okapi-surface-a20: #393939;
-    --okapi-surface-a30: #4f4f4f;
-    --okapi-surface-a40: #666;
-    --okapi-surface-a50: #7d7d7d;
+  --okapi-success-a0: rgb(125 255 149);
+  --okapi-success-a10: color-mix(in srgb, white 10%, var(--okapi-success-a0));
+  --okapi-success-a20: color-mix(in srgb, white 20%, var(--okapi-success-a0));
 
-    --okapi-surface-tonal-a0: #121e38;
-    --okapi-surface-tonal-a10: #25314a;
-    --okapi-surface-tonal-a20: #3a455c;
-    --okapi-surface-tonal-a30: #505a6f;
-    --okapi-surface-tonal-a40: #667083;
-    --okapi-surface-tonal-a50: #7e8697;
+  --okapi-warning-a0: rgb(255 188 94);
+  --okapi-warning-a10: color-mix(in srgb, white 10%, var(--okapi-warning-a0));
+  --okapi-warning-a20: color-mix(in srgb, white 20%, var(--okapi-warning-a0));
 
-    --okapi-success-a0: #7dff95;
-    --okapi-success-a10: #9dffac;
-    --okapi-success-a20: #b8ffc1;
+  --okapi-danger-a0: rgb(255 128 128);
+  --okapi-danger-a10: color-mix(in srgb, white 10%, var(--okapi-danger-a0));
+  --okapi-danger-a20: color-mix(in srgb, white 20%, var(--okapi-danger-a0));
 
-    --okapi-warning-a0: #ffbc5e;
-    --okapi-warning-a10: #ffca83;
-    --okapi-warning-a20: #ffd8a4;
+  --okapi-info-a0: rgb(135 209 255);
+  --okapi-info-a10: color-mix(in srgb, white 10%, var(--okapi-info-a0));
+  --okapi-info-a20: color-mix(in srgb, white 20%, var(--okapi-info-a0));
 
-    --okapi-danger-a0: #ff8080;
-    --okapi-danger-a10: #ff9b99;
-    --okapi-danger-a20: #ffb5b2;
-
-    --okapi-info-a0: #87d1ff;
-    --okapi-info-a10: #a1dbff;
-    --okapi-info-a20: #b9e4ff;
-
-    --okapi-text: #ffffff;
+  --okapi-focus: rgb(171 198 248);
+  --okapi-text: rgb(199 199 199);
 }
 
 /* light theme manual override via html attribute */
 :root[data-theme="light"] {
-    /* light */
-    --okapi-primary-a0: #0711c6;
-    --okapi-primary-a10: #050dac;
-    --okapi-primary-a20: #040992;
-    --okapi-primary-a30: #02067a;
-    --okapi-primary-a40: #020462;
-    --okapi-primary-a50: #01024b;
+  /* light */
+  --okapi-primary-a0: rgb(240, 241, 242);
+  --okapi-primary-a10: color-mix(in srgb, white 10%, var(--okapi-primary-a0));
+  --okapi-primary-a20: color-mix(in srgb, white 20%, var(--okapi-primary-a0));
+  --okapi-primary-a30: color-mix(in srgb, white 30%, var(--okapi-primary-a0));
+  --okapi-primary-a40: color-mix(in srgb, white 40%, var(--okapi-primary-a0));
+  --okapi-primary-a50: color-mix(in srgb, white 50%, var(--okapi-primary-a0));
 
-    --okapi-surface-a0: #fff;
-    --okapi-surface-a10: #f2f2f2;
-    --okapi-surface-a20: #e4e4e4;
-    --okapi-surface-a30: #d7d7d7;
-    --okapi-surface-a40: #cacaca;
-    --okapi-surface-a50: #bdbdbd;
+  --okapi-surface-a0: #fff;
+  --okapi-primary-a10: color-mix(in srgb, white 10%, var(--okapi-primary-a0));
+  --okapi-primary-a20: color-mix(in srgb, white 20%, var(--okapi-primary-a0));
+  --okapi-primary-a30: color-mix(in srgb, white 30%, var(--okapi-primary-a0));
+  --okapi-primary-a40: color-mix(in srgb, white 40%, var(--okapi-primary-a0));
+  --okapi-primary-a50: color-mix(in srgb, white 50%, var(--okapi-primary-a0));
 
-    --okapi-surface-tonal-a0: #e2ebfc;
-    --okapi-surface-tonal-a10: #d8e0ef;
-    --okapi-surface-tonal-a20: #ced5e2;
-    --okapi-surface-tonal-a30: #c4cad5;
-    --okapi-surface-tonal-a40: #babfc9;
-    --okapi-surface-tonal-a50: #b0b4bc;
+  --okapi-success-a0: rgb(125 255 149);
+  --okapi-success-a10: color-mix(in srgb, white 10%, var(--okapi-success-a0));
+  --okapi-success-a20: color-mix(in srgb, white 20%, var(--okapi-success-a0));
 
-    --okapi-success-a0: #4aff6b;
-    --okapi-success-a10: #74ff86;
-    --okapi-success-a20: #94ff9d;
+  --okapi-warning-a0: rgb(255 188 94);
+  --okapi-warning-a10: color-mix(in srgb, white 10%, var(--okapi-warning-a0));
+  --okapi-warning-a20: color-mix(in srgb, white 20%, var(--okapi-warning-a0));
 
-    --okapi-warning-a0: #ffac38;
-    --okapi-warning-a10: #ffb961;
-    --okapi-warning-a20: #ffc681;
+  --okapi-danger-a0: rgb(255 128 128);
+  --okapi-danger-a10: color-mix(in srgb, white 10%, var(--okapi-danger-a0));
+  --okapi-danger-a20: color-mix(in srgb, white 20%, var(--okapi-danger-a0));
 
-    --okapi-danger-a0: #ff6161;
-    --okapi-danger-a10: #ff7c79;
-    --okapi-danger-a20: #ff9590;
+  --okapi-info-a0: rgb(135 209 255);
+  --okapi-info-a10: color-mix(in srgb, white 10%, var(--okapi-info-a0));
+  --okapi-info-a20: color-mix(in srgb, white 20%, var(--okapi-info-a0));
 
-    --okapi-info-a0: #61c2ff;
-    --okapi-info-a10: #7dccff;
-    --okapi-info-a20: #96d5ff;
-    
-    --okapi-text: #000000;
+  --okapi-text: rgb(0, 0, 0);
 }
-
 
 * {
-    color: var(--okapi-text);
-    background-color: var(--okapi-surface-a0);
-    font-family: monospace;
-    font-size: 1rem;
+  color: var(--okapi-text);
+  font-family: monospace;
+  font-size: 1rem;
 }
-
 
 fieldset {
   display: flex;
@@ -198,7 +169,9 @@ label {
 input {
   margin-bottom: 0.75rem;
   width: 100%;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   background: transparent;
   border-radius: 0.25rem;
   border: 2px solid var(--okapi-surface-a30);
@@ -213,8 +186,9 @@ input[type="checkbox"] {
   cursor: pointer;
   display: inline-grid;
   place-content: center;
-  margin-right: 1rem;
+  margin-right: 0.5rem;
   margin-bottom: 0;
+  cursor: pointer;
 }
 
 select {
@@ -238,11 +212,11 @@ select:focus + .arrow::after,
 select:focus-visible + .arrow::after {
   outline: none;
   box-shadow: none;
-  border-color: var(--okapi-primary-a20);
+  border-color: var(--okapi-focus);
 }
 
 input[type="checkbox"]:focus-visible {
-  outline: 1px solid var(--okapi-primary-a20) !important;
+  outline: 2px solid var(--okapi-focus) !important;
 }
 
 .checkbox-wrapper {
@@ -251,10 +225,13 @@ input[type="checkbox"]:focus-visible {
   justify-content: flex-end;
   align-items: center;
   margin-bottom: 0.75rem;
+  cursor: pointer;
 }
 
 .checkbox-wrapper label {
   margin-bottom: 0;
+  cursor: pointer;
+  user-select: none; 
 }
 
 .select-wrapper {
@@ -286,8 +263,8 @@ input[type="checkbox"]::before {
 }
 
 input[type="checkbox"]:checked {
-  background-color: var(--okapi-primary-a20);
-  border-color: var(--okapi-primary-a20);
+  background-color: var(--okapi-focus);
+  border-color: var(--okapi-focus);
 }
 
 input[type="checkbox"]:checked::before {
@@ -295,6 +272,6 @@ input[type="checkbox"]:checked::before {
 }
 
 input[type="checkbox"]:focus-visible {
-  outline: 3px solid var(--okapi-primary-a20);
+  outline: 3px solid var(--okapi-focus);
   outline-offset: 2px;
 }

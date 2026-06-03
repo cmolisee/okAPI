@@ -44,10 +44,9 @@ export const resetNetworkViewerEnabledSetting = async (): Promise<void> => await
 export const watch = (
     key: StorageKeys,
     callback?: (newValue: boolean | Theme | null, oldValue: boolean | Theme | null) => void,
-    enableLogging: boolean = false,
 ): () => void => {
-    return storage.watch<Theme | boolean>(`local:${key}`, (newValue, oldValue) => {
+    return storage.watch<Theme | boolean>(key, (newValue, oldValue) => {
         if (callback) callback(newValue, oldValue);
-        if (enableLogging) console.debug(`${key} changed from ${oldValue} to ${newValue}`);
+        logging('storage', `${key} changed from ${oldValue} to ${newValue}`);
     });
 }
