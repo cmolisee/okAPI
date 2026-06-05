@@ -1,4 +1,5 @@
 export type Engine = 'chromium-cdp' | 'firefox-filter' | 'safari-patch';
+export type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 export type InterceptedRequest = {
   id: string;
   url: string;
