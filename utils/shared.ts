@@ -1,4 +1,3 @@
-import { MessageRegistry, MessageSource } from "@/lib/interceptor/types";
 import { setThemeSetting, Theme } from "./storage";
 
 /**
@@ -10,13 +9,6 @@ export const toggleTheme = (theme: Theme) => {
     document.documentElement.setAttribute('data-theme', theme);
     setThemeSetting(theme);
 };
-/**
- * prefix all messaging types to ensure we don't accidently capture unrelated traffic.
- * @param ns - namespace
- * @param t - message type
- * @returns ns + t
- */
-function prefix(ns: string, t: MessageRegistry['type']): string { return `${ns!}-${t!}` }
 
 /**
  * wrapper to debug console based on Mode.

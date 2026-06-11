@@ -160,3 +160,105 @@ user clicks away -> popup destroyed, all state lost
     </div>
 </div>
 ```
+
+## Schema Versioning
+ 
+Dexie migrations run via `.version(N).stores(...)`. When adding/removing indexes:
+ 
+```ts
+// db.ts
+this.version(1).stores({ rules: "++id, uuid, ..." });
+ 
+// Adding a new index in v2:
+this.version(2).stores({ rules: "++id, uuid, ..., newField" });
+// Dexie handles the IDBVersionChange transaction automatically.
+```
+ 
+Never rename or delete the DB — bump the version instead.
+
+---
+
+## Status Flow
+ 
+```
+[offline create]  → pending_create → synced
+                                   → error (retry → synced)
+ 
+[offline update]  → pending_update → synced
+                                   → error
+ 
+[offline delete]  → pending_delete → hard-deleted from IDB
+                  (if never synced) → immediate hard-delete
+ 
+[sync conflict]   → conflict       → manual resolution required
+```
+ 
+`pending_create` is sticky — an update to an unsynced record stays `pending_create`
+so the remote sees a single CREATE rather than CREATE + UPDATE.
+
+---
+ 
+## Cross-Tab Sync
+ 
+`BroadcastChannel` works across popup, options page, and devtools panel.
+It does **not** reach content scripts (different origin). Use `chrome.runtime.sendMessage`
+for content script → background communication, then re-emit on the bus in the background.
+ 
+```ts
+// background.ts (WXT entrypoint)
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg.type === "db:event") bus.emit(msg.event.type, msg.event.payload);
+});
+```
+ 
+---
+ 
+## Batch Operations
+ 
+`batchRules()` wraps ops in a single Dexie transaction — all-or-nothing.
+For partial success (each op independent), run them outside a transaction:
+ 
+```ts
+const results = await Promise.allSettled(
+  ops.map(({ op, data }) => /* individual calls */)
+);
+```
+ 
+---
+
+## WXT Integration Tips
+ 
+- **Background service worker**: Instantiate `SyncManager` here. SW can be
+  terminated; re-instantiate on `chrome.runtime.onInstalled` and `onStartup`.
+- **Popup / Options**: Import repos directly — Dexie opens the same IDB.
+- **Content scripts**: Avoid direct Dexie imports (bundle size). Use
+  `chrome.runtime.sendMessage` to the background instead.
+---
+ 
+## Offline Detection
+ 
+`navigator.onLine` is unreliable (returns `true` on captive portals).
+Consider wrapping `syncFn` to catch network errors and set status `error`,
+then retry on the next flush cycle rather than trusting `onLine` alone.
+ 
+---
+ 
+## Conflict Strategy (not implemented — choose one)
+ 
+| Strategy | When to use |
+|---|---|
+| **Last-write-wins** (default) | Simple; `updatedAt` timestamp decides |
+| **Server wins** | Server is source of truth; overwrite local |
+| **Client wins** | Local edits always override remote |
+| **Manual** | Set `status: "conflict"`, surface to user |
+ 
+Mark conflicts using `status: "conflict"` + store `remoteSnapshot` field for diffing.
+ 
+---
+ 
+## Indexes to Add If Needed
+ 
+- `rules: "remoteId"` — if you query by server-assigned ID post-sync
+- `logs: "[tabId+timestamp]"` — compound index for per-tab log filtering
+- `rules: "[profileId+enabled]"` — if you filter by both frequently
+ 
