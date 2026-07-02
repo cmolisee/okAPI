@@ -1,4 +1,4 @@
-# okAPI
+# ok-API
 
 API Interception strategy by browser:
 

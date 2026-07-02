@@ -3,199 +3,194 @@
   color-scheme: light dark;
 
   /* light */
-  --okapi-primary-a0: rgb(240, 241, 242);
-  --okapi-primary-a10: color-mix(in srgb, white 10%, var(--okapi-primary-a0));
-  --okapi-primary-a20: color-mix(in srgb, white 20%, var(--okapi-primary-a0));
-  --okapi-primary-a30: color-mix(in srgb, white 30%, var(--okapi-primary-a0));
-  --okapi-primary-a40: color-mix(in srgb, white 40%, var(--okapi-primary-a0));
-  --okapi-primary-a50: color-mix(in srgb, white 50%, var(--okapi-primary-a0));
+  --ok-api-primary-a0: rgb(240, 241, 242);
+  --ok-api-primary-a10: color-mix(in srgb, white 10%, var(--ok-api-primary-a0));
+  --ok-api-primary-a20: color-mix(in srgb, white 20%, var(--ok-api-primary-a0));
+  --ok-api-primary-a30: color-mix(in srgb, white 30%, var(--ok-api-primary-a0));
+  --ok-api-primary-a40: color-mix(in srgb, white 40%, var(--ok-api-primary-a0));
+  --ok-api-primary-a50: color-mix(in srgb, white 50%, var(--ok-api-primary-a0));
 
-  --okapi-surface-a0: #fff;
-  --okapi-primary-a10: color-mix(in srgb, white 10%, var(--okapi-primary-a0));
-  --okapi-primary-a20: color-mix(in srgb, white 20%, var(--okapi-primary-a0));
-  --okapi-primary-a30: color-mix(in srgb, white 30%, var(--okapi-primary-a0));
-  --okapi-primary-a40: color-mix(in srgb, white 40%, var(--okapi-primary-a0));
-  --okapi-primary-a50: color-mix(in srgb, white 50%, var(--okapi-primary-a0));
+  --ok-api-surface-a0: #fff;
+  --ok-api-primary-a10: color-mix(in srgb, white 10%, var(--ok-api-primary-a0));
+  --ok-api-primary-a20: color-mix(in srgb, white 20%, var(--ok-api-primary-a0));
+  --ok-api-primary-a30: color-mix(in srgb, white 30%, var(--ok-api-primary-a0));
+  --ok-api-primary-a40: color-mix(in srgb, white 40%, var(--ok-api-primary-a0));
+  --ok-api-primary-a50: color-mix(in srgb, white 50%, var(--ok-api-primary-a0));
 
-  --okapi-success-a0: rgb(125 255 149);
-  --okapi-success-a10: color-mix(in srgb, white 10%, var(--okapi-success-a0));
-  --okapi-success-a20: color-mix(in srgb, white 20%, var(--okapi-success-a0));
+  --ok-api-success-a0: rgb(125 255 149);
+  --ok-api-success-a10: color-mix(in srgb, white 10%, var(--ok-api-success-a0));
+  --ok-api-success-a20: color-mix(in srgb, white 20%, var(--ok-api-success-a0));
 
-  --okapi-warning-a0: rgb(255 188 94);
-  --okapi-warning-a10: color-mix(in srgb, white 10%, var(--okapi-warning-a0));
-  --okapi-warning-a20: color-mix(in srgb, white 20%, var(--okapi-warning-a0));
+  --ok-api-warning-a0: rgb(255 188 94);
+  --ok-api-warning-a10: color-mix(in srgb, white 10%, var(--ok-api-warning-a0));
+  --ok-api-warning-a20: color-mix(in srgb, white 20%, var(--ok-api-warning-a0));
 
-  --okapi-danger-a0: rgb(255 128 128);
-  --okapi-danger-a10: color-mix(in srgb, white 10%, var(--okapi-danger-a0));
-  --okapi-danger-a20: color-mix(in srgb, white 20%, var(--okapi-danger-a0));
+  --ok-api-danger-a0: rgb(255 128 128);
+  --ok-api-danger-a10: color-mix(in srgb, white 10%, var(--ok-api-danger-a0));
+  --ok-api-danger-a20: color-mix(in srgb, white 20%, var(--ok-api-danger-a0));
 
-  --okapi-info-a0: rgb(135 209 255);
-  --okapi-info-a10: color-mix(in srgb, white 10%, var(--okapi-info-a0));
-  --okapi-info-a20: color-mix(in srgb, white 20%, var(--okapi-info-a0));
+  --ok-api-info-a0: rgb(135 209 255);
+  --ok-api-info-a10: color-mix(in srgb, white 10%, var(--ok-api-info-a0));
+  --ok-api-info-a20: color-mix(in srgb, white 20%, var(--ok-api-info-a0));
 
-  --okapi-text: rgb(0, 0, 0);
+  --ok-api-text: rgb(0, 0, 0);
+
+  --ok-api-color-divider: rgba(94,94,94);
+  --ok-api-toolbar-background-color: rgba(60,60,60);
+  --ok-api-base-container: rgba(40,40,40);
+  --ok-api-color-on-surface: rgba(199,199,199);
+  --ok-api-sys-color-primary: rgba(168,199,250);
+  --ok-api-state-hover: rgba(253, 252, 251, 0.1);
 }
 
 /* dark theme override via system preference */
 @media (prefers-color-scheme: dark) {
   :root {
     /* dark */
-    --okapi-primary-a0: rgba(60, 60, 60);
-    --okapi-primary-a10: color-mix(in srgb, white 10%, var(--okapi-primary-a0));
-    --okapi-primary-a20: color-mix(in srgb, white 20%, var(--okapi-primary-a0));
-    --okapi-primary-a30: color-mix(in srgb, white 30%, var(--okapi-primary-a0));
-    --okapi-primary-a40: color-mix(in srgb, white 40%, var(--okapi-primary-a0));
-    --okapi-primary-a50: color-mix(in srgb, white 50%, var(--okapi-primary-a0));
+    --ok-api-primary-a0: rgba(60, 60, 60);
+    --ok-api-primary-a10: color-mix(in srgb, white 10%, var(--ok-api-primary-a0));
+    --ok-api-primary-a20: color-mix(in srgb, white 20%, var(--ok-api-primary-a0));
+    --ok-api-primary-a30: color-mix(in srgb, white 30%, var(--ok-api-primary-a0));
+    --ok-api-primary-a40: color-mix(in srgb, white 40%, var(--ok-api-primary-a0));
+    --ok-api-primary-a50: color-mix(in srgb, white 50%, var(--ok-api-primary-a0));
     
-    --okapi-surface-a0: rgba(40, 40, 40);
-    --okapi-surface-a10: color-mix(in srgb, white 10%, var(--okapi-surface-a0));
-    --okapi-surface-a20: color-mix(in srgb, white 20%, var(--okapi-surface-a0));
-    --okapi-surface-a30: color-mix(in srgb, white 30%, var(--okapi-surface-a0));
-    --okapi-surface-a40: color-mix(in srgb, white 40%, var(--okapi-surface-a0));
-    --okapi-surface-a50: color-mix(in srgb, white 50%, var(--okapi-surface-a0));
+    --ok-api-surface-a0: rgba(40, 40, 40);
+    --ok-api-surface-a10: color-mix(in srgb, white 10%, var(--ok-api-surface-a0));
+    --ok-api-surface-a20: color-mix(in srgb, white 20%, var(--ok-api-surface-a0));
+    --ok-api-surface-a30: color-mix(in srgb, white 30%, var(--ok-api-surface-a0));
+    --ok-api-surface-a40: color-mix(in srgb, white 40%, var(--ok-api-surface-a0));
+    --ok-api-surface-a50: color-mix(in srgb, white 50%, var(--ok-api-surface-a0));
 
-    --okapi-success-a0: rgb(125 255 149);
-    --okapi-success-a10: color-mix(in srgb, white 10%, var(--okapi-success-a0));
-    --okapi-success-a20: color-mix(in srgb, white 20%, var(--okapi-success-a0));
+    --ok-api-success-a0: rgb(125 255 149);
+    --ok-api-success-a10: color-mix(in srgb, white 10%, var(--ok-api-success-a0));
+    --ok-api-success-a20: color-mix(in srgb, white 20%, var(--ok-api-success-a0));
 
-    --okapi-warning-a0: rgb(255 188 94);
-    --okapi-warning-a10: color-mix(in srgb, white 10%, var(--okapi-warning-a0));
-    --okapi-warning-a20: color-mix(in srgb, white 20%, var(--okapi-warning-a0));
+    --ok-api-warning-a0: rgb(255 188 94);
+    --ok-api-warning-a10: color-mix(in srgb, white 10%, var(--ok-api-warning-a0));
+    --ok-api-warning-a20: color-mix(in srgb, white 20%, var(--ok-api-warning-a0));
 
-    --okapi-danger-a0: rgb(255 128 128);
-    --okapi-danger-a10: color-mix(in srgb, white 10%, var(--okapi-danger-a0));
-    --okapi-danger-a20: color-mix(in srgb, white 20%, var(--okapi-danger-a0));
+    --ok-api-danger-a0: rgb(255 128 128);
+    --ok-api-danger-a10: color-mix(in srgb, white 10%, var(--ok-api-danger-a0));
+    --ok-api-danger-a20: color-mix(in srgb, white 20%, var(--ok-api-danger-a0));
 
-    --okapi-info-a0: rgb(135 209 255);
-    --okapi-info-a10: color-mix(in srgb, white 10%, var(--okapi-info-a0));
-    --okapi-info-a20: color-mix(in srgb, white 20%, var(--okapi-info-a0));
+    --ok-api-info-a0: rgb(135 209 255);
+    --ok-api-info-a10: color-mix(in srgb, white 10%, var(--ok-api-info-a0));
+    --ok-api-info-a20: color-mix(in srgb, white 20%, var(--ok-api-info-a0));
 
-    --okapi-focus: rgb(171 198 248);
-    --okapi-text: rgb(199 199 199);
+    --ok-api-focus: rgb(171 198 248);
+    --ok-api-text: rgb(199 199 199);
+
+    --ok-api-color-divider: rgba(94,94,94);
+    --ok-api-toolbar-background-color: rgba(60,60,60);
+    --ok-api-base-container: rgba(40,40,40);
+    --ok-api-color-on-surface: rgba(199,199,199);
+    --ok-api-sys-color-primary: rgba(168,199,250);
+    --ok-api-state-hover: rgba(253, 252, 251, 0.1);
   }
 }
 
 /* dark theme manual override via html attribute */
 :root[data-theme="dark"] {
   /* dark */
-  --okapi-primary-a0: rgba(60, 60, 60);
-  --okapi-primary-a10: color-mix(in srgb, white 10%, var(--okapi-primary-a0));
-  --okapi-primary-a20: color-mix(in srgb, white 20%, var(--okapi-primary-a0));
-  --okapi-primary-a30: color-mix(in srgb, white 30%, var(--okapi-primary-a0));
-  --okapi-primary-a40: color-mix(in srgb, white 40%, var(--okapi-primary-a0));
-  --okapi-primary-a50: color-mix(in srgb, white 50%, var(--okapi-primary-a0));
+  --ok-api-primary-a0: rgba(60, 60, 60);
+  --ok-api-primary-a10: color-mix(in srgb, white 10%, var(--ok-api-primary-a0));
+  --ok-api-primary-a20: color-mix(in srgb, white 20%, var(--ok-api-primary-a0));
+  --ok-api-primary-a30: color-mix(in srgb, white 30%, var(--ok-api-primary-a0));
+  --ok-api-primary-a40: color-mix(in srgb, white 40%, var(--ok-api-primary-a0));
+  --ok-api-primary-a50: color-mix(in srgb, white 50%, var(--ok-api-primary-a0));
   
-  --okapi-surface-a0: rgba(40, 40, 40);
-  --okapi-surface-a10: color-mix(in srgb, white 10%, var(--okapi-surface-a0));
-  --okapi-surface-a20: color-mix(in srgb, white 20%, var(--okapi-surface-a0));
-  --okapi-surface-a30: color-mix(in srgb, white 30%, var(--okapi-surface-a0));
-  --okapi-surface-a40: color-mix(in srgb, white 40%, var(--okapi-surface-a0));
-  --okapi-surface-a50: color-mix(in srgb, white 50%, var(--okapi-surface-a0));
+  --ok-api-surface-a0: rgba(40, 40, 40);
+  --ok-api-surface-a10: color-mix(in srgb, white 10%, var(--ok-api-surface-a0));
+  --ok-api-surface-a20: color-mix(in srgb, white 20%, var(--ok-api-surface-a0));
+  --ok-api-surface-a30: color-mix(in srgb, white 30%, var(--ok-api-surface-a0));
+  --ok-api-surface-a40: color-mix(in srgb, white 40%, var(--ok-api-surface-a0));
+  --ok-api-surface-a50: color-mix(in srgb, white 50%, var(--ok-api-surface-a0));
 
-  --okapi-success-a0: rgb(125 255 149);
-  --okapi-success-a10: color-mix(in srgb, white 10%, var(--okapi-success-a0));
-  --okapi-success-a20: color-mix(in srgb, white 20%, var(--okapi-success-a0));
+  --ok-api-success-a0: rgb(125 255 149);
+  --ok-api-success-a10: color-mix(in srgb, white 10%, var(--ok-api-success-a0));
+  --ok-api-success-a20: color-mix(in srgb, white 20%, var(--ok-api-success-a0));
 
-  --okapi-warning-a0: rgb(255 188 94);
-  --okapi-warning-a10: color-mix(in srgb, white 10%, var(--okapi-warning-a0));
-  --okapi-warning-a20: color-mix(in srgb, white 20%, var(--okapi-warning-a0));
+  --ok-api-warning-a0: rgb(255 188 94);
+  --ok-api-warning-a10: color-mix(in srgb, white 10%, var(--ok-api-warning-a0));
+  --ok-api-warning-a20: color-mix(in srgb, white 20%, var(--ok-api-warning-a0));
 
-  --okapi-danger-a0: rgb(255 128 128);
-  --okapi-danger-a10: color-mix(in srgb, white 10%, var(--okapi-danger-a0));
-  --okapi-danger-a20: color-mix(in srgb, white 20%, var(--okapi-danger-a0));
+  --ok-api-danger-a0: rgb(255 128 128);
+  --ok-api-danger-a10: color-mix(in srgb, white 10%, var(--ok-api-danger-a0));
+  --ok-api-danger-a20: color-mix(in srgb, white 20%, var(--ok-api-danger-a0));
 
-  --okapi-info-a0: rgb(135 209 255);
-  --okapi-info-a10: color-mix(in srgb, white 10%, var(--okapi-info-a0));
-  --okapi-info-a20: color-mix(in srgb, white 20%, var(--okapi-info-a0));
+  --ok-api-info-a0: rgb(135 209 255);
+  --ok-api-info-a10: color-mix(in srgb, white 10%, var(--ok-api-info-a0));
+  --ok-api-info-a20: color-mix(in srgb, white 20%, var(--ok-api-info-a0));
 
-  --okapi-focus: rgb(171 198 248);
-  --okapi-text: rgb(199 199 199);
+  --ok-api-focus: rgb(171 198 248);
+  --ok-api-text: rgb(199 199 199);
+
+  --ok-api-color-divider: rgba(94,94,94);
+  --ok-api-toolbar-background-color: rgba(60,60,60);
+  --ok-api-base-container: rgba(40,40,40);
+  --ok-api-color-on-surface: rgba(199,199,199);
+  --ok-api-sys-color-primary: rgba(168,199,250);
+  --ok-api-state-hover: rgba(253, 252, 251, 0.1);
 }
 
 /* light theme manual override via html attribute */
 :root[data-theme="light"] {
   /* light */
-  --okapi-primary-a0: rgb(240, 241, 242);
-  --okapi-primary-a10: color-mix(in srgb, white 10%, var(--okapi-primary-a0));
-  --okapi-primary-a20: color-mix(in srgb, white 20%, var(--okapi-primary-a0));
-  --okapi-primary-a30: color-mix(in srgb, white 30%, var(--okapi-primary-a0));
-  --okapi-primary-a40: color-mix(in srgb, white 40%, var(--okapi-primary-a0));
-  --okapi-primary-a50: color-mix(in srgb, white 50%, var(--okapi-primary-a0));
+  --ok-api-primary-a0: rgb(240, 241, 242);
+  --ok-api-primary-a10: color-mix(in srgb, white 10%, var(--ok-api-primary-a0));
+  --ok-api-primary-a20: color-mix(in srgb, white 20%, var(--ok-api-primary-a0));
+  --ok-api-primary-a30: color-mix(in srgb, white 30%, var(--ok-api-primary-a0));
+  --ok-api-primary-a40: color-mix(in srgb, white 40%, var(--ok-api-primary-a0));
+  --ok-api-primary-a50: color-mix(in srgb, white 50%, var(--ok-api-primary-a0));
 
-  --okapi-surface-a0: #fff;
-  --okapi-primary-a10: color-mix(in srgb, white 10%, var(--okapi-primary-a0));
-  --okapi-primary-a20: color-mix(in srgb, white 20%, var(--okapi-primary-a0));
-  --okapi-primary-a30: color-mix(in srgb, white 30%, var(--okapi-primary-a0));
-  --okapi-primary-a40: color-mix(in srgb, white 40%, var(--okapi-primary-a0));
-  --okapi-primary-a50: color-mix(in srgb, white 50%, var(--okapi-primary-a0));
+  --ok-api-surface-a0: #fff;
+  --ok-api-primary-a10: color-mix(in srgb, white 10%, var(--ok-api-primary-a0));
+  --ok-api-primary-a20: color-mix(in srgb, white 20%, var(--ok-api-primary-a0));
+  --ok-api-primary-a30: color-mix(in srgb, white 30%, var(--ok-api-primary-a0));
+  --ok-api-primary-a40: color-mix(in srgb, white 40%, var(--ok-api-primary-a0));
+  --ok-api-primary-a50: color-mix(in srgb, white 50%, var(--ok-api-primary-a0));
 
-  --okapi-success-a0: rgb(125 255 149);
-  --okapi-success-a10: color-mix(in srgb, white 10%, var(--okapi-success-a0));
-  --okapi-success-a20: color-mix(in srgb, white 20%, var(--okapi-success-a0));
+  --ok-api-success-a0: rgb(125 255 149);
+  --ok-api-success-a10: color-mix(in srgb, white 10%, var(--ok-api-success-a0));
+  --ok-api-success-a20: color-mix(in srgb, white 20%, var(--ok-api-success-a0));
 
-  --okapi-warning-a0: rgb(255 188 94);
-  --okapi-warning-a10: color-mix(in srgb, white 10%, var(--okapi-warning-a0));
-  --okapi-warning-a20: color-mix(in srgb, white 20%, var(--okapi-warning-a0));
+  --ok-api-warning-a0: rgb(255 188 94);
+  --ok-api-warning-a10: color-mix(in srgb, white 10%, var(--ok-api-warning-a0));
+  --ok-api-warning-a20: color-mix(in srgb, white 20%, var(--ok-api-warning-a0));
 
-  --okapi-danger-a0: rgb(255 128 128);
-  --okapi-danger-a10: color-mix(in srgb, white 10%, var(--okapi-danger-a0));
-  --okapi-danger-a20: color-mix(in srgb, white 20%, var(--okapi-danger-a0));
+  --ok-api-danger-a0: rgb(255 128 128);
+  --ok-api-danger-a10: color-mix(in srgb, white 10%, var(--ok-api-danger-a0));
+  --ok-api-danger-a20: color-mix(in srgb, white 20%, var(--ok-api-danger-a0));
 
-  --okapi-info-a0: rgb(135 209 255);
-  --okapi-info-a10: color-mix(in srgb, white 10%, var(--okapi-info-a0));
-  --okapi-info-a20: color-mix(in srgb, white 20%, var(--okapi-info-a0));
+  --ok-api-info-a0: rgb(135 209 255);
+  --ok-api-info-a10: color-mix(in srgb, white 10%, var(--ok-api-info-a0));
+  --ok-api-info-a20: color-mix(in srgb, white 20%, var(--ok-api-info-a0));
 
-  --okapi-text: rgb(0, 0, 0);
+  --ok-api-text: rgb(0, 0, 0);
+
+  --ok-api-color-divider: rgba(94,94,94);
+  --ok-api-toolbar-background-color: rgba(60,60,60);
+  --ok-api-base-container: rgba(40,40,40);
+  --ok-api-color-on-surface: rgba(199,199,199);
+  --ok-api-sys-color-primary: rgba(168,199,250);
+  --ok-api-state-hover: rgba(253, 252, 251, 0.1);
 }
 
 * {
-  color: var(--okapi-text);
+  color: var(--ok-api-text);
   font-family: monospace;
-  font-size: 1rem;
+  font-size: 12px;
 }
 
-fieldset {
-  display: flex;
-  flex-direction: column;
-  margin: 1rem;
-  padding: 1rem;
-  border-radius: 0.25rem;
-}
-
-label {
-  margin-bottom: 0.25rem;
-}
-
-input {
-  margin-bottom: 0.75rem;
-  width: 100%;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
-  background: transparent;
-  border-radius: 0.25rem;
-  border: 2px solid var(--okapi-surface-a30);
-}
-
-input[type="checkbox"] {
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--okapi-surface-a30);
-  border-radius: 4px;
-  cursor: pointer;
-  display: inline-grid;
-  place-content: center;
-  margin-right: 0.5rem;
-  margin-bottom: 0;
-  cursor: pointer;
+:focus-visible {
+  outline: -webkit-focus-ring-color auto 1px;
 }
 
 select {
   appearance: none;
   width: 100%;
   padding: 10px;
-  border: 1px solid var(--okapi-surface-a30);
+  border: 1px solid var(--ok-api-surface-a30);
   border-radius: 4px;
   background-color: transparent;
   cursor: pointer;
@@ -205,33 +200,13 @@ select::-ms-expand {
   display: none;
 }
 
-input:focus,
 select:focus,
 select:focus-visible,
 select:focus + .arrow::after,
 select:focus-visible + .arrow::after {
   outline: none;
   box-shadow: none;
-  border-color: var(--okapi-focus);
-}
-
-input[type="checkbox"]:focus-visible {
-  outline: 2px solid var(--okapi-focus) !important;
-}
-
-.checkbox-wrapper {
-  display: flex;
-  flex-direction: row-reverse;
-  justify-content: flex-end;
-  align-items: center;
-  margin-bottom: 0.75rem;
-  cursor: pointer;
-}
-
-.checkbox-wrapper label {
-  margin-bottom: 0;
-  cursor: pointer;
-  user-select: none; 
+  border-color: var(--ok-api-focus);
 }
 
 .select-wrapper {
@@ -246,62 +221,8 @@ input[type="checkbox"]:focus-visible {
   top: 30%;
   width: 8px;
   height: 8px;
-  border-right: 2px solid var(--okapi-surface-a30);
-  border-bottom: 2px solid var(--okapi-surface-a30);
+  border-right: 2px solid var(--ok-api-surface-a30);
+  border-bottom: 2px solid var(--ok-api-surface-a30);
   transform: rotate(45deg);
   pointer-events: none;
-}
-
-input[type="checkbox"]::before {
-  content: "";
-  width: 0.65rem;
-  height: 0.65rem;
-  transform: scale(0);
-  transition: 120ms transform ease-in-out;
-  background-color: CanvasText;
-  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
-}
-
-input[type="checkbox"]:checked {
-  background-color: var(--okapi-focus);
-  border-color: var(--okapi-focus);
-}
-
-input[type="checkbox"]:checked::before {
-  transform: scale(1);
-}
-
-input[type="checkbox"]:focus-visible {
-  outline: 3px solid var(--okapi-focus);
-  outline-offset: 2px;
-}
-
-/* icon button */
-.icon-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  margin: 0 auto;
-  background: transparent;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  color: var(--okapi-text);
-  outline: none;
-  transition: background-color 0.1s linear;
-}
-
-.button-icon {
-  width: 16px;
-  height: 16px;
-  fill: currentColor; 
-}
-.icon-button:hover {
-  background-color: var(--okapi-surface-a30);
-}
-.icon-button:focus-visible {
-  box-shadow: inset 0 0 0 2px var(--color-selection, #1a73e8);
 }

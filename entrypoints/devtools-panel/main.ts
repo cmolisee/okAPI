@@ -1,386 +1,470 @@
-import { attach } from '@/lib/interceptor/chromium';
+import { browser } from 'wxt/browser';
+import { TabStore } from '@/utils/storage';
 import type {
-  Message,
   InterceptedRequest,
-  ResponseOverride,
   Engine,
+  EnableMocking,
+  EnableNetworkView,
+  DisableNetworkView,
+  DisableMocking,
+  ServiceWorkerToPanel,
 } from '../../lib/interceptor/types';
-import { getMockingEnabledSetting, getNetworkViewerEnabledSetting, getNotificationsEnabledSetting, setMockingEnabledSetting, setNetworkViewerEnabledSetting, setNotificationsEnabledSetting } from '../../utils/storage';
-import { tryPrettyPrint } from '@/utils/shared';
+import { Unwatch } from 'wxt/utils/storage';
+import db, { addMock, HttpMethod, initDb, MockEndpoint, updateMock } from '@/utils/db';
+import { BADGE_ACTIVE, BADGE_INACTIVE, BadgeManager, setExtensionIconStateActive, setExtensionIconStateDisabled } from '@/utils/shared';
+import createTabToolbar from '@/components/tab-toolbar';
+import createToolbarTab from '@/components/toolbar-tab';
+import createToolsToolbar from '@/components/tool-toolbar';
+import createSimpleLabel from '@/components/simple-label';
+import createCheckbox from '@/components/checkbox';
+import createAddMockRow from '@/components/add-mock-row';
+import createReadOnlyForm from '@/components/read-only-form';
+import createRequestRow from '@/components/request-row';
+import createForm from '@/components/form';
+import createMockRow from '@/components/mock-row';
 
-// --- MSG HELPERS ---
-
-// function send(msg: Message): void {
-//   port.postMessage(msg);
-// }
-
-// function attach(): void {
-//   send(
-// }
-
-// function detach(): void {
-//   send();
-// }
-
-// function override(o: ResponseOverride): void {
-//   send({ type: 'RESPONSE_OVERRIDE', payload: { override: o } });
-// }
-
-// function passthrough(requestId: string): void {
-//   send({ type: 'RESPONSE_PASSTHROUGH', payload: { requestId } });
-// }
+// --- control data ---
+initDb();
 const tabId = browser.devtools.inspectedWindow.tabId;
-const port = browser.runtime.connect({ name: `okapi-${tabId}` });
-const requests = new Map<string, InterceptedRequest>();
-let selected: InterceptedRequest | undefined = undefined;
-let isAttached = false;
-let engine: Engine | undefined = undefined;
+const cleanup: Array<Unwatch|null> = [];
+let port: Browser.runtime.Port | null = null;
+let isPanelVisible = true; 
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+let selectedRequest: InterceptedRequest | undefined = undefined;
+let selectedMock: MockEndpoint | undefined = undefined;
 
-// service worker -> panel
-function statusListener(msg: Message): boolean {
-  if (msg.type !== 'INTERCEPTOR_STATUS') return false;
-  const { attached, strategy } = (msg as Message<'INTERCEPTOR_STATUS'>).data;
-  isAttached = attached;
-  engine = strategy;
+function reconnect() {
+  if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) return;
+  const delay = Math.min(1000 * reconnectAttempts++, 5000);
 
-  updateEngineLabel();
-  return true;
+  setTimeout(() => {
+    if (isPanelVisible && navigator.onLine) {
+      connectToBackground();
+    }
+  }, delay);
 }
 
-// service worker -> panel
-function requestListener(msg: Message): boolean {
-  if (msg.type !== 'REQUEST_PAUSED') return false;
-  const request = (msg as Message<'REQUEST_PAUSED'>).data;
-  upsertRequestRow(request);
-
-  // When running, pause all requests for a chance to replace it.
-  // If no mock selected then auto pass it through to resume execution.
-  if (request.source === 'chromium-cdp' && selected?.id !== request.id) {
-    setTimeout(() => {
-      if (requests.has(request.id)) port.postMessage({ type: 'RESPONSE_PASSTHROUGH', payload: { requestId: request.id } });
-    }, 5_000);
-  }
-  return true;
+async function initializeTabStore() {
+  if (await TabStore.has(tabId)) return;
+  Promise.all([
+    TabStore.set(tabId, 'isNotificationsEnabled', false),
+    TabStore.set(tabId, 'isNetworkViewerEnabled', false),
+    TabStore.set(tabId, 'isMockingEnabled', false),
+    TabStore.set(tabId, 'engineType', undefined),
+    TabStore.set(tabId, 'isAttached', false),
+    // todo: i need to be able to show which of the captured requests was mocked
+    //  in the network view.
+    TabStore.set(tabId, 'capturedRequests', []),
+    TabStore.set(tabId, 'mockedRequests', []),
+    TabStore.set(tabId, 'panelUIState', { tab: 'networkView' }),
+  ])
 }
 
-// open message bus service worker -> panel
-port.onMessage.addListener((msg: Message) => {
-  // fire listeners
-  const isMessageTypeUnkown = !statusListener(msg) && !requestListener(msg);
-  if (isMessageTypeUnkown) logging('devtools', 'unknown message type', msg);
-});
+async function connectToBackground() {
+  port = browser.runtime.connect({ name: `ok-api:${tabId}` });
+  await initializeTabStore();
 
-port.onDisconnect.addListener(() => {
-  // setNotificationsEnabledSetting(false);
-  // setMockingEnabledSetting(false);
-  // setNetworkViewerEnabledSetting(false);
-});
+  port?.onMessage.addListener(async (msg: ServiceWorkerToPanel, port: Browser.runtime.Port) => {
+    // service worker ID should match the extension runtime ID
+    if (!port.sender?.id || port.sender.id !== browser.runtime.id) return;
 
-// --- toolbar ui ---
-const enableNetworkViewerCheckbox = document.getElementById('enableNetworkViewer')! as HTMLInputElement;
-const enableMockingCheckbox = document.getElementById('enableMocking')! as HTMLInputElement;
-const enableNotificationsCheckbox = document.getElementById('enableNotifications')! as HTMLInputElement;
-const networkViewTabButton = document.getElementById('network-view-btn')! as HTMLButtonElement;
-const mockViewTabButton = document.getElementById('mock-view-btn')! as HTMLButtonElement;
-const networkViewPane = document.getElementById('network-view-pane')! as HTMLDivElement;
-const networkDetailPane = document.getElementById('network-detail-pane')! as HTMLDivElement;
-const mockViewPane = document.getElementById('mock-view-pane')! as HTMLDivElement;
-const mockDetailPane = document.getElementById('mock-detail-pane')! as HTMLDivElement;
-const engineLabelElement = document.getElementById('engine-label')! as HTMLSpanElement;
+    const panelTab = (await TabStore.get(tabId, 'panelUIState'))?.tab;
+    switch (msg.type) {
+      case 'PANEL_CONTENT': {
+        const {requests, mocks} = msg.payload;
+        if (requests && document.getElementById('network-view-toggle')?.ariaPressed === 'true') {
+          renderRequests(requests);
+        }
+        if (mocks && document.getElementById('mock-view-toggle')?.ariaPressed === 'true') {
+          renderMocks(mocks);
+        }
+        break;
+      }
+      case 'FAILED_ENABLE_NETWORK_VIEW': { break;}
+      case 'FAILED_ENABLE_MOCKING': { break;}
+      case 'FAILED_UPDATE_MOCK_PATTERN': { break;}
+      case 'UPDATE_INTERCEPTED_REQUESTS': {
+        // TODO: make sure we verify sender id 
+        if (panelTab !== 'networkView') return;
+        renderRequests(msg.payload?.requests);
+        break;
+      }
+      case 'UPDATE_MOCKS': {
+        // TODO: make sure we verify sender id 
+        if (panelTab !== 'mockView') return;
+        renderMocks(msg.payload.mocks);
+        break;
+      }
+      default: logging('devtools-panel', 'Unknown message type', msg); break;
+    }
+  });
 
-async function updateScriptStatus(): Promise<void> {
-  const isActive = await getNetworkViewerEnabledSetting() || await getMockingEnabledSetting();
-  if (isActive === isAttached) return;
-  const msgType = isActive ? 'INTERCEPTOR_ATTACH' : 'INTERCEPTOR_DETACH'
-  port.postMessage({ type: msgType, payload: { tabId } });
+  port?.onDisconnect.addListener((p) => {
+    port = null;
+    if (isPanelVisible && navigator.onLine) {
+      reconnect();
+    }
+  });
 }
 
-function updateEngineLabel() { engineLabelElement.innerText = engine ? engine : isAttached ? 'unknown' : 'Enable Network View or Mocking'; }
-
-const unwatchEnableNetworkViewerSetting = watch(
-  'local:settings.networkViewerEnabled',
-  (newValue, _) => {
-    enableNetworkViewerCheckbox.checked = newValue as boolean;
-    updateScriptStatus();
-  }
-);
-const unwatchEnableMockingSetting = watch(
-  'local:settings.mockingEnabled',
-  (newValue, _) => {
-    enableMockingCheckbox.checked = newValue as boolean;
-    updateScriptStatus();
-  }
-);
-const unwatchNotificationSetting = watch(
-  'local:settings.notificationsEnabled',
-  (newValue, _) => enableNotificationsCheckbox.checked = newValue as boolean
-);
-
-enableNetworkViewerCheckbox.addEventListener('change', (event: Event) => {
-  setNetworkViewerEnabledSetting((event.target as HTMLInputElement).checked)
-});
-enableMockingCheckbox.addEventListener('change', (event: Event) => {
-  setMockingEnabledSetting((event.target as HTMLInputElement).checked)
-});
-enableNotificationsCheckbox.addEventListener('change', (event: Event) => {
-  setNotificationsEnabledSetting((event.target as HTMLInputElement).checked)
-});
-
-window.addEventListener('beforeunload', () => {
-  unwatchEnableNetworkViewerSetting();
-  unwatchEnableMockingSetting();
-  unwatchNotificationSetting();
-});
-
-networkViewTabButton.addEventListener('click', () => {
-  networkViewTabButton.classList.add('active');
-  networkViewPane.classList.add('active');
-  networkDetailPane.classList.add('active');
-
-  networkViewPane.classList.remove('hidden');
-  networkDetailPane.classList.remove('hidden');
-
-  mockViewTabButton.classList.remove('active');
-  mockViewPane.classList.remove('active');
-  mockDetailPane.classList.remove('active');
-
-  mockViewPane.classList.add('hidden');
-  mockDetailPane.classList.add('hidden');
-});
-mockViewTabButton.addEventListener('click', () => {
-  mockViewTabButton.classList.add('active');
-  mockViewPane.classList.add('active');
-  mockDetailPane.classList.add('active');
-
-  mockViewPane.classList.remove('hidden');
-  mockDetailPane.classList.remove('hidden');
-
-  networkViewTabButton.classList.remove('active');
-  networkViewPane.classList.remove('active');
-  networkDetailPane.classList.remove('active');
-
-  networkViewPane.classList.add('hidden');
-  networkDetailPane.classList.add('hidden');
-});
-
-// --- network view ui ---
-const networkViewHint = document.querySelector('#network-view-pane .empty-hint')! as HTMLElement;
-const networkDetailPlaceholder = document.querySelector('#network-detail-pane .detail-placeholder')! as HTMLElement;
-const networkDetailContent = document.querySelector('#network-detail-pane .detail-content')! as HTMLElement;
-const networkDetailMeta = document.querySelector('#network-detail-pane .detail-meta')! as HTMLElement;
-const networkDetailRequest = document.querySelector('#network-detail-pane #request-body')! as HTMLPreElement;
-const networkDetailHeaders = document.querySelector('#network-detail-pane #headers')! as HTMLPreElement;
-const networkDetailResponse = document.querySelector('#network-detail-pane #response-body')! as HTMLPreElement;
-const createMockBtn = document.getElementById('create-mock')! as HTMLButtonElement;
-
-/**
- * add/remove hidden on .empty-hint in network view pane
- * @param force true: add, false: remove
- */
-function toggleHideHint(force: boolean) {
-  networkViewHint.classList.toggle('hidden', force)
+function getEngine(): Engine {
+  const browser = import.meta.env.BROWSER;
+  if (['firefox', 'safari'].includes(browser)) return browser as Engine;
+  return 'chrome';
 }
 
-function updateRequestRow(id: string) {
-  const requestToUpdate = networkViewPane.querySelector(`[data-id="${id}"]`);
-  if (requestToUpdate) {
-    requestToUpdate.classList.add('updated');
-    return true;
+function addMockOnSubmit(event: Event) {
+  event.preventDefault();
+  const form = event.currentTarget as HTMLFormElement;
+  const formData = new FormData(form);
+  const pattern = formData.get('pattern') as string;
+
+  const newMock: Omit<MockEndpoint, 'id'|'createdAt'|'updatedAt'|'listOrder'> = {
+    delayMs: 0,
+    enabled: false,
+    matchType: 'regex',
+    method: 'GET',
+    name: '',
+    response: {
+      status: 200,
+      statusText: undefined,
+      headers: undefined,
+      body: undefined
+    },
+    url: pattern,
+    priorityOrder: 0,
   }
 
-  return false;
+  addMock(newMock);
 }
 
-function createRequestRow(id: string) {
-  const div = window.document.createElement('div');
-  div.className = 'request-row';
-  div.dataset.id = id;
-  return div;
-}
+async function render() {
+  const header = document.querySelector('header');
 
-function createRequestMethod(method: string) {
-  const span = window.document.createElement('span');
-  span.className = 'row-method';
-  span.textContent = method;
-  return span;
-}
+  const tabToolbar = createTabToolbar();
+  const optionToolbar = createToolsToolbar();
+  const labelToolbar = createToolsToolbar();
+  header?.append(tabToolbar, optionToolbar, labelToolbar);
 
-function createRequestStatus(status: number | null) {
-  const span = window.document.createElement('span');
-  span.className = `row-status ${status && status >= 400 ? 'status-error' : ''}`;
-  span.textContent = String(status ?? '…');
-  return span;
-}
+  const networkViewTab = createToolbarTab({ id: 'network-view-toggle', title: 'Network Viewer', ariaSelected: 'true' });
+  const mockViewTab = createToolbarTab({ id: 'mock-view-toggle', title: 'Mock Viewer', ariaSelected: 'false' });
+  tabToolbar.append(networkViewTab, mockViewTab);
+  
+  const engineType = getEngine();
+  TabStore.set(tabId, 'engineType', engineType);
+  labelToolbar.append(createSimpleLabel({ textContent: `Engine: ${engineType ?? 'uknown'}`}));
 
-function createRequestUrl(url: string) {
-  const span = window.document.createElement('span');
-  span.className = 'row-url';
-  span.textContent = url;
-  return span;
-}
+  // --- notification toggle ---
+  const enableNotificationsCheckbox = createCheckbox({ 
+    htmlFor: 'enableNotifications',
+    id: 'enableNotifications',
+    textContent: 'Enable Notifications',
+    checked: await TabStore.get(tabId, 'isNotificationsEnabled') ?? false
+  });
+  optionToolbar.append(enableNotificationsCheckbox);
 
-function selectRequest(id: string): void {
-  selected = requests.get(id) ?? undefined;
-  if (!selected) return;
+  enableNotificationsCheckbox!.querySelector('input')!.addEventListener('change', (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    TabStore.set(tabId, 'isNotificationsEnabled', target.checked);
+  });
 
-  networkViewPane.querySelectorAll('.request-row').forEach(r =>
-    r.classList.toggle('active', r.getAttribute('data-id') === id),
+  cleanup.push(
+    TabStore.watch(tabId, 'isNotificationsEnabled', (nv: boolean|null) => {
+      enableNotificationsCheckbox!.querySelector('input')!.checked = nv ?? false
+    }),
   );
 
-  networkDetailPlaceholder.classList.add('hidden');
-  networkDetailContent.classList.remove('hidden');
+  // --- network toggle ---
+  const isNetworkViewCheckboxChecked = await TabStore.get(tabId, 'isNetworkViewerEnabled') ?? false;
+  async function networkViewerEnabled() {
+    if (!port) return;
+    port.postMessage({type: 'ENABLE_NETWORK_VIEW', payload: {engineType: engineType}} as EnableNetworkView);
+    setExtensionIconStateActive(tabId);
+  }
+  async function networkViewerDisabled() {
+    if (!port) return;
+    port.postMessage({type: 'DISABLE_NETWORK_VIEW', payload: {engineType: engineType}} as DisableNetworkView);
+    if (!await TabStore.get(tabId, 'isMockingEnabled')) setExtensionIconStateDisabled(tabId);
+  }
+  
+  if (isNetworkViewCheckboxChecked) {
+    networkViewerEnabled();
+  } else {
+    networkViewerDisabled();
+  }
 
-  networkDetailMeta.innerHTML =
-    `<strong>${selected.method}</strong> <span class="url">${selected.url}</span> ` +
-    `<span class="status">${selected.statusCode ?? '…'}</span>`;
+  const enableNetworkViewCheckbox = createCheckbox({ 
+    htmlFor: 'enableNetworkViewer',
+    id: 'enableNetworkViewer',
+    textContent: 'Enable Network Viewer',
+    checked: await TabStore.get(tabId, 'isNetworkViewerEnabled') ?? false
+  });
+  optionToolbar.append(enableNetworkViewCheckbox);
 
-  networkDetailRequest.textContent = tryPrettyPrint(selected.requestBody ?? '');
-  networkDetailHeaders.textContent = tryPrettyPrint(
-    JSON.stringify({ request: selected.requestHeaders, response: selected.responseHeaders })
+  enableNetworkViewCheckbox!.querySelector('input')!.addEventListener('change', (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    TabStore.set(tabId, 'isNetworkViewerEnabled', target.checked);
+  });
+
+  cleanup.push(
+    TabStore.watch(tabId, 'isNetworkViewerEnabled', async (nv: boolean|null) => {
+      if (!port) return;
+      enableNetworkViewCheckbox!.querySelector('input')!.checked = nv ?? false;
+
+      if (nv) {
+        networkViewerEnabled();
+      } else {
+        networkViewerDisabled()
+      }
+    })
   );
-  networkDetailResponse.textContent = tryPrettyPrint(JSON.stringify(selected.responseBody) ?? '');
+
+  // --- mocking toggle ---
+  const isMockingCheckboxChecked = await TabStore.get(tabId, 'isMockingEnabled') ?? false;
+  async function mockingEnabled() {
+    if (!port) return;
+    port.postMessage({type: 'ENABLE_MOCKING', payload: {engineType: engineType}} as EnableMocking);
+    setExtensionIconStateActive(tabId);
+    await BadgeManager.background(tabId, BADGE_ACTIVE.background);
+    await BadgeManager.color(tabId, BADGE_ACTIVE.text);
+    if (!(await BadgeManager.get(tabId))) {
+      await BadgeManager.set(tabId, '0');
+    }
+  }
+  async function mockingDisabled() {
+    if (!port) return;
+    port.postMessage({type: 'DISABLE_MOCKING', payload: {engineType: engineType}} as DisableMocking);
+    if (!await TabStore.get(tabId, 'isNetworkViewerEnabled')) setExtensionIconStateDisabled(tabId);
+    await BadgeManager.background(tabId, BADGE_INACTIVE.background);
+    await BadgeManager.color(tabId, BADGE_INACTIVE.text);
+  }
+
+  if (isMockingCheckboxChecked) {
+    mockingEnabled();
+  } else {
+    mockingDisabled();
+  }
+
+  const enableMockingCheckbox = createCheckbox({ 
+    htmlFor: 'enableMocking',
+    id: 'enableMocking',
+    textContent: 'Enable Mocking',
+    checked: isMockingCheckboxChecked
+  });
+  optionToolbar.append(enableMockingCheckbox);
+
+  enableMockingCheckbox!.querySelector('input')!.addEventListener('change',async (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    TabStore.set(tabId, 'isMockingEnabled', target.checked);
+  });
+
+  cleanup.push(
+    TabStore.watch(tabId, 'isMockingEnabled', async (nv: boolean|null) => {
+      if (!port) return;
+      enableMockingCheckbox!.querySelector('input')!.checked = nv ?? false;
+      if (nv) {
+        mockingEnabled();
+      } else {
+        mockingDisabled();
+      }
+    })
+  );
+
+  // --- panel tab buttons ---
+  networkViewTab!.addEventListener('click', async (event: Event) => {
+    mockViewTab!.setAttribute('aria-pressed', 'false');
+    networkViewTab!.setAttribute('aria-pressed', 'true');
+    document.querySelectorAll('.active').forEach(ele => ele.classList.replace('active', 'hidden'));
+    document.querySelectorAll('.hidden').forEach(ele => ele.classList.replace('hidden', 'active'));
+    await TabStore.set(tabId, 'panelUIState', {tab: 'networkView'});
+  });
+
+  mockViewTab!.addEventListener('click', async (event: Event) => {
+    networkViewTab!.setAttribute('aria-pressed', 'false');
+    mockViewTab!.setAttribute('aria-pressed', 'true');
+    document.querySelectorAll('.active').forEach(ele => ele.classList.replace('active', 'hidden'));
+    document.querySelectorAll('.hidden').forEach(ele => ele.classList.replace('hidden', 'active'));
+    await TabStore.set(tabId, 'panelUIState', {tab: 'mockView'});
+  });
+
+  // --- network ---
+  const networkList = document.querySelector('.network-list');
+  const networkDetails = document.querySelector('.network-details');
+
+  let networkListPlaceholder: HTMLElement = document.createElement('p');
+  networkListPlaceholder.textContent = 'No Requests.';
+  if (await TabStore.get(tabId, 'isNetworkViewerEnabled')) {
+    networkListPlaceholder.textContent += ' Enable Network Viewer to capture requests.'
+  }
+  networkList!.append(networkListPlaceholder);
+
+  const networkDetailsPlaceholder = document.createElement('p');
+  networkDetailsPlaceholder.textContent = 'Select a request to inspect it.';
+  networkDetails?.append(networkDetailsPlaceholder);
+
+  // --- mocking ---
+  const mockList = document.querySelector('.mock-list');
+  const mockDetails = document.querySelector('.mock-details');
+
+  // display list in reverse order so we can simply append children naturally
+  const addMockRow = createAddMockRow();
+  mockList?.append(enableMockingCheckbox);
+  
+  const addMockRowForm = addMockRow?.querySelector('form') as HTMLFormElement;
+  addMockRowForm.onsubmit = addMockOnSubmit;
+
+  const mockDetailsPlaceholder = document.createElement('p');
+  mockDetailsPlaceholder.textContent = 'Select a mock.';
+  mockDetails?.append(mockDetailsPlaceholder);
 }
 
-async function upsertRequestRow(request: InterceptedRequest): Promise<void> {
-  toggleHideHint(true);
+async function selectRequest(event: Event) {
+  if (!event.currentTarget) return;
+  const networkDetails = document.querySelector('.network-details');
+  if (!networkDetails) return;
+  const requestId = (event.currentTarget as HTMLElement).id
+  selectedRequest = (await TabStore.get(tabId, 'capturedRequests'))?.find(r => r.requestId === requestId);
+  if (!selectedRequest) return;
 
-  if (updateRequestRow(request.id)) return;
+  networkDetails.innerHTML = '';
 
-  const row = createRequestRow(request.id);
-  const method = createRequestMethod(request.method);
-  const status = createRequestStatus(request.statusCode);
-  const url = createRequestUrl(request.url);
-  // TODO: consider response headers
+  selectedRequest.requestHeaders;
+  const newMock: Omit<MockEndpoint, 'id'|'createdAt'|'updatedAt'|'priorityOrder'|'listOrder'> = {
+    delayMs: 0,
+    enabled: false,
+    matchType: 'regex',
+    description: '',
+    method: selectedRequest?.method as HttpMethod,
+    name: selectedRequest?.url ?? '',
+    request: {
+      headers: selectedRequest.requestHeaders,
+      queryParams: Object.fromEntries(new URL(selectedRequest.url).searchParams),
+      body: selectedRequest.requestBody,
+    },
+    response: {
+      status: Number(selectedRequest?.statusCode),
+      statusText: undefined,
+      headers: Object.fromEntries(
+        (selectedRequest?.responseHeaders ?? []).map(item => [item.name, item.value])
+      ),
+      body: selectedRequest?.responseBody
+    },
+    url: selectedRequest.url ?? '',
+  };
 
-  row.append(method, status, url);
-  row.addEventListener('click', () => selectRequest(request.id));
-
-  networkViewPane.appendChild(row);
+  networkDetails.replaceChildren(createReadOnlyForm({
+    onclick: async () => await addMock(newMock),
+    ...selectedRequest
+  }));
 }
 
-createMockBtn.addEventListener('click', (event: MouseEvent) => {
-  // collect selected request details
-  // create a new mock template with these details
-  // send/open mock view with these details in panel
+async function renderRequests(requests: Array<InterceptedRequest>) {
+  const networkList = document.querySelector('.network-list');
+  if (!networkList) return;
+  // template in memory to build full update and render in a single paint
+  const fragment: DocumentFragment = document.createDocumentFragment();
+  // temporary element to collect the new children to render
+  const temp = document.createElement('div');
+  // render all mocks
+  requests.forEach(r => {
+    temp.append(createRequestRow({
+      ...r,
+      id: r.requestId.toString(),
+      onclick: selectRequest
+    }));
+  });
+
+  fragment.append(...temp.children);
+  networkList.replaceChildren(fragment);
+}
+
+async function submitSaveMock(event: SubmitEvent) {
+  event.preventDefault();
+  const formElement = event.currentTarget as HTMLFormElement;
+  if (!formElement) return;
+  const formData = new FormData(formElement);
+  const mockId = formElement.dataset.id;
+  const originalMock = JSON.parse(JSON.stringify(await db.mocks.get(Number(mockId))));
+  if (!originalMock) return;
+
+  originalMock!.url = formData.get('url')!.toString();
+  // TODO: need to create custom field for headers
+  originalMock!.request!.headers = JSON.parse(formData.get('request-headers')!.toString());
+  originalMock!.request!.queryParams = JSON.parse(formData.get('request-params')!.toString());
+  originalMock!.request!.body = JSON.parse(formData.get('request-body')!.toString());
+
+  originalMock!.response!.status = Number(formData.get('response-status'));
+  originalMock!.response!.headers = JSON.parse(formData.get('response-headers')!.toString());
+  originalMock!.response!.body = JSON.parse(formData.get('response-body')!.toString());
+
+  await updateMock(originalMock.id, originalMock);
+}
+
+async function selectMock(event: Event) {
+  if (!event.currentTarget) return;
+  const mockDetails = document.querySelector('.mock-details');
+  if (!mockDetails) return;
+  const id = (event.currentTarget as HTMLElement).id
+  selectedMock = await db.mocks.get(Number(id));
+  if (!selectedMock) return;
+
+  mockDetails.innerHTML = '';
+  
+  mockDetails.replaceChildren(createForm({
+    submit: submitSaveMock,
+    ...selectedMock
+  }));
+}
+
+async function renderMocks(mocks: Array<MockEndpoint>) {
+  const mockList = document.querySelector('.mock-list');
+  if (!mockList) return;
+  // template in memory to build full update and render in a single paint
+  const fragment: DocumentFragment = document.createDocumentFragment();
+  // temporary element to collect the new children to render
+  const temp = document.createElement('div');
+  // rerender the add mock row
+  const addMockRow = createAddMockRow();
+  temp.append(addMockRow);
+
+  const addMockRowForm = addMockRow?.querySelector('form') as HTMLFormElement;
+  addMockRowForm.onsubmit = addMockOnSubmit;
+
+  // render all mocks
+  mocks.forEach(m => {
+    temp.append(createMockRow({
+      ...m,
+      id: m.id!.toString(),
+      onclick: selectMock,
+    })); 
+  });
+
+  fragment.append(...temp.children);
+  mockList.replaceChildren(fragment);
+}
+
+// --- setup ---
+window.addEventListener('DOMContentLoaded', async () => {
+  await connectToBackground();
+  await render();
+  // populate or repopulate requests
+  // populate or repopulate mocks
 });
 
-// upsertRequestRow({
-//   id: '1',
-//   url: 'test1',
-//   method: 'get',
-//   requestHeaders: {},
-//   requestBody: null,
-//   responseHeaders: {},
-//   responseBody: null,
-//   statusCode: 200,
-//   timestamp: 0,
-//   source: 'chromium-cdp'
-// });
-// upsertRequestRow({
-//   id: '2',
-//   url: 'test2',
-//   method: 'get',
-//   requestHeaders: {},
-//   requestBody: null,
-//   responseHeaders: {},
-//   responseBody: null,
-//   statusCode: 200,
-//   timestamp: 0,
-//   source: 'chromium-cdp'
-// })
-// upsertRequestRow({
-//   id: '3',
-//   url: 'test3',
-//   method: 'get',
-//   requestHeaders: {},
-//   requestBody: null,
-//   responseHeaders: {},
-//   responseBody: null,
-//   statusCode: 200,
-//   timestamp: 0,
-//   source: 'chromium-cdp'
-// })
+// todo: return to modify for offline behavior
+// browser suspended or offline, cleanup port for reconnect later
+window.addEventListener('offline', () => {
+  if (port) port.disconnect();
+});
 
-// --- mock view ui ---
+// reconnect to port when browser is unsuspended or goes online again
+window.addEventListener('online', () => {
+  if (!port && isPanelVisible) connectToBackground();
+});
 
-
-// add create mock in the view
-  // should be an input field that accepts a url and allows some regex 
-  // should show errors if not formatted properly and disable add button
-  // should enable add button if valid and not empty
-  // on add, should create a new mock
-    // all fields empty
-    // saved in a json serializable object where each non-regex path part is a layer
-
-// function to upsert mock row
-  // similar to network upsert row
-  // generate markup for each item based on the serialized mocks object from storage
-  // populates view and the details
-  // should have column for all rows with checkbox to enable
-  // should have column for all rows with icon to delete
-
-// update function to update the mock on field change
-// select function to populate the detail based on selected mock
-
-
-
-
-
-  
-
-
-
-
-  // todo: consider adding clear button to network viewer
-
-updateEngineLabel();
-  // btnOverrideElement.addEventListener('click', () => {
-  //   if (!selected) return;
-  //   if (selected.source === 'safari-patch') {
-  //     // Safari: send a decision before the real request is made
-  //     send({
-  //       type: 'REQUEST_DECISION',
-  //       payload: {
-  //         decision: {
-  //           requestId:       selected.id,
-  //           action:          'block',
-  //           syntheticStatus: 200,
-  //           syntheticBody:   editorBodyElement.value,
-  //         },
-  //       },
-  //     });
-  //   } else {
-  //     // Chromium/Firefox: override the response after it was received
-  //     send({
-  //       type:    'RESPONSE_OVERRIDE',
-  //       payload: {
-  //         override: {
-  //           requestId:  selected.id,
-  //           body:       editorBodyElement.value,
-  //           statusCode: selected.statusCode ?? 200,
-  //         },
-  //       },
-  //     });
-  //   }
-  
-  //   listElement.querySelector(`[data-id="${selected.id}"]`)?.classList.add('row--overridden');
-  // });
-
-  // btnPassthroughElement.addEventListener('click', () => {
-  //   if (!selected) return;
-  //   if (selected.source === 'safari-patch') {
-  //     send({
-  //       type: 'REQUEST_DECISION',
-  //       payload: {
-  //         decision: {
-  //           requestId: selected.id,
-  //           action:    'passthrough',
-  //         },
-  //       },
-  //     });
-  //   } else {
-  //     send({ type: 'RESPONSE_PASSTHROUGH', payload: { requestId: selected.id } });
-  //   }
-  
-  //   listElement.querySelector(`[data-id="${selected.id}"]`)?.classList.remove('row--updated');
-  // });
+// cleanup
+window.addEventListener('beforeunload', async () => {
+  port = null;
+  cleanup.forEach(fn => fn && fn());
+});

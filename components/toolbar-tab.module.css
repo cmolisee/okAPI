@@ -1,0 +1,26 @@
+.toolbar-tab {
+  color: var(--ok-api-color-on-surface);
+  height: 28px;
+  float: left;
+  padding: 0 10px;
+  white-space: nowrap;
+  cursor: default;
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-tab:focus-visible,
+.toolbar-tab:hover {
+  color: var(--ok-api-color-on-surface);
+  background-color: var(--ok-api-state-hover);
+}
+
+.tab-title {
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.toolbar-tab[aria-selected="true"] .tab-title {
+  border-bottom: 2px solid var(--ok-api-sys-color-primary);
+  color: var(--ok-api-sys-color-primary);
+}
