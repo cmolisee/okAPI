@@ -1,10 +1,6 @@
-/**
- * intercepts fetch and XHR.
- * wait for panel to send decision: passthrough, block, modify.
- */
-
 type PendingDecisionMap = Map<string, (decision: object) => void>;
 
+// This script is only for Safari
 export default defineUnlistedScript(() => {
 	(() => {
 		'use strict';
@@ -346,6 +342,6 @@ export default defineUnlistedScript(() => {
 			}
 		};
 
-		console.debug('[okAPI: API Mocking] safari patch active (blocking mode)');
+		console.debug('[ok-api: API Mocking] safari patch active (blocking mode)');
 	})();
 });

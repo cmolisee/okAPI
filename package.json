@@ -1,5 +1,5 @@
 {
-  "name": "okapi",
+  "name": "ok-api",
   "description": "",
   "scripts": {
     "dev": "wxt",
@@ -28,10 +28,12 @@
     "@biomejs/biome": "2.4.15",
     "@types/chrome": "^0.1.42",
     "@types/har-format": "^1.2.16",
+    "devtools-protocol": "^0.0.1647336",
     "typescript": "^6.0.3",
     "wxt": "^0.20.26"
   },
   "dependencies": {
-    "dexie": "^4.4.3"
+    "dexie": "^4.4.3",
+    "fractional-indexing": "^3.4.0"
   }
 }

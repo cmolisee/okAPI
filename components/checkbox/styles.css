@@ -1,0 +1,99 @@
+:host {
+  --ok-checkbox-size: 12px;
+  --ok-checkbox-radius: 2px;
+  --ok-checkbox-border: #8c8c8c;
+  --ok-checkbox-border-hover: #6b6b6b;
+  --ok-checkbox-bg: #ffffff;
+  --ok-checkbox-bg-disabled: #eeeeee;
+  --ok-checkbox-accent: #1a73e8;
+  --ok-checkbox-accent-hover: #1967d2;
+  --ok-checkbox-mark: #ffffff;
+  --ok-checkbox-focus-ring: rgba(26, 115, 232, 0.5);
+  --ok-checkbox-label-color: #1f1f1f;
+  --ok-checkbox-label-color-disabled: #5f6368;
+
+  display: inline-flex;
+  align-items: center;
+  cursor: default;
+  font-size: 13px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --ok-checkbox-border: #6b6b6b;
+    --ok-checkbox-border-hover: #9aa0a6;
+    --ok-checkbox-bg: #3c4043;
+    --ok-checkbox-bg-disabled: #2b2b2b;
+    --ok-checkbox-accent: #8ab4f8;
+    --ok-checkbox-accent-hover: #aecbfa;
+    --ok-checkbox-mark: #202124;
+    --ok-checkbox-label-color: #e8eaed;
+    --ok-checkbox-label-color-disabled: #80868b;
+  }
+}
+
+.checkbox-wrapper {
+  background-color: transparent;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  cursor: pointer;
+}
+
+.checkbox-wrapper:hover {
+    background-color: var(--ok-api-primary-a30);
+}
+
+.checkbox-wrapper label {
+  margin-bottom: 0;
+  cursor: pointer;
+  user-select: none; 
+}
+
+.checkbox-wrapper input {
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: transparent;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--ok-api-text);
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
+  margin-right: 0.5rem;
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+.checkbox-wrapper input:focus,
+.checkbox-wrapper input:focus-visible {
+  box-shadow: none;
+  border-color: var(--ok-api-focus);
+  outline: 2px solid var(--ok-api-focus) !important;
+}
+
+.checkbox-wrapper input::before {
+  content: "";
+  width: 0.65rem;
+  height: 0.65rem;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  background-color: CanvasText;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.checkbox-wrapper input:checked {
+  background-color: var(--ok-api-focus);
+  border-color: var(--ok-api-focus);
+}
+
+.checkbox-wrapper input:checked::before {
+  transform: scale(1);
+}
+
+.checkbox-wrapper input:focus-visible {
+  outline: 3px solid var(--ok-api-focus);
+  outline-offset: 2px;
+}

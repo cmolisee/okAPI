@@ -1,0 +1,31 @@
+/* .toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--ok-api-primary-a0);
+  border-bottom: 1px solid var(--ok-api-primary-a30);
+  height: 29px;
+  padding: 0 4px;
+  touch-action: none;
+} */
+
+.tab-toolbar-contents {
+  flex: auto;
+  pointer-events: none;
+  margin-left: 0;
+  position: relative;
+  cursor: default;
+}
+
+.tab-toolbar-tabs {
+  pointer-events: initial;
+}
+
+.tab-toolbar {
+  display: flex;
+  flex: 0 0 27px;
+  border-bottom: 1px solid var(--ok-api-color-divider);
+  overflow: visible;
+  width: 100%;
+  background-color: var(--ok-api-toolbar-background-color);
+}

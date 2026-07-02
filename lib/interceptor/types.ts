@@ -1,23 +1,20 @@
-export type Engine = 'chromium-cdp' | 'firefox-filter' | 'safari-patch';
+import { MockEndpoint } from "@/utils/db";
+import Protocol from "devtools-protocol";
+
+export type Engine = 'chrome' | 'firefox' | 'safari';
 export type InterceptedRequest = {
-  id: string;
+  requestId: string;
   url: string;
   method: string;
-  requestHeaders: Record<string, string>;
-  requestBody: string | null;
-  responseHeaders: Record<string, string>;
+  requestHeaders: Protocol.Network.Headers;
+  requestBody: Protocol.Network.PostDataEntry[] | undefined;
+  responseHeaders: Protocol.Fetch.HeaderEntry[] | undefined;
   responseBody: string | null;
-  statusCode: number | null;
+  statusCode: number;
   timestamp: number;
   source: Engine;
     // Safari: pause request and wait for panel to respond
   pendingDecision?: boolean;
-}
-export type ResponseOverride = {
-  requestId: string;
-  statusCode?: number;
-  headers?: Record<string, string>;
-  body?: string;
 }
 // Safari: panel decision to pending intercepted request
 export type RequestDecision = {
@@ -36,42 +33,99 @@ export type RequestDecision = {
   modifiedHeaders?: Record<string, string>;
   modifiedBody?:    string;
 }
-export type MessageRegistry =
-  // content script → background: safari capture    
-  | { type: 'CONTENT_REQUEST_CAPTURED'; payload: {} }
-  // panel → background: start intercepting tab
-  | { type: 'INTERCEPTOR_ATTACH'; payload: {} }
-  // panel → background: stop intercepting tab
-  | { type: 'INTERCEPTOR_DETACH'; payload: {} }
-  // background → panel: current attach status
-  | { type: 'INTERCEPTOR_STATUS'; payload: { attached: boolean; strategy: Engine; } }
-  // panel → background → content → page: safari decision
-  | { type: 'REQUEST_DECISION'; payload: {} }
-  // background → panel: request/response is paused
-  | { type: 'REQUEST_PAUSED'; payload: InterceptedRequest }
-  // panel → background: apply override and resume
-  | { type: 'RESPONSE_OVERRIDE'; payload: {} }
-  // panel → background: resume without modification
-  | { type: 'RESPONSE_PASSTHROUGH'; payload: { requestId: string } }
-  // page → content: intercepted request on safari
-  | { type: 'SAFARI_REQUEST_INTERCEPTED'; payload: {} }
-  | { type: 'PING'; payload: void };
-export type MessageSource = 
-  | 'service-worker' // background.ts
-  | 'content'
-  | 'popup'
-  | 'options'
-  | 'devtools'
-  | 'injected';
-export type MessageMetadata = {
-    to?: MessageSource;
-    from?: MessageSource;
-    timestamp?: string;
+// panel -> service worker (background)
+// attach interceptor for a specific tab and engineType
+// export type InterceptorAttach = {
+//   type: Uppercase<'interceptor_attach'>,
+//   payload: { engineType: Engine }
+// }
+// panel -> service worker (background)
+// detach service worker interceptor for a specific tab and engineType
+// should be called whenever both network_view and mocking are disabled
+// export type InterceptorDetach = {
+//   type: Uppercase<'interceptor_detach'>,
+//   payload: { engineType: Engine }
+// }
+export type GetRequests = {
+  type: Uppercase<'get_request_list'>,
+  payload: {}
 }
-// return void or payload if T is valid Type in MessageRegistry['type']
-export type ExtractPayload<T = unknown> = Extract<MessageRegistry, { type: T }> extends never ? void : Extract<MessageRegistry, { type: T }>['payload'];
-export type Message<T = unknown> = {
-    type: T;
-    data: ExtractPayload<T>;
-    meta?: MessageMetadata;
+export type GetMocks = {
+  type: Uppercase<'get_mock_list'>,
+  payload?: {}
 }
+export type PanelContent = {
+  type: Uppercase<'panel_content'>,
+  payload: {requests?: Array<InterceptedRequest & Partial<{isMocked: boolean}>>, mocks?: Array<MockEndpoint>}
+}
+// panel or popup -> service worker (background)
+// interceptor should already be attached
+// enables debugger with static patterns for network_view feature
+export type EnableNetworkView = {
+  type: Uppercase<'enable_network_view'>,
+  payload: { engineType: Engine }
+}
+export type DisableNetworkView = {
+  type: Uppercase<'disable_network_view'>,
+  payload: { engineType: Engine }
+}
+export type FailedEnableNetworkView = {
+  type: Uppercase<'failed_enable_network_view'>,
+  payload?: {}
+}
+// panel or popup -> service worker (background)
+// interceptor should already be attached
+// enables debugger with patterns built from enabled mocks
+export type EnableMocking = {
+  type: Uppercase<'enable_mocking'>,
+  payload: { engineType: Engine }
+}
+export type DisableMocking = {
+  type: Uppercase<'disable_mocking'>,
+  payload: { engineType: Engine }
+}
+export type FailedEnableMocking = {
+  type: Uppercase<'failed_enable_mocking'>,
+  payload?: {}
+}
+// panel -> service worker (background)
+// interceptor should already be attached. only when mock is enabled/disabled from panel.
+// disables the debugger then
+// re-enables debugger with patterns built from enabled mocks
+export type UpdateMockPatterns = {
+  type: Uppercase<'update_mock_patterns'>,
+  payload: { engineType: Engine }
+}
+export type FailedUpdateMockPatterns = {
+  type: Uppercase<'failed_update_mock_pattern'>,
+  payload?: {}
+}
+export type RequestIntercepted = {
+  type: Uppercase<'intercepted_request'>,
+  payload: { interceptedRequests: InterceptedRequest[] }
+}
+export type UpdateInterceptedRequests = {
+  type: Uppercase<'update_intercepted_requests'>,
+  payload: { requests: Array<InterceptedRequest & Partial<{isMocked: boolean}>> }
+}
+export type UpdateMocks = {
+  type: Uppercase<'update_mocks'>,
+  payload: { mocks: Array<MockEndpoint> }
+}
+
+export type PanelToServiceWorker = 
+  | GetRequests
+  | GetMocks
+  | EnableNetworkView
+  | DisableNetworkView
+  | EnableMocking
+  | DisableMocking
+  | UpdateMockPatterns;
+
+export type ServiceWorkerToPanel =
+  | PanelContent
+  | FailedEnableNetworkView
+  | FailedEnableMocking
+  | FailedUpdateMockPatterns
+  | UpdateInterceptedRequests
+  | UpdateMocks;

@@ -1,5 +1,7 @@
-import Dexie, { EntityTable, type Table } from 'dexie';
+import Dexie, { EntityTable, liveQuery, type Table } from 'dexie';
+import { generateKeyBetween } from 'fractional-indexing';
 
+export type UrlMatchType = 'exact' | 'contains' | 'wildcard' | 'regex';
 export type HttpMethod =
   | 'GET'
   | 'POST'
@@ -7,423 +9,346 @@ export type HttpMethod =
   | 'PATCH'
   | 'DELETE'
   | 'OPTIONS'
-  | 'HEAD'
-  | '*';
-export type Status =
-  | 'synced'
-  | 'pending_create'
-  | 'pending_update'
-  | 'pending_delete'
-  | 'error'
-  | 'conflict';
-export type DateString = string;
-export type MockRecord = {
-    createdAt: ISODateString;
-    updatedAt: ISODateString;
-    id?: string;
-    uuid: string;
-    method: HttpMethod;
-    urlPattern: string;
-    statusCode: number;
-    responseHeaders: Record<string, string>;
-    responseBody: string | null;
-    contentType: string;
-    delayMs?: number;
-    enabled: boolean;
-    syncedAt?: number;
-    status: Status;
-    error?: string;
-    remoteId?: string;
-    desription?: string;
-    title?: string;
+  | 'HEAD';
+  export type MockRequestSpec = {
+  headers?: Record<string, string>;
+  queryParams?: Record<string, string>;
+  /** arbitrary json used to validate/inspect the incoming request body. */
+  body?: unknown;
 }
-export type SyncMeta = {
-    id?: number;
-    key: string;
-    lastSyncAt: number;
-    lastSyncCursor?: string;
-    pendingCount: number;
+export type MockResponseSpec = {
+  status: number;
+  statusText?: string;
+  headers?: Record<string, string>;
+  /** arbitrary json returned as the mocked response body. */
+  body: unknown;
 }
-export type NewMockRecord = Omit<MockRecord,'id' | 'uuid' | 'status' | 'createdAt' | 'updatedAt'>;
-export type UpdateMockRecord = Partial<Omit<MockRecord, 'id' | 'uuid' | 'createdAt'>>;
-export type BatchOperationType = 'create' | 'update' | 'delete';
-export type BatchOperation<T> = {
-  op: BatchOperationType;
-  data: T;
+export type MockEndpoint = {
+  /** Optional artificial latency to simulate real network conditions. */
+  delayMs: number;
+  createdAt: number;
+  enabled: boolean;
+  id?: number;
+  matchType: UrlMatchType;
+  description?: string;
+  method: HttpMethod;
+  name: string;
+  updatedAt: number;
+  request?: MockRequestSpec;
+  response: MockResponseSpec;
+  tags?: string[];
+  /** literal URL/path, or a pattern interpreted per `matchType`. */
+  url: string;
+  priorityOrder: number;
+  listOrder: string;
 }
-export type BatchResult = {
-  succeeded: number;
-  failed: number;
-  errors: Array<{ index: number; error: string }>;
+export interface RequestLog {
+  id?: number;
+  /** FK to MockEndpoint.id when source === 'mock'. */
+  mockId?: number;
+  method: HttpMethod;
+  url: string;
+  requestHeaders?: Record<string, string>;
+  requestBody?: unknown;
+  responseStatus: number;
+  responseHeaders?: Record<string, string>;
+  responseBody?: unknown;
+  durationMs?: number;
+  timestamp: number;
 }
-
-export class OkapiDB extends Dexie {
-  mocks!: Table<MockRecord, number>;
-  syncMeta!: Table<SyncMeta, number>;
- 
-  constructor() {
-    super('okapi');
- 
-    this.version(1).stores({
-      rules: [
-        '++id',
-        'uuid',
-        'profileId',
-        'method',
-        'urlPattern',
-        'status',
-        'enabled',
-        'priority',
-        '*tags',
-        'updatedAt',
-        '[status+updateAt'
-      ].join(', '),
- 
-      syncMeta: ['++id', '&key'].join(', '),
-    });
-  }
-}
- 
-export const db = new OkapiDB();
-
-const now = () => Date.now();
-const uuid = () => crypto.randomUUID();
- 
-function makePending<T extends { status: Status; updatedAt: number }>(
-  patch: Partial<T>,
-  pendingStatus: Status
-): Partial<T> {
-  return { ...patch, status: pendingStatus, updatedAt: now() };
-}
-
-export const mockRepository = {
-  async getAll(profileId?: string): Promise<MockRecord[]> {
-    const query = profileId
-      ? db.mocks.where('profileId').equals(profileId)
-      : db.mocks.toCollection();
-    return query.sortBy('urlPattern');
-  },
- 
-  async getByStatus(status: Status): Promise<MockRecord[]> {
-    return db.mocks.where('status').equals(status).toArray();
-  },
- 
-  async create(input: NewMockRecord): Promise<MockRecord> {
-    const record: MockRecord = {
-      ...input,
-      uuid: uuid(),
-      status: 'pending_create',
-      createdAt: now(),
-      updatedAt: now(),
-    };
-    const id = (await db.mocks.add(record)).toString();
-    return { ...record, id };
-  },
- 
-  async update(uuid: string, patch: UpdateMockRecord): Promise<void> {
-    const rule = await db.mocks.where('uuid').equals(uuid).first();
-    if (!rule?.id) throw new Error(`Rule not found: ${uuid}`);
- 
-    // Don't downgrade a pending_create to pending_update
-    const nextStatus: Status = rule.status === 'pending_create' ? 'pending_create' : 'pending_update';
- 
-    await db.mocks.update(
-      Number(rule.id),
-      makePending({ ...patch }, nextStatus) as Partial<MockRecord>
-    );
-  },
- 
-  async delete(uuid: string): Promise<void> {
-    const rule = await db.mocks.where('uuid').equals(uuid).first();
-    if (!rule?.id) throw new Error(`Rule not found: ${uuid}`);
- 
-    // Never-synced records can be hard-deleted immediately
-    if (rule.status === 'pending_create') {
-      await db.mocks.delete(Number(rule.id));
-      return;
-    }
- 
-    await db.mocks.update(Number(rule.id), {
-      status: 'pending_delete',
-      updatedAt: now(),
-    });
-  },
- 
-  async hardDelete(uuid: string): Promise<void> {
-    await db.mocks.where('uuid').equals(uuid).delete();
-  },
- 
-  async markSynced(uuid: string, remoteId?: string): Promise<void> {
-    const rule = await db.mocks.where('uuid').equals(uuid).first();
-    if (!rule?.id) return;
-    await db.mocks.update(Number(rule.id), {
-      status: 'synced',
-      syncedAt: now(),
-      error: undefined,
-      ...(remoteId ? { remoteId } : {}),
-    });
-  },
- 
-  async markError(uuid: string, message: string): Promise<void> {
-    const rule = await db.mocks.where('uuid').equals(uuid).first();
-    if (!rule?.id) return;
-    await db.mocks.update(Number(rule.id), { status: 'error', error: message });
-  },
+type MockApiDexie = Dexie & {
+  mocks: EntityTable<MockEndpoint, 'id'>;
+  logs: EntityTable<RequestLog, 'id'>;
 };
 
-// ─── Batch Operations ────────────────────────────────────────────────────────
- 
+export const db = new Dexie('ok-apiMockApiDB') as MockApiDexie;
+db.version(1).stores({
+  // ++id -> auto-incrementing primary key
+  // *tags -> multi-entry index (array of strings)
+  // [method+url] -> compound index for fast exact lookups
+  mocks: '++id,listOrder,method,url,[method+url],createdAt,updatedAt,*tags',
+  logs: '++id,mockId,method,url,source,timestamp',
+});
+
 /**
- * Execute a batch of rule operations in a single Dexie transaction.
- * All-or-nothing: if any op throws, the entire batch rolls back.
+ * Ask the browser to put this origin's storage into "persistent" mode.
+ * Overides default "best-effort" behavior by disabling automatic 
+ * storage-eviction-under-disk-pressure policy.
+ * Safe to call multiple times.
+ * 
+ * @returns true iff storage is successfuly persisted.
  */
-export async function batchRules(
-  ops: BatchOperation<MockRecord | NewMockRecord | { uuid: string }>[]
-): Promise<BatchResult> {
-  const result: BatchResult = { succeeded: 0, failed: 0, errors: [] };
- 
-  await db.transaction("rw", db.mocks, async () => {
-    for (let i = 0; i < ops.length; i++) {
-      const { op, data } = ops[i];
-      try {
-        if (op === "create") {
-          const input = data as NewMockRecord;
-          await db.mocks.add({
-            ...input,
-            uuid: uuid(),
-            status: "pending_create",
-            createdAt: now(),
-            updatedAt: now(),
-          });
-        } else if (op === "update") {
-          const { uuid: u, ...patch } = data as MockRecord;
-          await mockRepository.update(u, patch);
-        } else if (op === "delete") {
-          await mockRepository.delete((data as { uuid: string }).uuid);
-        }
-        result.succeeded++;
-      } catch (err) {
-        result.failed++;
-        result.errors.push({
-          index: i,
-          error: err instanceof Error ? err.message : String(err),
-        });
-        // Re-throw to trigger Dexie transaction rollback
-        throw err;
-      }
+export async function persistStorage(): Promise<boolean> {
+  try {
+    if (!navigator.storage?.persist || !navigator.storage?.persisted) {
+      return false;
     }
-  }).catch(() => {
-    // Transaction rolled back; errors already recorded above
-  });
- 
-  return result;
-}
- 
-/**
- * Collect all pending records and push them to the remote API.
- * Returns counts of what was processed.
- */
-export async function flushPendingToRemote(
-  syncFn: (rules: MockRecord[],) => Promise<{rules: Array<{ uuid: string; remoteId?: string; error?: string }>;}>
-): Promise<{ rules: BatchResult }> {
-  const pendingStatuses: Status[] = [
-    "pending_create",
-    "pending_update",
-    "pending_delete",
-    "error",
-  ];
- 
-  const [pendingMocks] = await Promise.all([
-    db.mocks.where("status").anyOf(pendingStatuses).toArray()
-  ]);
- 
-  if (!pendingMocks.length) {
-    return { rules: { succeeded: 0, failed: 0, errors: [] }, };
+    const alreadyPersisted = await navigator.storage.persisted();
+    const persisted = alreadyPersisted || (await navigator.storage.persist());
+    return persisted;
+  } catch {
+    // Storage API not available
+    // 'unlimitedStorage' as a fall back should cover most scenarios.
+    return false;
   }
- 
-  const remoteResults = await syncFn(pendingMocks);
- 
-  const rulesResult: BatchResult = { succeeded: 0, failed: 0, errors: [] };
-  const profilesResult: BatchResult = { succeeded: 0, failed: 0, errors: [] };
- 
-  await db.transaction("rw", db.mocks, async () => {
-    for (const r of remoteResults.rules) {
-      if (r.error) {
-        await mockRepository.markError(r.uuid, r.error);
-        rulesResult.failed++;
-        rulesResult.errors.push({ index: rulesResult.failed, error: r.error });
-      } else {
-        const rule = pendingMocks.find((x) => x.uuid === r.uuid);
-        if (rule?.status === "pending_delete") {
-          await mockRepository.hardDelete(r.uuid);
-        } else {
-          await mockRepository.markSynced(r.uuid, r.remoteId);
-        }
-        rulesResult.succeeded++;
-      }
-    }
-  });
- 
-  // Update syncMeta timestamp
-  await db.syncMeta.put({
-    key: "last_flush",
-    lastSyncAt: now(),
-    pendingCount: profilesResult.failed + rulesResult.failed,
-  });
- 
-  return { rules: rulesResult };
 }
 
-// export type IDBMessageType =
-//     | 'DB_UPSERT'
-//     | 'DB_BULK_UPSERT'
-//     | 'DB_SOFT_DELETE'
-//     | 'DB_BULK_SOFT_DELETE'
-//     | 'DB_QUERY_BY_STATUS'
-//     | 'DB_UPDATE_STATUS'
-//     | 'DB_BULK_UPDATE_STATUS'
-//     | 'DB_PURGE_DELETED';
-// export type IDBMessage<P = unknown> = {
-//     type: IDBMessageType;
-//     table: string;
-//     payload: P;
-// }
-// export type IDBResponse<R = unknown> = {
-//     ok: boolean;
-//     data?: R;
-//     error?: string;
-// }
+/**
+ * current usage/quota for this origin's storage.
+ * 
+ * @returns {StorageEstimate|undefined}
+ */
+export async function getStorageEstimate(): Promise<StorageEstimate | undefined> {
+  return navigator.storage?.estimate ? navigator.storage.estimate() : undefined;
+}
 
-// const ENTITY_META = Symbol('dexie:entity');
-// const INDEXED_FIELDS = Symbol('dexie:indexed');
+// --- mock operations ---
+/**
+ * Adds new mock to the table.
+ * The 'id' (primary key) is auto incremented by dexie.
+ * 'createdAt' and 'updatedAt' are generated.
+ * 'priorityOrder' is defaulted to 0.
+ * The next fractional index is auto-generated for 'listOrder'.
+ * 
+ * @param mock - Mock data to add
+ * @returns The created mocks id (primary key)
+ */
+export async function addMock(
+  mock: Omit<MockEndpoint, 'id'|'createdAt'|'updatedAt'|'priorityOrder'|'listOrder'>,
+): Promise<number|undefined> {
+  const now = Date.now();
 
-// export type EntityOptions = {
-//     storeName?: string;
-// }
-// export type IndexedFieldMeta = {
-//     propertyKey: string;
-//     unique: boolean;
-//     multiEntry: boolean;
-// }
+  const lastMock = await db.mocks.orderBy('listOrder').last();
+  const prevKey = lastMock ? lastMock.listOrder : null;
+  const newKey = generateKeyBetween(prevKey, null);
 
-// export function Entity(options: EntityOptions = {}) {
-//     return function <T extends { new (...args: unknown[]): object }>(ctor: T) {
-//         Reflect.defineMetadata(ENTITY_META, options, ctor);
-//         return ctor;
-//     }
-// }
+  return db.mocks.add({ 
+    ...mock, 
+    createdAt: now, 
+    updatedAt: now,
+    priorityOrder: 0,
+    listOrder: newKey,
+  } as MockEndpoint);
+}
 
-// export function Indexed(options: { unique?: boolean; multiEntry?: boolean } = {}) {
-//     return function (target: object, propertyKey: string) {
-//         const existing: IndexedFieldMeta[] = Reflect.getMetadata(INDEXED_FIELDS, target.constructor) ?? [];
-//         existing.push ({
-//             propertyKey,
-//             unique: options.unique ?? false,
-//             multiEntry: options.multiEntry ?? false,
-//         });
-//         Reflect.defineMetadata(INDEXED_FIELDS, existing, target.constructor);
-//     };
-// }
+/**
+ * Updates target mock with applied changes.
+ * 
+ * @param id - primary key of the mock.
+ * @param changes - updates to the mock.
+ * @returns 'id' (primary key) of the updated mock
+ */
+export async function updateMock(
+  id: number,
+  changes: Partial<Omit<MockEndpoint, 'id'|'createdAt'|'updatedAt'|'listOrder'>>,
+): Promise<number> {
+  return db.mocks.update(id, { ...changes, updatedAt: Date.now() });
+}
 
-// function buildStoredString(ctor: Function): string {
-//     const fields: IndexedFieldMeta[] = Reflect.getMetadata(INDEXED_FIELDS, ctor) ?? [];
-//     const BASE_INDEXES = ['status', '[status+updatedAt]', 'remodeId', 'retryCount'];
-//     const extra = fields.map(f => {
-//         const prefix = f.unique ? '&' : f.multiEntry ? '*' : '';
-//         return `${prefix}${f.propertyKey}`;
-//     });
-//     const all = Array.from(new Set([...BASE_INDEXES, ...extra]));
-//     return `++id, ${all.join(', ')}`;
-// }
+/**
+ * Update the listOrder of an item based on the items before and after it in the new position.
+ * 
+ * @param id - the 'id' (primary key) of the moved item.
+ * @param idBefore - the 'id' (primary key) of the item preceding the moved item (after being moved).
+ * @param idAfter - the 'id' (primary key) of the item after the moved item (after being moved).
+ */
+export async function moveMock(id: number, idBefore: number, idAfter: number) {
+  const prevItem = idBefore ? await db.mocks.get(idBefore) : null;
+  const nextItem = idAfter ? await db.mocks.get(idAfter) : null;
 
-// export type PageVisit = IDBBaseRecord & {
-//     id?: number;
-//     url: string;
-//     title: string;
-//     visitedAt: ISODateString;
-//     durationMs: number;
-//     tags: string[];
-// };
-// export type Annotation = IDBBaseRecord & {
-//     id?: number;
-//     pageVisitedId: number;
-//     selectedtext: string;
-//     note: string;
-//     color: string;
-//     anchorSelector: string;
-// }
-// export type SyncLog = IDBBaseRecord & {
-//     id?: number;
-//     targetTable: string;
-//     targetId: number;
-//     operation: 'create' | 'update' | 'delete';
-//     httpStatus: number | null;
-//     syncedAt: ISODateString;
-// }
+  const prevKey = prevItem ? prevItem.listOrder : null;
+  const nextKey = nextItem ? nextItem.listOrder : null;
 
-// @Entity({ storeName: 'pageVisits' })
-// class PageVisitEntity {
-//     @Indexed({ unique: false }) url!: string;
-//     @Indexed() visitedAt!: string;
-//     @Indexed({ multiEntry: true }) tags!: string[];
-// }
+  const newOrderKey = generateKeyBetween(prevKey, nextKey);
 
-// @Entity({ storeName: 'annotations' })
-// class AnnotationEntity {
-//     @Indexed() pageVisitId!: number;
-//     @Indexed() color!: string;
-// }
+  await db.mocks.update(id, { listOrder: newOrderKey });
+}
 
-// @Entity({ storeName: 'syncLogs' })
-// class SyncLogEntity {
-//     @Indexed() targetTable!: string;
-//     @Indexed() targetId!: number;
-//     @Indexed() operation!: string;
-//     @Indexed() syncedAt!: string;
-// }
+export async function deleteMock(id: number): Promise<void> {
+  await db.mocks.delete(id);
+}
 
-// export const STORE_SCHEMAS = {
-//     pageVisits: buildStoredString(PageVisitEntity),
-//     annotations: buildStoredString(AnnotationEntity),
-//     syncLogs: buildStoredString(SyncLogEntity)
-// } as const;
+/**
+ * Adds multiple mocks to the table. For each mock:
+ * The 'id' (primary key) is auto incremented by dexie.
+ * 'createdAt' and 'updatedAt' are generated.
+ * 'priorityOrder' is defaulted to 0.
+ * The next fractional index is auto-generated for 'listOrder'.
+ * 
+ * @param mocks - mocks to add.
+ * @returns 'id's (primary keys) of the added mocks
+ */
+export async function bulkAddMocks(
+  mocks: Array<Omit<MockEndpoint, 'id'|'createdAt'|'updatedAt'|'listOrder'>>,
+): Promise<(number|undefined)[]> {
+  const now = Date.now();
 
-// export class AppDatabase extends Dexie {
-//     pageVisits!: EntityTable<PageVisit, 'id'>;
-//     annotations!: EntityTable<Annotation, 'id'>;
-//     syncLogs!: EntityTable<SyncLog, 'id'>;
+  const lastMock = await db.mocks.orderBy('listOrder').last();
+  let currentKey = lastMock ? lastMock.listOrder : null;
+  
+  const prepared = mocks.map((m) => {
+    currentKey = generateKeyBetween(currentKey, null);
 
-//     constructor() {
-//         super('OkapiDB');
+    return { ...m, createdAt: now, updatedAt: now, listOrder: currentKey } as MockEndpoint;
+  });
+  return db.transaction('rw', db.mocks, () => db.mocks.bulkAdd(prepared, { allKeys: true }));
+}
 
-//         this.version(1).stores(STORE_SCHEMAS);
+/**
+ * Updates/insertes mocks. Mocks are inserted iff a matching id (primary key)
+ * cannot be found - updated otherwise.
+ * 
+ * @param mocks - mocks to update
+ * @returns 'id's (primary keys) of the updated mocks
+ */
+export async function bulkPutMocks(mocks: MockEndpoint[]): Promise<(number|undefined)[]> {
+  const now = Date.now();
+  const prepared = mocks.map((m) => ({ ...m, updatedAt: now }));
+  return db.transaction('rw', db.mocks, () => db.mocks.bulkPut(prepared, { allKeys: true }));
+}
 
-//         this.pageVisits.hook('creating', (_pk, obj) => stampNew(obj));
-//         this.annotations.hook('creating', (_pk, obj) => stampNew(obj));
-//         this.syncLogs.hook('creating', (_pk, obj) => stampNew(obj));
+export async function bulkDeleteMocks(ids: number[]): Promise<void> {
+  await db.transaction('rw', db.mocks, () => db.mocks.bulkDelete(ids));
+}
 
-//         this.pageVisits.hook('updating', (mods) => stampUpdate(mods));
-//         this.annotations.hook('updating', (mods) => stampUpdate(mods));
-//         this.syncLogs.hook('updating', (mods) => stampUpdate(mods));
-//     }
-// }
+/**
+ * Get all mocks in the table in listOrder.
+ * 
+ * @returns mocks
+ */
+export async function getOrderedMocks() {
+  return await db.mocks
+    .orderBy('listOrder')
+    .toArray();
+}
 
-// function stampNew(obj: Partial<IDBBaseRecord>): void {
-//     const now = new Date().toISOString();
-//     obj._idb_status ??= IdbStatus.PENDING_CREATE;
-//     obj._idb_createdAt ??= now;
-//     obj._idb_updatedAt ??= now;
-//     obj.remoteId ??= null;
-//     obj.retryCount ??= 0;
-//     obj.lastError ??=null;
-// }
 
-// function stampUpdate(mods: Partial<IDBBaseRecord>): void {
-//     mods._idb_updatedAt = new Date().toISOString();
-// }
+// find first enabled mock that matches
+function wildcardToRegExp(pattern: string): RegExp {
+  const escaped = pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
+  return new RegExp(`^${escaped}$`);
+}
 
-// let _db: AppDatabase | undefined;
-// export function getDb(): AppDatabase {
-//     if (!_db) _db = new AppDatabase();
-//     return _db;
-// }
+export function urlMatches(mock: MockEndpoint, url: string): boolean {
+  switch (mock.matchType) {
+    case 'exact':
+      return mock.url === url;
+    case 'contains':
+      return url.includes(mock.url);
+    case 'wildcard':
+      return wildcardToRegExp(mock.url).test(url);
+    case 'regex':
+      return new RegExp(mock.url).test(url);
+    default:
+      return false;
+  }
+}
+
+export async function getMatchingMocks(url: string): Promise<Array<MockEndpoint>> {
+  const mocks = await getEnabledMocks();
+  const matches = mocks.filter(m => urlMatches(m, url));
+  return matches.sort((a,b) => a.priorityOrder - b.priorityOrder);
+}
+
+export async function getEnabledMocks(): Promise<Array<MockEndpoint>> {
+  return db.mocks.where('enabled').equals('true').toArray();
+}
+
+// --- logs operations ---
+export async function addLog(log: Omit<RequestLog, 'id'>): Promise<(number|undefined)> {
+  return db.logs.add(log as RequestLog);
+}
+
+export async function bulkAddLogs(logs: Array<Omit<RequestLog, 'id'>>): Promise<(number|undefined)[]> {
+  return db.transaction('rw', db.logs, () =>
+    db.logs.bulkAdd(logs as RequestLog[], { allKeys: true }),
+  );
+}
+
+export async function deleteLog(id: number): Promise<void> {
+  await db.logs.delete(id);
+}
+
+export async function bulkDeleteLogs(ids: number[]): Promise<void> {
+  await db.transaction('rw', db.logs, () => db.logs.bulkDelete(ids));
+}
+
+/** Batch-deletes logs older than `maxAgeMs`. Returns number of rows removed. */
+export async function pruneLogsOlderThan(maxAgeMs: number): Promise<number> {
+  const cutoff = Date.now() - maxAgeMs;
+  return db.transaction('rw', db.logs, async () => {
+    const ids = await db.logs.where('timestamp').below(cutoff).primaryKeys();
+    await db.logs.bulkDelete(ids);
+    return ids.length;
+  });
+}
+
+/** Batch-deletes oldest logs beyond `maxCount`, keeping the most recent ones. */
+export async function pruneLogsKeepLatest(maxCount: number): Promise<number> {
+  return db.transaction('rw', db.logs, async () => {
+    const total = await db.logs.count();
+    if (total <= maxCount) return 0;
+    const ids = await db.logs.orderBy('timestamp').limit(total - maxCount).primaryKeys();
+    await db.logs.bulkDelete(ids);
+    return ids.length;
+  });
+}
+
+// --- import/export ---
+export interface ExportedData {
+  mocks: MockEndpoint[];
+  logs: RequestLog[];
+  exportedAt: number;
+}
+
+export async function exportAllData(): Promise<ExportedData> {
+  return db.transaction('r', db.mocks, db.logs, async () => {
+    const [mocks, logs] = await Promise.all([
+      db.mocks.toArray(),
+      db.logs.toArray(),
+    ]);
+    return { mocks, logs, exportedAt: Date.now() };
+  });
+}
+
+// batch-import mocks from a json file/object
+export async function importMocks(
+  mocks: Array<Omit<MockEndpoint, 'id' | 'createdAt' | 'updatedAt'>>,
+): Promise<(number|undefined)[]> {
+  return bulkAddMocks(mocks);
+}
+
+export async function clearAllData(): Promise<void> {
+  await db.transaction('rw', db.mocks, db.logs, async () => {
+    await Promise.all([db.mocks.clear(), db.logs.clear()]);
+  });
+}
+
+// --- cross-tab syncing ---
+export function watchAllMocks() {
+  return liveQuery(() => db.mocks.orderBy('listOrder').toArray());
+}
+
+export function watchEnabledMocks() {
+  return liveQuery(async () => (await db.mocks.toArray()).filter((m) => m.enabled));
+}
+
+export function watchMock(id: number) {
+  return liveQuery(() => db.mocks.get(id));
+}
+
+export function watchRecentLogs(limit = 50) {
+  return liveQuery(() => db.logs.orderBy('timestamp').reverse().limit(limit).toArray());
+}
+
+// initialization is idempotent
+// can be called in all entrypoints
+let initialized = false;
+export async function initDb(): Promise<void> {
+  if (initialized) return;
+  initialized = true;
+  await db.open();
+  await persistStorage();
+}
+
+export default db;

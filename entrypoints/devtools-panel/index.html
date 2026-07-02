@@ -3,122 +3,25 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>okAPI: API Mocking</title>
+    <title>ok-api: API Mocking</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <header>
-      <div class="toolbar">
-        <div class="toolbar-tab-list">
-          <button id="network-view-btn" class="toolbar-tab active">Network Viewer</button>
-          <button id="mock-view-btn" class="toolbar-tab">Mock Viewer</button>
-        </div>
-      </div>
-
-      <div class="toolbar">
-        <div class="toolbar-options">
-          <div class="checkbox-wrapper">
-            <label for="enableNetworkViewer">Enable Network Viewer</label>
-            <input id="enableNetworkViewer" type="checkbox">
-          </div>
-          <div class="toolbar-divider"></div>
-          <div class="checkbox-wrapper">
-              <label for="enableMocking">Enable Mocking</label>
-              <input id="enableMocking" type="checkbox">
-          </div>
-          <div class="toolbar-divider"></div>
-          <div class="checkbox-wrapper">
-              <label for="enableNotifications">Enable Popup Notifications</label>
-              <input id="enableNotifications" type="checkbox">
-          </div>
-        </div>
-      </div>
-
-      <div class="toolbar">
-        <div class="toolbar-info">
-          Engine: <span id="engine-label"></span>
-        </div>
-      </div>
-    </header>
-
-
+    <header></header>
 
     <main>
       <div id="resize-container">
-        <div class="pane pane-top" id="top-pane">
-          <div id="network-view-pane" class="active">
-              <p class="empty-hint">No requests captured yet.</p>
-            </div>
 
-            <div id="mock-view-pane" class="hidden">
-              <div class="mock-row add-mock">
-                <button class="icon-button">
-                  <svg class="button-icon" fill="currentColor" viewBox="0 0 16 16" color="currentColor" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="overflow: visible;"><path d="M8 1.5a.5.5 0 0 0-1 0V7H1.5a.5.5 0 0 0 0 1H7v5.5a.5.5 0 0 0 1 0V8h5.5a.5.5 0 0 0 0-1H8V1.5Z"></path></svg>
-                </button>
-                <div class="input-container">
-                  <span id="hint">
-                    Add mock via URL or pattern.
-                    '*' and '**' are allowed.
-                  </span>
-                  <input type="text" id="mock-pattern" placeholder="URL or Pattern" />
-                </div>
-              </div>
-            </div>
+        <div class="pane-container pane-container-left">
+          <div class="network-list active"></div>
+          <div class="mock-list hidden"></div>
         </div>
         
         <div id="resize-bar"></div>
         
-        <div class="pane pane-bottom" id="bottom-pane">
-          <div id="network-detail-pane" class="active">
-              <div class="detail-placeholder">Select a request to inspect or modify it.</div>
-
-              <div class="detail-content hidden">
-                <div class="detail-meta" id="detail-meta"></div>
-
-                <div id="tab-request" class="tab-body active" data-active >
-                  <pre id="request-body"></pre>
-                </div>
-                <div id="tab-headers" class="tab-body" >
-                  <pre id="headers"></pre>
-                </div>
-                <div id="tab-response" class="tab-body" >
-                  <pre id="response-body"></pre>
-                </div>
-
-                <div class="detail-actions">
-                  <button id="create-mock">Create Mock</button>
-                </div>
-              </div>
-            </div>
-
-            <div id="mock-detail-pane" class="hidden">
-              <div class="detail-placeholder">Select a request to inspect or modify it.</div>
-
-              <div class="detail-content hidden">
-                <div class="detail-meta" id="detail-meta"></div>
-
-                <div class="tabs">
-                  <button class="tab" data-tab="request">Request</button>
-                  <button class="tab" data-tab="headers" disabled>Headers</button>
-                  <button class="tab active" data-tab="response" disabled>Response</button>
-                </div>
-
-                <div class="tab-body hidden" id="tab-request">
-                  <textarea id="request-editor" spellcheck="false" placeholder="{}"></textarea>
-                </div>
-                <div class="tab-headers hidden" id="tab-headers">
-                  <textarea id="headers-editor" spellcheck="false" placeholder="{}"></textarea>
-                </div>
-                <div id="tab-response active" class="tab-response">
-                  <textarea id="response-editor" spellcheck="false" placeholder="{status: 200, data: {}}"></textarea>
-                </div>
-
-                <div class="checkbox-item">
-                  <input type="checkbox" id="enable-mock" name="enable mock" value="enabled">
-                  <label for="enable-mock">Enable Mock</label>
-                </div>
-              </div>
-            </div>
+        <div class="pane-container pane-container-right">
+          <div class="network-details active"></div>
+          <div class="mock-details hidden"></div>
         </div>
       </div>
     </main>
