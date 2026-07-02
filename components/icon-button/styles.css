@@ -1,0 +1,87 @@
+:host {
+  --ok-bg-hover: rgba(0, 0, 0, 0.08);
+  --ok-bg-active: rgba(0, 0, 0, 0.14);
+  --ok-accent: #1a73e8;
+  --ok-accent-bg: rgba(26, 115, 232, 0.14);
+  --ok-focus-ring: rgba(26, 115, 232, 0.5);
+  --ok-label-color: #1f1f1f;
+  --ok-label-color-disabled: #5f6368;
+  --ok-radius: 4px;
+  --ok-size: 24px;
+  --ok-icon-size: 16px;
+
+  display: inline-block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+:host([disabled]) {
+  pointer-events: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --ok-bg-hover: rgba(255, 255, 255, 0.12);
+    --ok-bg-active: rgba(255, 255, 255, 0.18);
+    --ok-accent: #8ab4f8;
+    --ok-accent-bg: rgba(138, 180, 248, 0.2);
+    --ok-focus-ring: rgba(138, 180, 248, 0.5);
+    --ok-label-color: #e8eaed;
+    --ok-label-color-disabled: #80868b;
+  }
+}
+
+button {
+  appearance: none;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ok-size);
+  height: var(--ok-size);
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--ok-radius);
+  background: transparent;
+  color: var(--ok-label-color);
+  cursor: pointer;
+  transition: background-color 80ms ease;
+}
+
+button:hover:not(:disabled) {
+  background: var(--ok-bg-hover);
+}
+
+button:active:not(:disabled) {
+  background: var(--ok-bg-active);
+}
+
+button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ok-focus-ring);
+}
+
+button:disabled {
+  color: var(--ok-label-color-disabled);
+  opacity: 0.5;
+  cursor: default;
+}
+
+::slotted(svg),
+::slotted(img) {
+  width: var(--ok-icon-size);
+  height: var(--ok-icon-size);
+  pointer-events: none;
+}
+
+:host([toggled]) button {
+  background: var(--ok-accent-bg);
+  color: var(--ok-accent);
+}
+
+:host([toggled]) button:hover:not(:disabled) {
+  background: var(--ok-accent-bg);
+}

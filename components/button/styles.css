@@ -1,0 +1,104 @@
+:host {
+  --ok-border: #8c8c8c;
+  --ok-border-hover: #6b6b6b;
+  --ok-bg: #ffffff;
+  --ok-bg-hover: #f3f3f3;
+  --ok-bg-active: #e8e8e8;
+  --ok-bg-disabled: #eeeeee;
+  --ok-accent: #1a73e8;
+  --ok-accent-hover: #1967d2;
+  --ok-accent-active: #185abc;
+  --ok-focus-ring: rgba(26, 115, 232, 0.5);
+  --ok-label-color: #1f1f1f;
+  --ok-label-color-disabled: #5f6368;
+  --ok-mark: #ffffff;
+  --ok-font: 11px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --ok-radius: 3px;
+
+  display: inline-block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+:host([disabled]) {
+  pointer-events: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --ok-border: #6b6b6b;
+    --ok-border-hover: #9aa0a6;
+    --ok-bg: #3c4043;
+    --ok-bg-hover: #46484a;
+    --ok-bg-active: #505254;
+    --ok-bg-disabled: #2b2b2b;
+    --ok-accent: #8ab4f8;
+    --ok-accent-hover: #aecbfa;
+    --ok-accent-active: #c6dafc;
+    --ok-focus-ring: rgba(138, 180, 248, 0.5);
+    --ok-label-color: #e8eaed;
+    --ok-label-color-disabled: #80868b;
+    --ok-mark: #202124;
+  }
+}
+
+button {
+  appearance: none;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  font: var(--ok-font);
+  color: var(--ok-label-color);
+  background: var(--ok-bg);
+  border: 1px solid var(--ok-border);
+  border-radius: var(--ok-radius);
+  padding: 3px 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 80ms ease, border-color 80ms ease;
+}
+
+button:hover:not(:disabled) {
+  background: var(--ok-bg-hover);
+  border-color: var(--ok-border-hover);
+}
+
+button:active:not(:disabled) {
+  background: var(--ok-bg-active);
+}
+
+button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ok-focus-ring);
+}
+
+button:disabled {
+  background: var(--ok-bg-disabled);
+  color: var(--ok-label-color-disabled);
+  border-color: var(--ok-border);
+  opacity: 0.7;
+  cursor: default;
+}
+
+/* Primary variant — for the one emphasized action in a dialog/toolbar,
+   e.g. Settings' "Done". Use sparingly, same as DevTools does. */
+:host([variant='primary']) button {
+  background: var(--ok-accent);
+  border-color: var(--ok-accent);
+  color: var(--ok-mark);
+}
+
+:host([variant='primary']) button:hover:not(:disabled) {
+  background: var(--ok-accent-hover);
+  border-color: var(--ok-accent-hover);
+}
+
+:host([variant='primary']) button:active:not(:disabled) {
+  background: var(--ok-accent-active);
+  border-color: var(--ok-accent-active);
+}
