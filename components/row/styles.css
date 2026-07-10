@@ -1,0 +1,41 @@
+:host {
+	--ok-border: #8c8c8c;
+  --ok-border-hover: #6b6b6b;
+  --ok-bg: #ffffff;
+  --ok-bg-disabled: #eeeeee;
+  --ok-accent: #1a73e8;
+  --ok-focus-ring: rgba(26, 115, 232, 0.5);
+  --ok-padding-block: 2px;
+  --ok-padding-inline: 6px;
+
+	display: flex;
+	flex-direction: row;
+	cursor: pointer;
+	user-select: none;
+	transition: all 0.2s ease-in-out;
+    width: 100%;
+    font: var(--ok-font);
+    color: var(--ok-label-color);
+    background: var(--ok-bg);
+    padding: var(--ok-padding-block) var(--ok-padding-inline);
+    outline: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --ok-border: #6b6b6b;
+    --ok-border-hover: #9aa0a6;
+    --ok-bg: #3c4043;
+    --ok-bg-disabled: #2b2b2b;
+    --ok-accent: #8ab4f8;
+    --ok-focus-ring: rgba(138, 180, 248, 0.5);
+  }
+}
+
+:host(:hover) {
+  border-color: var(--ok-border-hover);
+}
+
+:host(:focus-visible) {
+  border-color: var(--ok-focus-ring);
+}

@@ -7,11 +7,13 @@ styleSheet.replaceSync(css);
 const template = document.createElement('template');
 template.innerHTML = html;
 
+type ButtonType = 'button' | 'submit' | 'reset';
+
 /**
  * Icon button web component.
  * 
  * Usage:
- *   <devtools-icon-button label="Settings">
+ *   <devtools-icon-button type="button" label="Settings">
  *     <svg viewBox="0 0 16 16" fill="currentColor">...</svg>
  *   </devtools-icon-button>
  *
@@ -23,16 +25,31 @@ export class OkIconButton extends HTMLElement {
         'disabled',
         'label',
         'toggled',
+        'type',
     ] as const;
+    static formAssociated = true;
 
     private readonly button: HTMLButtonElement;
+    private readonly internals: ElementInternals;
+    private fieldsetDisabled = false;
 
     constructor() {
         super();
+        this.internals = this.attachInternals();
         const shadow = this.attachShadow({ mode: 'open' });
         shadow.adoptedStyleSheets = [styleSheet];
         shadow.appendChild(template.content.cloneNode(true));
         this.button = shadow.querySelector('button')!;
+        this.syncAttrs();
+
+        this.button.addEventListener('click', () => {
+            if (this.type === 'submit') this.internals.form?.requestSubmit();
+            else if (this.type === 'reset') this.internals.form?.reset();
+        });
+    }
+
+    formDisabledCallback(disabled: boolean): void {
+        this.fieldsetDisabled = disabled;
         this.syncAttrs();
     }
 
@@ -40,32 +57,21 @@ export class OkIconButton extends HTMLElement {
         this.syncAttrs();
     }
 
-    get disabled(): boolean {
-        return this.hasAttribute('disabled');
+    get disabled(): boolean { return this.hasAttribute('disabled'); }
+    set disabled(value: boolean) { this.toggleAttribute('disabled', value); }
+    get type(): ButtonType { 
+        const t = this.getAttribute('type');
+        return t === 'submit' || t === 'reset' ? t : 'button';
     }
-
-    set disabled(value: boolean) {
-        this.toggleAttribute('disabled', value);
-    }
-
-    get label(): string {
-        return this.getAttribute('label') ?? '';
-    }
-
-    set label(value: string) {
-        this.setAttribute('label', value);
-    }
-
-    get toggled(): boolean {
-        return this.hasAttribute('toggled');
-    }
-
-    set toggled(value: boolean) {
-        this.toggleAttribute('toggled', value);
-    }
+    set type(value: ButtonType) { this.setAttribute('type', value); }
+    get label(): string { return this.getAttribute('label') ?? ''; }
+    set label(value: string) { this.setAttribute('label', value); }
+    get toggled(): boolean { return this.hasAttribute('toggled'); }
+    set toggled(value: boolean) { this.toggleAttribute('toggled', value); }
 
     private syncAttrs(): void {
-        this.button.disabled = this.disabled;
+        this.button.disabled = this.disabled || this.fieldsetDisabled;
+        this.button.type = this.type;
 
         if (this.hasAttribute('label')) {
             this.button.setAttribute('aria-label', this.label);

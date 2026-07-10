@@ -1,0 +1,52 @@
+:host {
+  --ok-border: #8c8c8c;
+  --ok-label-color: #1f1f1f;
+  --ok-font: 11px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --ok-border: #6b6b6b;
+    --ok-label-color: #e8eaed;
+  }
+}
+
+/* The <fieldset> exists so its real `disabled` property can cascade
+   fieldset-disabling to every form-associated field slotted inside —
+   see devtools-form.ts. display: contents removes its default border/
+   padding/box without removing it from the tree (disabling only cares
+   about the tree, not the box). */
+fieldset {
+  all: unset;
+  display: contents;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+::slotted(label) {
+  font: var(--ok-font);
+  color: var(--ok-label-color);
+  margin-bottom: -6px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ok-border);
+}
+
+.actions[hidden] {
+  display: none;
+}

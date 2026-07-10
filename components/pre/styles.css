@@ -1,0 +1,44 @@
+:host {
+  --ok-border: #8c8c8c;
+  --ok-bg: #f8f9fa;
+  --ok-label-color: #1f1f1f;
+  --ok-font-mono: 11px/1.5 ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --ok-radius: 3px;
+
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --ok-border: #6b6b6b;
+    --ok-bg: #2b2c2e;
+    --ok-label-color: #e8eaed;
+  }
+}
+
+pre {
+  box-sizing: border-box;
+  margin: 0;
+  width: 100%;
+  max-height: 240px;
+  overflow: auto;
+  font: var(--ok-font-mono);
+  color: var(--ok-label-color);
+  background: var(--ok-bg);
+  border: 1px solid var(--ok-border);
+  border-radius: var(--ok-radius);
+  padding: 6px 8px;
+  white-space: pre;
+  user-select: text;
+  cursor: text;
+}
+
+/* Opt-in wrapping for content better read line-by-line than scrolled. */
+:host([wrap]) pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}

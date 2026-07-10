@@ -8,21 +8,21 @@ const template = document.createElement('template');
 template.innerHTML = html;
 
 /**
- * Text input web component.
+ * Textarea web component.
  * 
  * Usage:
- *   <ok-text-input placeholder="Filter"></ok-text-input>
+ *   <ok-textarea placeholder="Paste JSON" rows="6"></ok-textarea>
  *
- *   const el = document.querySelector<OkTextInput>('ok-text-input');
- *   el.value = 'hello';
- *   el.addEventListener('input', () => console.log(el.value));   // every keystroke
- *   el.addEventListener('change', () => console.log(el.value));  // on commit/blur
+ *   const el = document.querySelector<OkTextarea>('ok-textarea');
+ *   el.value = '{}';
+ *   el.addEventListener('input', () => console.log(el.value));
+ *   el.addEventListener('change', () => console.log(el.value));
  */
-export class OkTextInput extends HTMLElement {
-    static readonly observedAttributes = ['placeholder', 'disabled', 'readonly', 'name', 'required'] as const;
+export class OkTextarea extends HTMLElement {
+    static readonly observedAttributes = ['placeholder', 'disabled', 'readonly', 'name', 'required', 'rows'] as const;
     static formAssociated = true;
 
-    private readonly input: HTMLInputElement;
+    private readonly textarea: HTMLTextAreaElement;
     private readonly internals: ElementInternals;
     private readonly defaultValue: string;
     private fieldsetDisabled = false;
@@ -33,19 +33,19 @@ export class OkTextInput extends HTMLElement {
         const shadow = this.attachShadow({ mode: 'open' });
         shadow.adoptedStyleSheets = [styleSheet];
         shadow.appendChild(template.content.cloneNode(true));
-        this.input = shadow.querySelector('input') as HTMLInputElement;
-
+        this.textarea = shadow.querySelector('textarea') as HTMLTextAreaElement;
+        
         this.defaultValue = this.getAttribute('value') ?? '';
         this.value = this.defaultValue;
-        this.syncAttrs()
+        this.syncAttrs();
 
-        this.input.addEventListener('input', () => {
-            this.internals.setFormValue(this.input.value);
+        this.textarea.addEventListener('input', () => {
+            this.internals.setFormValue(this.textarea.value);
         });
-        this.input.addEventListener('change', () => {
+        this.textarea.addEventListener('change', () => {
             this.dispatchEvent(new Event('change', { bubbles: true }));
         });
-        this.input.addEventListener('keydown', (e) => {
+        this.textarea.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') this.internals.form?.requestSubmit();
         });
     }
@@ -54,7 +54,7 @@ export class OkTextInput extends HTMLElement {
         this.value = this.defaultValue;
     }
 
-    formDisabledCallback(disabled: boolean): void {
+    formDisabledCallback(disabled:  boolean): void {
         this.fieldsetDisabled = disabled;
         this.syncAttrs();
     }
@@ -63,10 +63,8 @@ export class OkTextInput extends HTMLElement {
         this.syncAttrs();
     }
 
-    get value(): string { return this.getAttribute('value') ?? 'on'; }
-    set value(value: string) { 
-        this.setAttribute('value', value); 
-    }
+    get value(): string { return this.textarea.value }
+    set value(value: string) { this.textarea.value = value }
     get placeholder(): string { return this.getAttribute('placeholder') ?? ''; }
     set placeholder(value: string) { this.setAttribute('placeholder', value); }
     get disabled(): boolean { return this.hasAttribute('disabled'); }
@@ -76,24 +74,30 @@ export class OkTextInput extends HTMLElement {
     get name(): string { return this.getAttribute('name') ?? ''; }
     set name(value: string) { this.setAttribute('name', value); }
     get required(): boolean { return this.hasAttribute('required'); }
-    set required(v: boolean) { this.toggleAttribute('required', v); }
+    set required(value: boolean) { this.toggleAttribute('required', value); }
+    get rows(): number {
+        const r = Number(this.getAttribute('rows'));
+        return Number.isFinite(r) && r > 0 ? r : 4;
+    }
+    set rows(value: number) { this.setAttribute('rows', String(value)); }
 
     private syncAttrs(): void {
-        this.input.placeholder = this.placeholder;
-        this.input.disabled = this.disabled || this.fieldsetDisabled;
-        this.input.readOnly = this.readOnly;
-        this.input.name = this.name;
-        this.input.required = this.required;
+        this.textarea.placeholder = this.placeholder;
+        this.textarea.disabled = this.disabled || this.fieldsetDisabled;
+        this.textarea.readOnly = this.readOnly;
+        this.textarea.name = this.name;
+        this.textarea.required = this.required;
+        this.textarea.rows = this.rows;
     }
 }
 
 // do not redefine if already defined
-if (!customElements.get('ok-text-input')) {
-    customElements.define('ok-text-input', OkTextInput);
+if (!customElements.get('ok-textarea')) {
+    customElements.define('ok-textarea', OkTextarea);
 }
 
 declare global {
     interface HTMLElementTagNameMap {
-        'ok-text-input': OkTextInput
+        'ok-textarea': OkTextarea
     }
 }
