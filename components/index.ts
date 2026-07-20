@@ -1,0 +1,13 @@
+import './array-input/script';
+import './button/script';
+import './checkbox/script';
+import './icon-button/script';
+import './key-value/script';
+import './pre/script';
+import './readonly-form/script';
+import './row/script';
+import './select/script';
+import './tab-button/script';
+import './text-input/script';
+import './textarea/script';
+import './toolbar/script';

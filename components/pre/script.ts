@@ -1,4 +1,4 @@
-import css from './styles.css?inline';
+import css from './styles.css?raw';
 import html from './index.html?raw';
 
 const styleSheet = new CSSStyleSheet();
@@ -8,7 +8,7 @@ const template = document.createElement('template');
 template.innerHTML = html;
 
 /**
- * Textarea web component.
+ * Pre web component.
  * 
  * Usage (static content, authored directly):
  *   <ok-pre>{"ok": true}</ok-pre>

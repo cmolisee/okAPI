@@ -1,4 +1,4 @@
-import Dexie, { EntityTable, liveQuery, type Table } from 'dexie';
+import Dexie, { EntityTable, liveQuery } from 'dexie';
 import { generateKeyBetween } from 'fractional-indexing';
 
 export type UrlMatchType = 'exact' | 'contains' | 'wildcard' | 'regex';
@@ -10,15 +10,92 @@ export type HttpMethod =
   | 'DELETE'
   | 'OPTIONS'
   | 'HEAD';
-  export type MockRequestSpec = {
+export type HttpStatusCodes = 
+    | 100 | 101 | 102 | 103
+    | 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 226
+    | 300 | 301 | 302 | 303 | 304 | 305 | 306 | 307 | 308
+    | 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 408 | 409
+    | 410 | 411 | 412 | 413 | 414 | 415 | 416 | 417 | 418 | 421
+    | 422 | 423 | 424 | 425 | 426 | 428 | 429 | 431 | 451
+    | 500 | 501 | 502 | 503 | 504 | 505 | 506 | 507 | 508 | 510 | 511;
+type HttpStatusText =
+  // 1xx Informational
+  | "Continue"
+  | "Switching Protocols"
+  | "Processing"
+  | "Early Hints"
+  // 2xx Success
+  | "OK"
+  | "Created"
+  | "Accepted"
+  | "Non-Authoritative Information"
+  | "No Content"
+  | "Reset Content"
+  | "Partial Content"
+  | "Multi-Status"
+  | "Already Reported"
+  | "IM Used"
+  // 3xx Redirection
+  | "Multiple Choices"
+  | "Moved Permanently"
+  | "Found"
+  | "See Other"
+  | "Not Modified"
+  | "Use Proxy"
+  | "Temporary Redirect"
+  | "Permanent Redirect"
+  // 4xx Client Error
+  | "Bad Request"
+  | "Unauthorized"
+  | "Payment Required"
+  | "Forbidden"
+  | "Not Found"
+  | "Method Not Allowed"
+  | "Not Acceptable"
+  | "Proxy Authentication Required"
+  | "Request Timeout"
+  | "Conflict"
+  | "Gone"
+  | "Length Required"
+  | "Precondition Failed"
+  | "Payload Too Large"
+  | "URI Too Long"
+  | "Unsupported Media Type"
+  | "Range Not Satisfiable"
+  | "Expectation Failed"
+  | "I'm a teapot"
+  | "Misdirected Request"
+  | "Unprocessable Entity"
+  | "Locked"
+  | "Failed Dependency"
+  | "Too Early"
+  | "Upgrade Required"
+  | "Precondition Required"
+  | "Too Many Requests"
+  | "Request Header Fields Too Large"
+  | "Unavailable For Legal Reasons"
+  // 5xx Server Error
+  | "Internal Server Error"
+  | "Not Implemented"
+  | "Bad Gateway"
+  | "Service Unavailable"
+  | "Gateway Timeout"
+  | "HTTP Version Not Supported"
+  | "Variant Also Negotiates"
+  | "Insufficient Storage"
+  | "Loop Detected"
+  | "Not Extended"
+  | "Network Authentication Required";
+
+export type MockRequestSpec = {
   headers?: Record<string, string>;
   queryParams?: Record<string, string>;
   /** arbitrary json used to validate/inspect the incoming request body. */
   body?: unknown;
 }
 export type MockResponseSpec = {
-  status: number;
-  statusText?: string;
+  status: HttpStatusCodes;
+  statusText?: HttpStatusText;
   headers?: Record<string, string>;
   /** arbitrary json returned as the mocked response body. */
   body: unknown;

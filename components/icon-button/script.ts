@@ -1,4 +1,4 @@
-import css from './styles.css?inline';
+import css from './styles.css?raw';
 import html from './index.html?raw';
 
 const styleSheet = new CSSStyleSheet();
@@ -13,11 +13,11 @@ type ButtonType = 'button' | 'submit' | 'reset';
  * Icon button web component.
  * 
  * Usage:
- *   <devtools-icon-button type="button" label="Settings">
+ *   <ok-icon-button type="button" label="Settings">
  *     <svg viewBox="0 0 16 16" fill="currentColor">...</svg>
- *   </devtools-icon-button>
+ *   </ok-icon-button>
  *
- *   const el = document.querySelector<DevToolsIconButton>('devtools-icon-button');
+ *   const el = document.querySelector<OkIconButton>('ok-icon-button');
  *   el.addEventListener('click', () => (el.toggled = !el.toggled));
  */
 export class OkIconButton extends HTMLElement {

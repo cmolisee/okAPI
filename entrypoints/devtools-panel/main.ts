@@ -10,18 +10,9 @@ import type {
   ServiceWorkerToPanel,
 } from '../../lib/interceptor/types';
 import { Unwatch } from 'wxt/utils/storage';
-import db, { addMock, HttpMethod, initDb, MockEndpoint, updateMock } from '@/utils/db';
-import { BADGE_ACTIVE, BADGE_INACTIVE, BadgeManager, setExtensionIconStateActive, setExtensionIconStateDisabled } from '@/utils/shared';
-import createTabToolbar from '@/components/tab-toolbar';
-import createToolbarTab from '@/components/toolbar-tab';
-import createToolsToolbar from '@/components/tool-toolbar';
-import createSimpleLabel from '@/components/simple-label';
-import createCheckbox from '@/components/checkbox';
-import createAddMockRow from '@/components/add-mock-row';
-import createReadOnlyForm from '@/components/read-only-form';
-import createRequestRow from '@/components/request-row';
-import createForm from '@/components/form';
-import createMockRow from '@/components/mock-row';
+import db, { addMock, HttpMethod, HttpStatusCodes, initDb, MockEndpoint, updateMock } from '@/utils/db';
+import { BADGE_ACTIVE, BADGE_INACTIVE, BadgeManager, HTTP_STATUS_CODES, HTTP_STATUS_TEXT, setExtensionIconStateActive, setExtensionIconStateDisabled } from '@/utils/shared';
+import '@/components';
 
 // --- control data ---
 initDb();
@@ -142,32 +133,42 @@ function addMockOnSubmit(event: Event) {
 async function render() {
   const header = document.querySelector('header');
 
-  const tabToolbar = createTabToolbar();
-  const optionToolbar = createToolsToolbar();
-  const labelToolbar = createToolsToolbar();
+  const tabToolbar = document.createElement('ok-toolbar');
+  const optionToolbar = document.createElement('ok-toolbar');
+  const labelToolbar = document.createElement('ok-toolbar');
   header?.append(tabToolbar, optionToolbar, labelToolbar);
 
-  const networkViewTab = createToolbarTab({ id: 'network-view-toggle', title: 'Network Viewer', ariaSelected: 'true' });
-  const mockViewTab = createToolbarTab({ id: 'mock-view-toggle', title: 'Mock Viewer', ariaSelected: 'false' });
-  tabToolbar.append(networkViewTab, mockViewTab);
+    const networkViewTab = document.createElement('ok-tab-button');
+    networkViewTab.textContent = 'Network View';
+    networkViewTab.setAttribute('id', 'network-view-toggle');
+    networkViewTab.setAttribute('toggled', '');
+
+    const mockViewTab = document.createElement('ok-tab-button');
+    mockViewTab.textContent = 'Mock View';
+    mockViewTab.setAttribute('id', 'network-view-toggle');
+    
+    tabToolbar.append(networkViewTab, mockViewTab);
   
-  const engineType = getEngine();
-  TabStore.set(tabId, 'engineType', engineType);
-  labelToolbar.append(createSimpleLabel({ textContent: `Engine: ${engineType ?? 'uknown'}`}));
+    const engineType = getEngine();
+    TabStore.set(tabId, 'engineType', engineType);
 
-  // --- notification toggle ---
-  const enableNotificationsCheckbox = createCheckbox({ 
-    htmlFor: 'enableNotifications',
-    id: 'enableNotifications',
-    textContent: 'Enable Notifications',
-    checked: await TabStore.get(tabId, 'isNotificationsEnabled') ?? false
-  });
-  optionToolbar.append(enableNotificationsCheckbox);
+    const engineLabel = document.createElement('span');
+    engineLabel.textContent = `Engine: ${engineType ?? 'uknown'}`;
+    labelToolbar.append(engineLabel);
 
-  enableNotificationsCheckbox!.querySelector('input')!.addEventListener('change', (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    TabStore.set(tabId, 'isNotificationsEnabled', target.checked);
-  });
+    // --- notification toggle ---
+    const enableNotificationsCheckbox = document.createElement('ok-checkbox');
+    enableNotificationsCheckbox.textContent = 'Enable Notifications';
+    enableNotificationsCheckbox.setAttribute('id', 'enableNotifications');
+    enableNotificationsCheckbox.setAttribute('name', 'enableNotifications');
+    enableNotificationsCheckbox.addEventListener('change', (event: Event) => {
+        const target = event.target as HTMLInputElement;
+        TabStore.set(tabId, 'isNotificationsEnabled', target.checked);
+    });
+
+    if (await TabStore.get(tabId, 'isNotificationsEnabled') ?? false) {
+        enableNotificationsCheckbox.setAttribute('checked', '');
+    }
 
   cleanup.push(
     TabStore.watch(tabId, 'isNotificationsEnabled', (nv: boolean|null) => {
@@ -194,31 +195,34 @@ async function render() {
     networkViewerDisabled();
   }
 
-  const enableNetworkViewCheckbox = createCheckbox({ 
-    htmlFor: 'enableNetworkViewer',
-    id: 'enableNetworkViewer',
-    textContent: 'Enable Network Viewer',
-    checked: await TabStore.get(tabId, 'isNetworkViewerEnabled') ?? false
-  });
-  optionToolbar.append(enableNetworkViewCheckbox);
+    const enableNetworkViewCheckbox = document.createElement('ok-checkbox');
+    enableNetworkViewCheckbox.textContent = 'Enable Network View';
+    enableNetworkViewCheckbox.setAttribute('id', 'enableNetworkViewer');
+    enableNetworkViewCheckbox.setAttribute('name', 'enableNetworkViewer');
+    enableNetworkViewCheckbox.addEventListener('change', (event: Event) => {
+        const target = event.target as HTMLInputElement;
+        TabStore.set(tabId, 'isNetworkViewerEnabled', target.checked);
+    });
 
-  enableNetworkViewCheckbox!.querySelector('input')!.addEventListener('change', (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    TabStore.set(tabId, 'isNetworkViewerEnabled', target.checked);
-  });
+    if (await TabStore.get(tabId, 'isNetworkViewerEnabled') ?? false) {
+        enableNotificationsCheckbox.setAttribute('checked', '');
+    }
+    
+    optionToolbar.append(enableNetworkViewCheckbox);
 
-  cleanup.push(
-    TabStore.watch(tabId, 'isNetworkViewerEnabled', async (nv: boolean|null) => {
-      if (!port) return;
-      enableNetworkViewCheckbox!.querySelector('input')!.checked = nv ?? false;
+    cleanup.push(
+        TabStore.watch(tabId, 'isNetworkViewerEnabled', async (nv: boolean|null) => {
+            if (!port) return;
 
-      if (nv) {
-        networkViewerEnabled();
-      } else {
-        networkViewerDisabled()
-      }
-    })
-  );
+            if (nv) {
+                enableNotificationsCheckbox.setAttribute('checked', '');
+                networkViewerEnabled();
+            } else {
+                enableNotificationsCheckbox.removeAttribute('checked');
+                networkViewerDisabled();
+            }
+        }),
+    );
 
   // --- mocking toggle ---
   const isMockingCheckboxChecked = await TabStore.get(tabId, 'isMockingEnabled') ?? false;
@@ -246,43 +250,46 @@ async function render() {
     mockingDisabled();
   }
 
-  const enableMockingCheckbox = createCheckbox({ 
-    htmlFor: 'enableMocking',
-    id: 'enableMocking',
-    textContent: 'Enable Mocking',
-    checked: isMockingCheckboxChecked
-  });
+    const enableMockingCheckbox = document.createElement('ok-checkbox');
+    enableMockingCheckbox.textContent = 'Enable Mocking';
+    enableMockingCheckbox.setAttribute('id', 'enableMocking');
+    enableMockingCheckbox.setAttribute('name', 'enableMocking');
+    enableMockingCheckbox.addEventListener('change', (event: Event) => {
+        const target = event.target as HTMLInputElement;
+        TabStore.set(tabId, 'isMockingEnabled', target.checked);
+    });
+
+    if (await TabStore.get(tabId, 'isMockingEnabled') ?? false) {
+        enableNotificationsCheckbox.setAttribute('checked', '');
+    }
   optionToolbar.append(enableMockingCheckbox);
 
-  enableMockingCheckbox!.querySelector('input')!.addEventListener('change',async (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    TabStore.set(tabId, 'isMockingEnabled', target.checked);
-  });
-
   cleanup.push(
-    TabStore.watch(tabId, 'isMockingEnabled', async (nv: boolean|null) => {
-      if (!port) return;
-      enableMockingCheckbox!.querySelector('input')!.checked = nv ?? false;
-      if (nv) {
-        mockingEnabled();
-      } else {
-        mockingDisabled();
-      }
-    })
+        TabStore.watch(tabId, 'isMockingEnabled', async (nv: boolean|null) => {
+            if (!port) return;
+            
+            if (nv) {
+                enableNotificationsCheckbox.setAttribute('checked', '');
+                mockingEnabled();
+            } else {
+                enableNotificationsCheckbox.removeAttribute('checked');
+                mockingDisabled();
+            }
+        })
   );
 
   // --- panel tab buttons ---
-  networkViewTab!.addEventListener('click', async (event: Event) => {
-    mockViewTab!.setAttribute('aria-pressed', 'false');
-    networkViewTab!.setAttribute('aria-pressed', 'true');
+  networkViewTab.addEventListener('click', async (event: Event) => {
+    mockViewTab.removeAttribute('toggled');
+    networkViewTab.setAttribute('toggled', '');
     document.querySelectorAll('.active').forEach(ele => ele.classList.replace('active', 'hidden'));
     document.querySelectorAll('.hidden').forEach(ele => ele.classList.replace('hidden', 'active'));
     await TabStore.set(tabId, 'panelUIState', {tab: 'networkView'});
   });
 
-  mockViewTab!.addEventListener('click', async (event: Event) => {
-    networkViewTab!.setAttribute('aria-pressed', 'false');
-    mockViewTab!.setAttribute('aria-pressed', 'true');
+  mockViewTab.addEventListener('click', async (event: Event) => {
+    networkViewTab.removeAttribute('toggled');
+    mockViewTab.setAttribute('toggled', '');
     document.querySelectorAll('.active').forEach(ele => ele.classList.replace('active', 'hidden'));
     document.querySelectorAll('.hidden').forEach(ele => ele.classList.replace('hidden', 'active'));
     await TabStore.set(tabId, 'panelUIState', {tab: 'mockView'});
@@ -297,7 +304,8 @@ async function render() {
   if (await TabStore.get(tabId, 'isNetworkViewerEnabled')) {
     networkListPlaceholder.textContent += ' Enable Network Viewer to capture requests.'
   }
-  networkList!.append(networkListPlaceholder);
+
+    networkList?.append(networkListPlaceholder);
 
   const networkDetailsPlaceholder = document.createElement('p');
   networkDetailsPlaceholder.textContent = 'Select a request to inspect it.';
@@ -308,15 +316,93 @@ async function render() {
   const mockDetails = document.querySelector('.mock-details');
 
   // display list in reverse order so we can simply append children naturally
-  const addMockRow = createAddMockRow();
-  mockList?.append(enableMockingCheckbox);
+  const addMockRow = document.createElement('ok-row');
+
+  const addMockRowSubmit = document.createElement('ok-button');
+  addMockRowSubmit.setAttribute('type', 'submit');
+  addMockRowSubmit.slot = 'actions';
+
+  const addMockRowInput = document.createElement('ok-text-input');
+  addMockRowInput.setAttribute('placeholder', 'URL or Pattern');
+  addMockRowInput.setAttribute('name', 'pattern');
+  addMockRowInput.setAttribute('required', '');
   
-  const addMockRowForm = addMockRow?.querySelector('form') as HTMLFormElement;
-  addMockRowForm.onsubmit = addMockOnSubmit;
+  const addMockRowForm = document.createElement('ok-form');
+  addMockRowForm.append(addMockRowSubmit, addMockRowInput);
+  addMockRowForm.addEventListener('submit', addMockOnSubmit);
+
+  mockList?.append(addMockRow);
 
   const mockDetailsPlaceholder = document.createElement('p');
   mockDetailsPlaceholder.textContent = 'Select a mock.';
   mockDetails?.append(mockDetailsPlaceholder);
+}
+
+function renderNetworkDetails(mock: Omit<MockEndpoint, 'id'|'createdAt'|'updatedAt'|'priorityOrder'|'listOrder'>) {
+    const readOnlyForm = document.createElement('ok-readonly-form');
+
+    // url, method, request, response
+    const urlLabel = document.createElement('label');
+    urlLabel.innerText = 'URL';
+
+    const urlPre = document.createElement('ok-pre');
+    urlPre.value = mock.url;
+
+    const methodLabel = document.createElement('label');
+    methodLabel.innerText = 'Method';
+
+    const methodPre = document.createElement('ok-pre');
+    methodPre.value = mock.method;
+
+    const requestHeadersLabel = document.createElement('label');
+    requestHeadersLabel.innerText = 'Request Headers';
+
+    const requestHeadersPre = document.createElement('ok-pre');
+    requestHeadersPre.value = JSON.stringify(mock.request?.headers ?? []);
+
+    const requestBodyLabel = document.createElement('label');
+    requestBodyLabel.innerText = 'Request Body';
+
+    const requestBodyPre = document.createElement('ok-pre');
+    requestBodyPre.value = JSON.stringify(mock.request?.body ?? {});
+
+    const responseStatusLabel = document.createElement('label');
+    responseStatusLabel.innerText = 'Status';
+
+    const responseStatusPre = document.createElement('ok-pre');
+    responseStatusPre.value = mock.response.status.toString();
+
+    const responseHeadersLabel = document.createElement('label');
+    responseHeadersLabel.innerText = 'Response Headers';
+
+    const responseHeadersPre = document.createElement('ok-pre');
+    responseHeadersPre.value = JSON.stringify(mock.response.headers);
+
+    const responseBodyLabel = document.createElement('label');
+    responseBodyLabel.innerText = 'Response Body';
+
+    const responseBodyPre = document.createElement('ok-pre');
+    responseBodyPre.value = JSON.stringify(mock.response.body);
+
+    readOnlyForm.append(
+        urlLabel,
+        urlPre,
+        methodLabel,
+        methodPre,
+        requestHeadersLabel,
+        requestHeadersPre,
+        requestBodyLabel,
+        requestBodyPre,
+        responseStatusLabel,
+        responseStatusPre,
+        responseHeadersLabel,
+        responseHeadersPre,
+        responseBodyLabel,
+        responseBodyPre,
+    );
+
+    readOnlyForm.addEventListener('submit', async () => await addMock(mock));
+    return readOnlyForm;
 }
 
 async function selectRequest(event: Event) {
@@ -343,7 +429,7 @@ async function selectRequest(event: Event) {
       body: selectedRequest.requestBody,
     },
     response: {
-      status: Number(selectedRequest?.statusCode),
+      status: (selectedRequest?.statusCode ?? 200) as HttpStatusCodes,
       statusText: undefined,
       headers: Object.fromEntries(
         (selectedRequest?.responseHeaders ?? []).map(item => [item.name, item.value])
@@ -353,10 +439,25 @@ async function selectRequest(event: Event) {
     url: selectedRequest.url ?? '',
   };
 
-  networkDetails.replaceChildren(createReadOnlyForm({
-    onclick: async () => await addMock(newMock),
-    ...selectedRequest
-  }));
+  networkDetails.replaceChildren(renderNetworkDetails(newMock));
+}
+
+function renderRequestRow(request: InterceptedRequest) {
+    const requestRow = document.createElement('ok-row');
+    requestRow.setAttribute('id', request.requestId.toString());
+    requestRow.addEventListener('click', selectRequest);
+
+    const method = document.createElement('span');
+    method.innerText = request.method;
+
+    const status = document.createElement('span');
+    status.innerText = request.statusCode.toString();
+
+    const url = document.createElement('span');
+    url.innerText = request.url;
+
+    requestRow.append(method, status, url);
+    return requestRow;
 }
 
 async function renderRequests(requests: Array<InterceptedRequest>) {
@@ -368,11 +469,7 @@ async function renderRequests(requests: Array<InterceptedRequest>) {
   const temp = document.createElement('div');
   // render all mocks
   requests.forEach(r => {
-    temp.append(createRequestRow({
-      ...r,
-      id: r.requestId.toString(),
-      onclick: selectRequest
-    }));
+    temp.append(renderRequestRow(r));
   });
 
   fragment.append(...temp.children);
@@ -388,17 +485,119 @@ async function submitSaveMock(event: SubmitEvent) {
   const originalMock = JSON.parse(JSON.stringify(await db.mocks.get(Number(mockId))));
   if (!originalMock) return;
 
-  originalMock!.url = formData.get('url')!.toString();
+  originalMock.url = formData.get('url')!.toString();
   // TODO: need to create custom field for headers
-  originalMock!.request!.headers = JSON.parse(formData.get('request-headers')!.toString());
-  originalMock!.request!.queryParams = JSON.parse(formData.get('request-params')!.toString());
-  originalMock!.request!.body = JSON.parse(formData.get('request-body')!.toString());
+  originalMock.request.headers = JSON.parse(formData.get('request-headers')!.toString());
+  originalMock.request.queryParams = JSON.parse(formData.get('request-params')!.toString());
+  originalMock.request.body = JSON.parse(formData.get('request-body')!.toString());
 
-  originalMock!.response!.status = Number(formData.get('response-status'));
-  originalMock!.response!.headers = JSON.parse(formData.get('response-headers')!.toString());
-  originalMock!.response!.body = JSON.parse(formData.get('response-body')!.toString());
+  originalMock.response.status = Number(formData.get('response-status'));
+  originalMock.response.headers = JSON.parse(formData.get('response-headers')!.toString());
+  originalMock.response.body = JSON.parse(formData.get('response-body')!.toString());
 
   await updateMock(originalMock.id, originalMock);
+}
+
+function renderMockForm(mock: MockEndpoint) {
+    const mockForm = document.createElement('ok-form');
+
+    const pattern = document.createElement('ok-text-input');
+    pattern.setAttribute('placeholder', 'pattern');
+    pattern.setAttribute('name', 'pattern');
+    pattern.setAttribute('required', '');
+
+    const matchType = document.createElement('ok-select');
+    matchType.setAttribute('required', '');
+    matchType.setAttribute('name', 'matchType');
+    for (const t of ['exact', 'contains', 'wildcard', 'regex']) {
+        const opt = document.createElement('option');
+        if (t === 'contains') opt.setAttribute('selected', '');
+        opt.setAttribute('value', t);
+        matchType.appendChild(opt);
+    }
+
+    const description = document.createElement('ok-textarea');
+    description.setAttribute('name', 'description');
+
+    const method = document.createElement('ok-select');
+    method.setAttribute('required', '');
+    method.setAttribute('name', 'method');
+    for (const t of ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD']) {
+        const opt = document.createElement('option');
+        if (t === 'GET') opt.setAttribute('selected', '');
+        opt.setAttribute('value', t);
+        method.appendChild(opt);
+    }
+
+    const name = document.createElement('ok-text-input');
+    name.setAttribute('placeholder', 'my mock name');
+    name.setAttribute('name', 'name');
+
+    const delayMs = document.createElement('ok-text-input');
+    delayMs.setAttribute('placeholder', '2000');
+    delayMs.setAttribute('name', 'delay');
+
+    const tags = document.createElement('ok-array-input');
+    tags.setAttribute('field', 'ok-text-input');
+    tags.setAttribute('name', 'tags');
+
+    const reqHeaders = document.createElement('ok-array-input');
+    reqHeaders.setAttribute('field', 'ok-key-value');
+    reqHeaders.setAttribute('name', 'request-headers');
+
+    const requestParams = document.createElement('ok-array-input');
+    requestParams.setAttribute('field', 'ok-key-value');
+    requestParams.setAttribute('name', 'request-headers');
+
+    const requestBody = document.createElement('ok-textarea');
+    requestBody.setAttribute('placeholder', '{}');
+    requestBody.setAttribute('name', 'request-body');
+
+    const responseStatus = document.createElement('ok-select');
+    responseStatus.setAttribute('required', '');
+    responseStatus.setAttribute('name', 'responseStatus');
+    for (const t of HTTP_STATUS_CODES) {
+        const opt = document.createElement('option');
+        if (t === 200) opt.setAttribute('selected', '');
+        opt.setAttribute('value', t.toString());
+        responseStatus.appendChild(opt);
+    }
+
+    const responseStatusText = document.createElement('ok-select');
+    responseStatusText.setAttribute('name', 'responseStatusText');
+    for (const t of ['', ...HTTP_STATUS_TEXT]) {
+        const opt = document.createElement('option');
+        if (t === '') opt.setAttribute('selected', '');
+        opt.setAttribute('value', t);
+        responseStatus.appendChild(opt);
+    }
+
+    const responseHeaders = document.createElement('ok-array-input');
+    responseHeaders.setAttribute('field', 'ok-key-value');
+    responseHeaders.setAttribute('name', 'request-headers');
+
+    const responseBody = document.createElement('ok-textarea');
+    responseBody.setAttribute('placeholder', '{}');
+    responseBody.setAttribute('name', 'request-body');
+
+    mockForm.append(
+        pattern,
+        matchType,
+        description,
+        method,
+        name,
+        delayMs,
+        tags,
+        reqHeaders,
+        requestParams,
+        requestBody,
+        responseStatus,
+        responseStatusText,
+        responseHeaders,
+        responseBody,
+    );
+
+    return mockForm;
 }
 
 async function selectMock(event: Event) {
@@ -411,10 +610,46 @@ async function selectMock(event: Event) {
 
   mockDetails.innerHTML = '';
   
-  mockDetails.replaceChildren(createForm({
-    submit: submitSaveMock,
-    ...selectedMock
-  }));
+  mockDetails.replaceChildren(renderMockForm(selectedMock));
+}
+
+function renderMockRow(mock: MockEndpoint) {
+    const row = document.createElement('ok-row');
+    row.setAttribute('id', mock.id?.toString()!);
+    row.addEventListener('click', selectMock);
+
+    const method = document.createElement('span');
+    method.innerText = mock.method;
+
+    const status = document.createElement('span');
+    status.innerText = mock.response.status.toString();
+
+    const url = document.createElement('span');
+    url.innerText = mock.url;
+
+    row.append(method, status, url);
+    return row;
+}
+
+function renderAddMockRow() {
+    const row = document.createElement('ok-row');
+    row.setAttribute('id', 'add-mock-row');
+
+    const submit = document.createElement('ok-button');
+    submit.setAttribute('type', 'submit');
+    submit.slot = 'actions';
+
+    const input = document.createElement('ok-text-input');
+    input.setAttribute('placeholder', 'URL or Pattern');
+    input.setAttribute('name', 'pattern');
+    input.setAttribute('required', '');
+    
+    const form = document.createElement('ok-form');
+    form.append(submit, input);
+    form.addEventListener('submit', addMockOnSubmit);
+
+    row.append(form);
+    return row;
 }
 
 async function renderMocks(mocks: Array<MockEndpoint>) {
@@ -425,19 +660,12 @@ async function renderMocks(mocks: Array<MockEndpoint>) {
   // temporary element to collect the new children to render
   const temp = document.createElement('div');
   // rerender the add mock row
-  const addMockRow = createAddMockRow();
+  const addMockRow = renderAddMockRow();
   temp.append(addMockRow);
-
-  const addMockRowForm = addMockRow?.querySelector('form') as HTMLFormElement;
-  addMockRowForm.onsubmit = addMockOnSubmit;
 
   // render all mocks
   mocks.forEach(m => {
-    temp.append(createMockRow({
-      ...m,
-      id: m.id!.toString(),
-      onclick: selectMock,
-    })); 
+    temp.append(renderMockRow(m)); 
   });
 
   fragment.append(...temp.children);

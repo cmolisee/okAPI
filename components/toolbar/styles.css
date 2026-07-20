@@ -1,0 +1,55 @@
+:host {
+  --ok-bg: #f3f3f3;
+  --ok-border: #d0d0d0;
+  --ok-label-color: #1f1f1f;
+  --ok-font: 11px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --ok-height: 27px;
+  --ok-gap: 4px;
+
+  display: block;
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --ok-bg: #2b2b2b;
+    --ok-border: #4a4a4a;
+    --ok-label-color: #e8eaed;
+  }
+}
+
+.toolbar {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--ok-gap);
+  height: var(--ok-height);
+  padding-inline: 4px;
+  background: var(--ok-bg);
+  border-bottom: 1px solid var(--ok-border);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Divider: a plain native <hr>, restyled from a horizontal rule into a
+   thin vertical separator line. */
+::slotted(hr) {
+  flex: none;
+  align-self: stretch;
+  width: 0;
+  height: auto;
+  margin: 5px 2px;
+  border: none;
+  border-left: 1px solid var(--ok-border);
+}
+
+::slotted(span),
+::slotted(label) {
+  flex: none;
+  font: var(--ok-font);
+  color: var(--ok-label-color);
+  white-space: nowrap;
+}

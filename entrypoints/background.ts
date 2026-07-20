@@ -1,6 +1,6 @@
 import * as Chromium from '../lib/interceptor/chromium';
-import * as Firefox  from '../lib/interceptor/firefox';
-import type { MessagingTypes, PanelContent, PanelToServiceWorker, UpdatePanelUI } from '../lib/interceptor/types';
+// import * as Firefox  from '../lib/interceptor/firefox';
+import type { PanelContent, PanelToServiceWorker } from '../lib/interceptor/types';
 import { getEnabledMocks, getOrderedMocks, initDb  } from '@/utils/db';
 import { TabStore, TabStoreMap } from '@/utils/storage';
 import { portManager } from '@/utils/port-manager';
@@ -83,7 +83,7 @@ export default defineBackground(async () => {
 
     // Send data to panel for UI when tab connects
     const {tab} = await TabStore.get(tabId, 'panelUIState') ?? { tab: 'networkView' };
-    const msg: UpdatePanelUI = {type: 'UPDATE_PANEL_UI', payload: undefined};
+    const msg: PanelContent = {type: 'PANEL_CONTENT', payload: {}};
     if (tab === 'networkView') msg.payload = {requests: await TabStore.get(tabId, 'capturedRequests')};
     if (tab === 'mockView') msg.payload = {mocks: await getOrderedMocks()};
     portManager.post(tabId, msg);

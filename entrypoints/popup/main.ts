@@ -1,13 +1,9 @@
-import { BADGE_ACTIVE, BADGE_INACTIVE, BadgeManager, getActiveTabId, updateExtensionIconState } from "@/utils/shared";
+import { BADGE_ACTIVE, BADGE_INACTIVE, BadgeManager, getActiveTabId } from "@/utils/shared";
 import { getThemeSetting, setThemeSetting, TabStore, Theme } from "../../utils/storage";
 
 (async () => {
     const tabId = await getActiveTabId();
     if (!tabId) return;
-    const themeSelect = document.getElementById('theme-select') as HTMLSelectElement | null;
-    const enableNotificationsCheckbox = document.getElementById('enableNotifications') as HTMLInputElement | null;
-    const enableMockingCheckbox = document.getElementById('enableMocking') as HTMLInputElement | null;
-    const enableNetworkViewerCheckbox = document.getElementById('enableNetworkViewer') as HTMLInputElement | null;
 
     if (!await TabStore.has(tabId)) {
         Promise.all([
@@ -21,6 +17,11 @@ import { getThemeSetting, setThemeSetting, TabStore, Theme } from "../../utils/s
             TabStore.set(tabId, 'panelUIState', { tab: 'networkView' }),
         ])
     }
+
+    const themeSelect = document.getElementById('theme-select') as HTMLSelectElement | null;
+    const enableNotificationsCheckbox = document.getElementById('enableNotifications') as HTMLInputElement | null;
+    const enableMockingCheckbox = document.getElementById('enableMocking') as HTMLInputElement | null;
+    const enableNetworkViewerCheckbox = document.getElementById('enableNetworkViewer') as HTMLInputElement | null;
 
     const themeChangeListener = (event: Event) => {
         const target = event.currentTarget as HTMLSelectElement;
@@ -36,7 +37,6 @@ import { getThemeSetting, setThemeSetting, TabStore, Theme } from "../../utils/s
         const target = event.target as HTMLInputElement;
         if (!target) return;
         TabStore.set(tabId, 'isMockingEnabled', target.checked);
-        updateExtensionIconState(tabId);
 
         if (target.checked) {
             await BadgeManager.background(tabId, BADGE_ACTIVE.background);
@@ -50,11 +50,18 @@ import { getThemeSetting, setThemeSetting, TabStore, Theme } from "../../utils/s
         }
     }
 
-    const networkViewerChangeListener = (event: Event) => {
+    const networkViewerChangeListener = async (event: Event) => {
         const target = event.target as HTMLInputElement;
         if (!target) return;
         TabStore.set(tabId, 'isNetworkViewerEnabled', target.checked);
-        updateExtensionIconState(tabId);
+        
+        if (target.checked) {
+            await BadgeManager.background(tabId, BADGE_ACTIVE.background);
+            await BadgeManager.color(tabId, BADGE_ACTIVE.text);
+        } else {
+            await BadgeManager.background(tabId, BADGE_INACTIVE.background);
+            await BadgeManager.color(tabId, BADGE_INACTIVE.text);
+        }
     }
 
     themeSelect!.value = await getThemeSetting();

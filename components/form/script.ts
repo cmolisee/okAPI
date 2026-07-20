@@ -1,4 +1,4 @@
-import css from './styles.css?inline';
+import css from './styles.css?raw';
 import html from './index.html?raw';
 
 const styleSheet = new CSSStyleSheet();

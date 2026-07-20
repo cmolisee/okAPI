@@ -1,4 +1,4 @@
-import css from './styles.css?inline';
+import css from './styles.css?raw';
 import html from './index.html?raw';
 import { OkButton } from '../button/script';
 
@@ -9,7 +9,7 @@ const template = document.createElement('template');
 template.innerHTML = html;
 
 /**
- * Textarea web component.
+ * Read only web component.
  * 
  * Usage:
  *   <ok-readonly-form id="lookup">
@@ -33,6 +33,10 @@ template.innerHTML = html;
 export class OkReadonlyForm extends HTMLElement {
     static readonly observedAttributes = ['disabled'] as const;
     
+    /**
+     * Runs the assigned callback on button click or nothing.
+     * No event nor form data is passed to the callback.
+     */
     onSubmit: (() => void) | null = null;
 
     private readonly button: OkButton;

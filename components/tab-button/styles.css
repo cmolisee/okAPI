@@ -1,0 +1,71 @@
+:host {
+  --ok-label-color: #5f6368;
+  --ok-accent: #1a73e8;
+  --ok-bg-hover: rgba(0, 0, 0, 0.06);
+  --ok-focus-ring: rgba(26, 115, 232, 0.5);
+  --ok-font: 12px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+  display: inline-flex;
+  align-self: stretch; /* fills the toolbar's height when slotted into one */
+}
+
+:host([hidden]) {
+  display: none;
+}
+
+:host([disabled]) {
+  pointer-events: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --ok-label-color: #9aa0a6;
+    --ok-accent: #8ab4f8;
+    --ok-bg-hover: rgba(255, 255, 255, 0.08);
+    --ok-focus-ring: rgba(138, 180, 248, 0.5);
+  }
+}
+
+button {
+  appearance: none;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  margin: 0;
+  padding: 0 12px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  font: var(--ok-font);
+  color: var(--ok-label-color);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 80ms ease, background-color 80ms ease, border-color 80ms ease;
+}
+
+button:hover:not(:disabled) {
+  background: var(--ok-bg-hover);
+}
+
+button:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--ok-focus-ring);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+:host([toggled]) button {
+  color: var(--ok-accent);
+  border-bottom-color: var(--ok-accent);
+}
+
+::slotted(svg) {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}

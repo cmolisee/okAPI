@@ -1,4 +1,4 @@
-import css from './styles.css?inline';
+import css from './styles.css?raw';
 import html from './index.html?raw';
 
 const styleSheet = new CSSStyleSheet();
@@ -18,7 +18,7 @@ template.innerHTML = html;
  *   cb.addEventListener('change', (e) => console.log(e.detail.checked));
  */
 export class OkCheckbox extends HTMLElement {
-    static readonly observedAttributes = ['checkd', 'disabled', 'indeterminate', 'name', 'value'] as const;
+    static readonly observedAttributes = ['id', 'checked', 'disabled', 'indeterminate', 'name', 'value'] as const;
     static formAssociated = true;
 
     private readonly input: HTMLInputElement;
@@ -53,6 +53,8 @@ export class OkCheckbox extends HTMLElement {
         this.syncInput();
     }
 
+    get id(): string { return this.getAttribute('id') || ''; }
+    set id(value: string) { this.setAttribute('id', value); }
     get checked(): boolean { return this.hasAttribute('checked'); }
     set checked(value: boolean) { this.toggleAttribute('checked', value); }
     get indeterminate(): boolean { return this.hasAttribute('indeterminate'); }
@@ -65,6 +67,7 @@ export class OkCheckbox extends HTMLElement {
     set value(value: string) { this.setAttribute('value', value); }
 
     private syncInput(): void {
+        this.input.id = this.id;
         this.input.checked = this.checked;
         this.input.indeterminate = this.indeterminate;
         this.input.disabled = this.disabled || this.fieldsetDisabled;

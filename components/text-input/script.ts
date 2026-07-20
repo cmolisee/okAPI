@@ -1,4 +1,4 @@
-import css from './styles.css?inline';
+import css from './styles.css?raw';
 import html from './index.html?raw';
 
 const styleSheet = new CSSStyleSheet();
@@ -63,7 +63,7 @@ export class OkTextInput extends HTMLElement {
         this.syncAttrs();
     }
 
-    get value(): string { return this.getAttribute('value') ?? 'on'; }
+    get value(): string { return this.getAttribute('value') ?? ''; }
     set value(value: string) { 
         this.setAttribute('value', value); 
     }

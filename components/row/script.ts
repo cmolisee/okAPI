@@ -1,4 +1,4 @@
-import css from './styles.css?inline';
+import css from './styles.css?raw';
 import html from './index.html?raw';
 
 const styleSheet = new CSSStyleSheet();
@@ -19,7 +19,7 @@ template.innerHTML = html;
  *  e.addEventListener('select', (e: Event) => ...);
  */
 export class OkRow extends HTMLElement {
-    static readonly observedAttributes = ['ok'] as const;
+    static readonly observedAttributes = ['id'] as const;
 
     private readonly row: HTMLElement;
 

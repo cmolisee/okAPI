@@ -1,4 +1,4 @@
-import css from './styles.css?inline';
+import css from './styles.css?raw';
 import html from './index.html?raw';
 
 const styleSheet = new CSSStyleSheet();
@@ -13,10 +13,10 @@ type ButtonType = 'button' | 'submit' | 'reset';
  * Button web component.
  * 
  * Usage:
- *   <devtools-button>Cancel</devtools-button>
- *   <devtools-button variant="primary">Done</devtools-button>
+ *   <ok-button>Cancel</ok-button>
+ *   <ok-button variant="primary">Done</ok-button>
  *
- *   const el = document.querySelector<DevToolsButton>('devtools-button');
+ *   const el = document.querySelector<OkButton>('ok-button');
  *   el.addEventListener('click', () => ...);
  */
 export class OkButton extends HTMLElement {
